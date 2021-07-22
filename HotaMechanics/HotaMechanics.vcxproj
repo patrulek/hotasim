@@ -140,7 +140,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="combat_ai.cpp" />
+    <ClCompile Include="combat_state.cpp" />
+    <ClCompile Include="combat_field.cpp" />
+    <ClCompile Include="combat_manager.cpp" />
     <ClCompile Include="HotaMechanics.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="combat_ai.h" />
+    <ClInclude Include="combat_field.h" />
+    <ClInclude Include="combat_hero.h" />
+    <ClInclude Include="combat_manager.h" />
+    <ClInclude Include="combat_action.h" />
+    <ClInclude Include="combat_state.h" />
+    <ClInclude Include="combat_unit.h" />
+    <ClInclude Include="structures.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
