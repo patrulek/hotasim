@@ -1,9 +1,43 @@
 #include "combat_ai.h"
+#include "combat_hero.h"
+
+#include <cmath>
 
 CombatAI::CombatAI(const CombatManager& _combat_manager)
 	: combat_manager(_combat_manager) {}
 
 
+float CombatAI::calculateUnitAttackFightValueModifier(const CombatUnit& unit) const {
+	// if has special abilities
+	// if has special spells active
+	return 1.0f + 0.05f * unit.calcDiffAtk();
+}
+
+float CombatAI::calculateUnitDefenceFightValueModifier(const CombatUnit& unit) const {
+	// if has special abilities active
+	// if has special spells active
+	return 1.0f + 0.05f * unit.calcDiffDef();
+}
+
+float CombatAI::calculateUnitFightValueModifier(const CombatUnit& unit) const {
+	return sqrt(calculateUnitAttackFightValueModifier(unit) * calculateUnitDefenceFightValueModifier(unit));
+}
+
+int CombatAI::calculateStackUnitFightValue(const CombatUnit& unit) const {
+	float stack_modifier = calculateUnitFightValueModifier(unit);
+	float stack_fight_value = unit.getStackUnitFightValue();
+
+	return static_cast<int>(stack_modifier * stack_fight_value);
+}
+
+int CombatAI::calculateHeroFightValue(const CombatHero& hero) const {
+	int hero_fight_value = 0;
+	
+	for (const auto unit : hero.getActiveUnits())
+		hero_fight_value += calculateStackUnitFightValue(unit);
+
+	return hero_fight_value;
+}
 
 void CombatAI::generatePossibleActions(CombatAI& ai) {
 	// check if spellcast possible
@@ -25,8 +59,8 @@ float CombatAI::multiplierModifier(CombatUnit& activeStack, int side) {
 // 42770
 int CombatAI::calculateSingleUnitValue(CombatUnit& activeStack, int side) {
 
-	int diff_atk = activeStack.calcDiffAtk(activeStack); // aka 42130
-	int diff_def = activeStack.calcDiffDef(activeStack); // aka 422B0
+	int diff_atk = activeStack.calcDiffAtk(); // aka 42130
+	int diff_def = activeStack.calcDiffDef(); // aka 422B0
 	float current_multiplier = 1.0;
 
 	// modify multiplier by spells
@@ -76,7 +110,7 @@ int CombatAI::calculateSingleUnitValue(CombatUnit& activeStack, int side) {
 	mul_multiplier = sqrt(mul_multiplier);
 
 
-	float fight_value = activeStack.unitTemplate.fightValue;
+	float fight_value = activeStack.unit_template.fightValue;
 	float unit_value = fight_value * mul_multiplier;
 
 	//if (this->is_alive()) // probably
@@ -100,7 +134,7 @@ int CombatAI::calculateUnitValue(CombatUnit& activeStack, int side) {
 
 	float singleUnitValue = calculateSingleUnitValue(activeStack, side); // call 42770
 
-	int numberAliveInStack = activeStack.currentStackNumber;
+	int numberAliveInStack = activeStack.stackNumber;
 
 	//float meleeAttackFightMultiplier = 1.0f; // diffAtk * 0.05 + 1 ; shooterModifier * 0.5 ; shield * 0.5f ; bless/curse */ 2.0;
 	// póŸniej jeszcze jakieœ mno¿enie multiplierów; 1.0 * 1.0; a póŸniej jeszcze sqrt robimy
@@ -111,10 +145,10 @@ int CombatAI::calculateUnitValue(CombatUnit& activeStack, int side) {
 
 	// if morale or clone, not sure; /=5.0f
 	int currentHealth = activeStack.currentStats.hp; // (base hp - helthlost)
-	int summedHealth = activeStack.currentStackNumber * activeStack.unitTemplate.stats.hp - 0; /* - healthlost*/
+	int summedHealth = activeStack.stackNumber * activeStack.unit_template.stats.hp - 0; /* - healthlost*/
 
 	float stackUnitValue = summedHealth * singleUnitValue;
-	stackUnitValue /= activeStack.unitTemplate.stats.hp; // base hp??
+	stackUnitValue /= activeStack.unit_template.stats.hp; // base hp??
 
 	return (int)stackUnitValue; // aka 217F94 
 }
@@ -148,10 +182,10 @@ void CombatAI::calculateUnitsFightValues(CombatAI& ai, CombatState& state) {
 	// iterate over player units
 	for (int i = 0; i < 1 /*21 get player unit number*/; ++i) {
 		CombatUnit& unit = state.heroes[0].units[i];
-		int unitStackNumber = unit.currentStackNumber;
+		int unitStackNumber = unit.stackNumber;
 		bool arrowTower = unit.isArrowTower(unit);
-		int diffAtk = unit.calcDiffAtk(unit);
-		int diffDef = unit.calcDiffDef(unit);
+		int diffAtk = unit.calcDiffAtk();
+		int diffDef = unit.calcDiffDef();
 
 		if (diffAtk < minMeleeDiffAtk)
 			minMeleeDiffAtk = diffAtk;
@@ -163,10 +197,10 @@ void CombatAI::calculateUnitsFightValues(CombatAI& ai, CombatState& state) {
 	// iterate over ai units
 	for (int i = 0; i < 1 /*21 get player unit number*/; ++i) {
 		CombatUnit& unit = state.heroes[1].units[i];
-		int unitStackNumber = unit.currentStackNumber;
+		int unitStackNumber = unit.stackNumber;
 		bool arrowTower = unit.isArrowTower(unit);
-		int diffAtk = unit.calcDiffAtk(unit);
-		int diffDef = unit.calcDiffDef(unit);
+		int diffAtk = unit.calcDiffAtk();
+		int diffDef = unit.calcDiffDef();
 
 		if (diffAtk < minMeleeDiffAtk)
 			minMeleeDiffAtk = diffAtk;

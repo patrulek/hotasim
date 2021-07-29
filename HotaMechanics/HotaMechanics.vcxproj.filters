@@ -30,6 +30,15 @@
     <ClCompile Include="combat_ai.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="unit_templates.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="combat_hero.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="combat_pathfinder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="structures.h">
@@ -54,6 +63,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="combat_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_templates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="combat_pathfinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

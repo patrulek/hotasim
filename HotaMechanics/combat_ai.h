@@ -2,14 +2,20 @@
 
 
 #include <cmath>
+#include <memory>
 
 #include "structures.h"
 
 #include "combat_manager.h"
 #include "combat_unit.h"
 #include "combat_state.h"
+#include "combat_pathfinder.h"
 
 class CombatManager;
+
+enum class AIDifficulty {
+	EASY /*80%, 100%*/, NORMAL /*130%, 160%, 200%*/
+};
 
 class CombatAI {
 public:
@@ -23,8 +29,11 @@ public:
 
 	CombatAction possibleActions[512];
 	CombatAction action;
+	AIDifficulty difficulty;
 
-	const CombatManager& const combat_manager;
+	const CombatManager& combat_manager;
+	std::unique_ptr<CombatPathfinder> pathfinder;
+
 	CombatAI(const CombatManager& combat_manager);
 
 
@@ -63,9 +72,16 @@ public:
 	// part of 22370
 	int unitPreconditions(CombatUnit& unit);
 
-	// 22370 - pick ai action
+	// 22370 - pick ai action	
 	void pickAction(CombatAI& ai, CombatState& state);
 
+
+	float calculateUnitAttackFightValueModifier(const CombatUnit& unit) const;
+	float calculateUnitDefenceFightValueModifier(const CombatUnit& unit) const;
+	float calculateUnitFightValueModifier(const CombatUnit& unit) const;
+
+	int calculateStackUnitFightValue(const CombatUnit& unit) const;
+	int calculateHeroFightValue(const CombatHero& hero) const;
 };
 
 

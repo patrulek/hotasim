@@ -4,23 +4,17 @@
 #include <iostream>
 
 #include "combat_manager.h"
+#include "unit_templates.h"
 
 
- const Unit peasant = {
-   15,
-   16,
-   { 1, 1, 0, 0, 3, 1, 0 },
-   SpellBook{}
-};
 
 int main()
 {
-
-   CombatUnit peasants1000 = CombatUnit(peasant);
-   peasants1000.stackNumber = peasants1000.currentStackNumber = 1000;
+   CombatUnit peasants1000 = CombatUnit(unit_templates["Peasant"]);
+   peasants1000.stackNumber = peasants1000.stackNumber = 1000;
    peasants1000.hexId = 5 * 17 + 1;
-   CombatUnit peasants100 = CombatUnit(peasant);
-   peasants100.stackNumber = peasants100.currentStackNumber = 100;
+   CombatUnit peasants100 = CombatUnit(unit_templates["Peasant"]);
+   peasants100.stackNumber = peasants100.stackNumber = 100;
    peasants100.hexId = 5 * 17 + 14;
 
    CombatHero player = CombatHero();
@@ -46,7 +40,7 @@ int main()
 
    auto unit = mgr.getActiveStack();
 
-   std::cout << "Current unit move: " << unit.currentStackNumber << std::endl << "Unit stats: " << unit.currentStats.atk << " | "
+   std::cout << "Current unit move: " << unit.stackNumber << std::endl << "Unit stats: " << unit.currentStats.atk << " | "
       << unit.currentStats.def << " | " << unit.currentStats.spd << std::endl;
 
 

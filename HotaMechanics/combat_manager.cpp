@@ -1,10 +1,28 @@
 #include "combat_manager.h"
 
+#include "combat_ai.h"
+#include "combat_state.h"
+#include "combat_unit.h"
+
+const CombatAI& CombatManager::getCombatAI() const {
+	return *ai;
+}
+
+CombatUnit& CombatManager::getActiveStack() {
+	int unitId = current_state->unitOrder[current_state->currentUnit];
+	int side = unitId / 21;
+	return current_state->heroes[side].units[unitId % 21];
+}
+
 CombatManager::CombatManager(const CombatHero& attacker, const CombatHero& defender, const CombatField& field)
-	: init_state(CombatState{ {attacker, defender}, field, -1, -1 })
+	: init_state(CombatState(attacker, defender, field))
 {
 	ai = std::make_unique<CombatAI>(*this);
 	current_state = std::make_unique<CombatState>(init_state);
+}
+
+CombatManager::~CombatManager() {
+
 }
 
 CombatState CombatManager::nextState() {

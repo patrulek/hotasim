@@ -3,23 +3,21 @@
 #include "structures.h"
 #include "combat_unit.h"
 
+#include <vector>
 
-struct CombatHero {
+class CombatHero {
+public:
 	PrimaryStats stats{};
-	SecondarySkills skills{};
+	HeroSkills skills{};
 	SpellBook spells{};
 	Equipment artifacts{};
-	CombatUnit units[21]{};
+	CombatUnit units[21];
 
 	CombatHero() = default;
 
+	std::vector<CombatUnit> getActiveUnits() const;
 
+	bool isAlive(CombatHero& hero) const;
 
-	bool isAlive(CombatHero& hero) {
-		return true; // check if has any unit alive
-	}
-
-	int aliveStacks(CombatHero& hero) {
-		return 1; // check all alive stacks in army
-	}
+	int aliveStacks(CombatHero& hero) const;
 };

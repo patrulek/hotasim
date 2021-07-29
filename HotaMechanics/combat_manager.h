@@ -3,33 +3,31 @@
 #include <memory>
 
 #include "structures.h"
-#include "combat_ai.h"
-#include "combat_hero.h"
-#include "combat_field.h"
+
 #include "combat_state.h"
 
 class CombatAI;
+class CombatHero;
+class CombatField;
+class CombatUnit;
 
 class CombatManager {
 
 public:
 	CombatManager(const CombatHero& attacker, const CombatHero& defender, const CombatField& field);
+	~CombatManager();
 
 
 
 	CombatState nextState();
 
-	CombatUnit& getActiveStack() {
-		int unitId = current_state->unitOrder[current_state->currentUnit];
-		int side = unitId / 21;
-		return current_state->heroes[side].units[unitId % 21];
-	}
+	CombatUnit& getActiveStack();
 
 
 	CombatState duplicateCurrentState() const { return CombatState(*current_state); }
 	CombatState& getCurrentState() const { return *current_state; }
 	const CombatState& getInitialState() const { return init_state; }
-
+	const CombatAI& getCombatAI() const;
 
 
 
