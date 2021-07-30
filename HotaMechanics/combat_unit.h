@@ -4,6 +4,11 @@
 #include "structures.h"
 
 #include <array>
+#include <vector>
+
+class CombatHex;
+class CombatHero;
+class CombatField;
 
 class CombatUnit {
 public:
@@ -12,13 +17,19 @@ public:
 	PrimaryStats currentStats;
 	uint16 stackNumber{ 0 };
 	uint16 health_lost{ 0 };
-	uint8 hexId{ 255 };
+	int hexId{ -1 };
 	std::array<SpellID, 8> active_spells{};
 	bool applied_hero_stats{ false };
 
+	/*const*/ CombatHero*/*&*/ hero;
+
 	CombatUnit(const Unit& unitTemplate)
 		: unit_template(unitTemplate), currentStats(unitTemplate.stats), currentFlags(unitTemplate.flags) {};
+	CombatUnit(const Unit& unitTemplate, /*const*/ CombatHero& hero)
+		: unit_template(unitTemplate), currentStats(unitTemplate.stats), currentFlags(unitTemplate.flags), hero(&hero) {};
 	CombatUnit() = default;
+
+	const std::vector<int> getHexesInSpeedRange(const CombatField& field) const;
 
 	float getSingleUnitFightValue() const {
 		return unit_template.fightValue;
