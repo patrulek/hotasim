@@ -8,7 +8,7 @@
 #include <iostream>
 
 enum class CombatHexOccupation {
-	EMPTY, UNIT, OBSTACLE // etc
+	EMPTY, UNIT, SOFT_OBSTACLE, SOLID_OBSTACLE // etc
 };
 
 class CombatHex {
@@ -21,6 +21,14 @@ public:
 
 	void occupyHex(CombatHexOccupation type) {
 		occupiedBy = type;
+	}
+
+	bool isWalkable() const {
+		bool first_col = id % COLS == 0;
+		bool last_col = id % COLS == COLS - 1;
+
+		return !(occupiedBy == CombatHexOccupation::SOLID_OBSTACLE || occupiedBy == CombatHexOccupation::UNIT)
+			&& !(first_col || last_col);
 	}
 
 	int distanceToHex(int target_hex_id) const {
@@ -106,10 +114,17 @@ public:
 				hexes[y][x].occupiedBy = CombatHexOccupation::EMPTY;
 			}
 
-		if (combatFieldTemplate == CombatFieldTemplate::TMP1)
-			hexes[0][5].occupiedBy = CombatHexOccupation::OBSTACLE;
+		//if (combatFieldTemplate == CombatFieldTemplate::TMP1)
+		//	hexes[0][5].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
 	}
 
 	CombatHex getById(int hex_id) const { return hexes[hex_id / 17][hex_id % 17]; }
 	std::vector<int> getHexesInRange(int from, int range) const;
+
+	// checking pathfinding to hexes which arent occupied
+	std::vector<int> getReachableHexesFromWalkableHexes(int from, int range, std::vector<int>& hexes, bool can_fly, bool double_wide) const;
+
+	std::vector<int> getWalkableHexesFromList(std::vector<int>& hexes) const; // from hexes in range check which one is not occupied
+
+	std::vector<int> findPath(int from, int to) const;
 };
