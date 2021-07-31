@@ -40,27 +40,27 @@ int CombatAI::calculateHeroFightValue(const CombatHero& hero) const {
 }
 
 
-CombatAction CombatAI::createWaitAction() {
-	return CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+CombatAction CombatAI::createWaitAction() const {
+	return CombatAction{ CombatActionType::WAIT, -1, -1, true };
 }
 
-CombatAction CombatAI::createWalkAction(int hex_id) {
-	return CombatAction{ CombatActionType::WALK, -1, hex_id, -1 };
+CombatAction CombatAI::createWalkAction(int hex_id) const {
+	return CombatAction{ CombatActionType::WALK, -1, hex_id, true };
 }
 
-CombatAction CombatAI::createDefendAction() {
-	return CombatAction{ CombatActionType::DEFENSE, -1, -1, -1 };
+CombatAction CombatAI::createDefendAction() const {
+	return CombatAction{ CombatActionType::DEFENSE, -1, -1, true };
 }
 
-CombatAction CombatAI::createSpellCastAction(int spell_id, int hex_id) {
+CombatAction CombatAI::createSpellCastAction(int spell_id, int unit_id, int hex_id) const {
 	throw std::exception("Not implemented yet");
 }
 
-CombatAction CombatAI::createAttackAction(int unit_id, int hex_id) {
-	return CombatAction{ CombatActionType::ATTACK, hex_id, unit_id, -1 };
+CombatAction CombatAI::createAttackAction(int unit_id, int hex_id) const {
+	return CombatAction{ CombatActionType::ATTACK, unit_id, hex_id, true };
 }
 
-std::vector<CombatAction> CombatAI::generateActionsForPlayer(const CombatUnit& activeStack) {
+std::vector<CombatAction> CombatAI::generateActionsForPlayer(const CombatUnit& activeStack) const {
 	if (!activeStack.canMakeAction())
 		return std::vector<CombatAction>{};
 
@@ -92,6 +92,12 @@ std::vector<CombatAction> CombatAI::generateActionsForPlayer(const CombatUnit& a
 		auto reachable_adjacent = field.getReachableHexesFromWalkableHexes(activeStack.hexId, activeStack.currentStats.spd,
 																								 walkable_adjacent, false, false);
 
+		
+		// if were staying in one of adjacent hexes to target, add that hex
+		bool staying_around = std::find(std::begin(adjacent_hexes), std::end(adjacent_hexes), activeStack.hexId) != std::end(adjacent_hexes);
+		if (staying_around)
+			reachable_adjacent.push_back(activeStack.hexId);
+
 		for (auto hex : reachable_adjacent) {
 			actions.push_back(createAttackAction(unit.getUnitId(), unit.hexId));
 		}
@@ -103,6 +109,8 @@ std::vector<CombatAction> CombatAI::generateActionsForPlayer(const CombatUnit& a
 
 	if (activeStack.canHeroCast())
 		throw std::exception("Not implemented yet");
+
+	return actions;
 }
 
 std::vector<CombatAction> CombatAI::generateActionsForAI() {
@@ -110,6 +118,7 @@ std::vector<CombatAction> CombatAI::generateActionsForAI() {
 	// check if attack possible
 	// check if wait / defend / surrender possible and has a sense
 	// check if move possible
+	return std::vector<CombatAction>{};
 }
 
 void CombatAI::evaluateAction(CombatAI& ai, CombatAction action, CombatState& state) {

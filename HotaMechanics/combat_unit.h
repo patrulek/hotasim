@@ -14,7 +14,7 @@ enum class CombatSide;
 class CombatUnit {
 public:
 	Unit unit_template{};
-	UnitState state;
+	UnitState state{ 0 };
 	PrimaryStats currentStats;
 	uint16 stackNumber{ 0 };
 	uint16 health_lost{ 0 };
@@ -52,6 +52,10 @@ public:
 		currentStats.atk += (hero_stats.atk * !applied_hero_stats);
 		currentStats.def += (hero_stats.def * !applied_hero_stats);
 		applied_hero_stats = true;
+	}
+
+	void initUnit() {
+		state.is_alive = true;
 	}
 
 	void applySpell(const int spell_id, const int power) {

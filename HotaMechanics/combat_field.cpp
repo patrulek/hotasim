@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 std::vector<int> CombatField::findPath(int from, int to) const {
-	if (!getById(to).isWalkable())
+	if (!getById(to).isWalkable() || from == to)
 		return std::vector<int>();
 
 	std::vector<int> path{};

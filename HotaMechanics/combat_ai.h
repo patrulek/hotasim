@@ -38,14 +38,14 @@ public:
 	CombatAI(const CombatManager& combat_manager);
 
 
-	std::vector<CombatAction> generateActionsForPlayer(const CombatUnit& activeStack);
+	std::vector<CombatAction> generateActionsForPlayer(const CombatUnit& activeStack) const;
 	std::vector<CombatAction> generateActionsForAI();
 
-	CombatAction createWaitAction();
-	CombatAction createWalkAction(int hex_id);
-	CombatAction createDefendAction();
-	CombatAction createSpellCastAction(int spell_id, int hex_id);
-	CombatAction createAttackAction(int unit_id, int hex_id);
+	CombatAction createWaitAction() const;
+	CombatAction createWalkAction(int hex_id) const;
+	CombatAction createDefendAction() const;
+	CombatAction createSpellCastAction(int spell_id, int unit_id, int hex_id) const;
+	CombatAction createAttackAction(int unit_id, int hex_id) const;
 
 	void evaluateAction(CombatAI& ai, CombatAction action, CombatState& state);
 

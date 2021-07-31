@@ -4,10 +4,7 @@
 #include "../HotaMechanics/structures.h"
 
 #include "../HotaMechanics/combat_field.h"
-
-int getHexId(int row, int col) {
-	return row * CombatHex::COLS + col;
-}
+#include "utils.h"
 
 TEST(CombatHex, shouldReturnCorrectArrayOfAdjacentHexesIdsToGivenHex) {
 	CombatHex hex;

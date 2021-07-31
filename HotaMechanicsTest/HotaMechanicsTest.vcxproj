@@ -36,6 +36,7 @@
     <ClCompile Include="combat_ai_test.cpp" />
     <ClCompile Include="combat_field_test.cpp" />
     <ClCompile Include="combat_unit_test.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HotaMechanics\HotaMechanics.vcxproj">
@@ -45,6 +46,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
