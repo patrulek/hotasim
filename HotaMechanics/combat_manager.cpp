@@ -4,6 +4,28 @@
 #include "combat_state.h"
 #include "combat_unit.h"
 
+
+std::vector<CombatUnit> CombatManager::getUnitsInRange(CombatSide side, std::vector<int>& hexes) const {
+	std::vector<CombatUnit> units_in_range;
+
+	for (auto unit : current_state->heroes[(int)side].getActiveUnits()) {
+		if (!unit.isAlive())
+			continue;
+
+		// if unit isnt common unit -> continue
+
+		bool found = std::find(std::begin(hexes), std::end(hexes), unit.hexId) != std::end(hexes);
+		if (found)
+			units_in_range.push_back(unit);
+	}
+
+	return units_in_range;
+}
+
+const CombatField& CombatManager::getCombatField() const {
+	return current_state->field;
+}
+
 const CombatAI& CombatManager::getCombatAI() const {
 	return *ai;
 }

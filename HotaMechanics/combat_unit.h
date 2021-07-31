@@ -9,11 +9,12 @@
 class CombatHex;
 class CombatHero;
 class CombatField;
+enum class CombatSide;
 
 class CombatUnit {
 public:
 	Unit unit_template{};
-	uint32 currentFlags{ 0 };
+	UnitState state;
 	PrimaryStats currentStats;
 	uint16 stackNumber{ 0 };
 	uint16 health_lost{ 0 };
@@ -24,10 +25,14 @@ public:
 	/*const*/ CombatHero*/*&*/ hero;
 
 	CombatUnit(const Unit& unitTemplate)
-		: unit_template(unitTemplate), currentStats(unitTemplate.stats), currentFlags(unitTemplate.flags) {};
+		: unit_template(unitTemplate), currentStats(unitTemplate.stats) {};
 	CombatUnit(const Unit& unitTemplate, /*const*/ CombatHero& hero)
-		: unit_template(unitTemplate), currentStats(unitTemplate.stats), currentFlags(unitTemplate.flags), hero(&hero) {};
+		: unit_template(unitTemplate), currentStats(unitTemplate.stats), hero(&hero) {};
 	CombatUnit() = default;
+
+	CombatSide getCombatSide() const;
+
+	int getUnitId() const;
 
 	const std::vector<int> getHexesInSpeedRange(const CombatField& field) const;
 
@@ -57,7 +62,11 @@ public:
 		return;
 	}
 
+	bool canCast() const {
+		return false; // todo
+	}
 
+	bool canHeroCast() const;
 
 	int* getReachableHexes(CombatUnit& unit) {
 		// get hexes in straight line range
@@ -71,10 +80,25 @@ public:
 		return .0f;
 	}
 
+	bool isAlive() const {
+		return state.is_alive;
+	}
+
+	bool canMakeAction() const {
+		return state.is_alive && !state.done;
+	}
+
+	bool canWait() const {
+		return !state.waiting;
+	}
+
+	bool canDefend() const {
+		return !state.defending;
+	}
 
 	// C8DE0 - get unit number shots and check if arrow tower
 	bool canShoot(CombatUnit& unit) {
-		return 0 && false; // unit->getNumberShots && unit->isArrowTower()
+		return currentStats.shots > 0; // 0 && false; // unit->getNumberShots && unit->isArrowTower()
 	}
 
 	// C86D0 - check if arrow tower, ballista or 150 (cannon? undefined?)

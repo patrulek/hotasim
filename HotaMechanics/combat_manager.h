@@ -5,6 +5,7 @@
 #include "structures.h"
 
 #include "combat_state.h"
+#include "combat_action.h"
 
 class CombatAI;
 class CombatHero;
@@ -28,7 +29,9 @@ public:
 	CombatState& getCurrentState() const { return *current_state; }
 	const CombatState& getInitialState() const { return init_state; }
 	const CombatAI& getCombatAI() const;
+	const CombatField& getCombatField() const;
 
+	std::vector<CombatUnit> getUnitsInRange(CombatSide side, std::vector<int>& hexes) const;
 
 
 

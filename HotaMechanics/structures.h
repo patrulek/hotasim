@@ -20,6 +20,7 @@ struct PrimaryStats {
 	uint16 spd;
 	uint16 hp;
 	uint16 mana;
+	uint16 shots;
 };
 
 enum class HeroSkills {
@@ -60,9 +61,20 @@ enum class SpellID {
 	HASTE
 };
 
+
+struct UnitState {
+	bool is_alive;
+	bool is_summon;
+	bool is_clone;
+	bool morale;
+	bool waiting;
+	bool done;
+	bool defending;
+	bool sacrificed;
+};
+
 struct Unit {
 	uint16 fightValue;
-	uint32 flags;
 	PrimaryStats stats;
 	SpellBook spellbook;
 	std::string name;
@@ -73,12 +85,4 @@ struct Unit {
 
 enum class CombatResult {
 	NOT_STARTED, IN_PROGRESS, DRAW, PLAYER, ENEMY
-};
-
-enum class CombatActionType {
-	UNDEFINED, MOVE, DEFENSE, CALCULATE, UNKNOWN_4, MELEE, SHOOT, WAIT, UNKNOWN_8, UNKOWN_9, REGEN, UNKNOWN_11
-};
-
-struct CombatAction {
-	CombatActionType type{ CombatActionType::UNDEFINED };
 };

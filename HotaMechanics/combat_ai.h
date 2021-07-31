@@ -10,6 +10,7 @@
 #include "combat_unit.h"
 #include "combat_state.h"
 #include "combat_pathfinder.h"
+#include "combat_action.h"
 
 class CombatManager;
 
@@ -37,7 +38,14 @@ public:
 	CombatAI(const CombatManager& combat_manager);
 
 
-	void generatePossibleActions(CombatAI& ai);
+	std::vector<CombatAction> generateActionsForPlayer(const CombatUnit& activeStack);
+	std::vector<CombatAction> generateActionsForAI();
+
+	CombatAction createWaitAction();
+	CombatAction createWalkAction(int hex_id);
+	CombatAction createDefendAction();
+	CombatAction createSpellCastAction(int spell_id, int hex_id);
+	CombatAction createAttackAction(int unit_id, int hex_id);
 
 	void evaluateAction(CombatAI& ai, CombatAction action, CombatState& state);
 

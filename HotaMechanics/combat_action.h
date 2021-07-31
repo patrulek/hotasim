@@ -3,12 +3,17 @@
 
 #include "structures.h"
 
+#include <vector>
 
-CombatAction* generateCombatActionsForPlayer(CombatState& state) {
-	CombatAction* actions = new CombatAction[256];
-	return actions;
-}
+enum class CombatActionType {
+	WALK, ATTACK, WAIT, DEFENSE, SPELLCAST
+};
 
-CombatAction generateCombatActionForAI(CombatState& state) {
-	//CombatUnit& unit = getUnit(state);
-}
+class CombatAction {
+public:
+	CombatActionType action;
+	int param1;
+	int target;
+	int param2;
+
+};

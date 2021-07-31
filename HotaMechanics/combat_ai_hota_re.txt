@@ -40,69 +40,8 @@ int CombatAI::calculateHeroFightValue(const CombatHero& hero) const {
 }
 
 
-CombatAction CombatAI::createWaitAction() {
-	return CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
-}
+std::vector<CombatAction> CombatAI::generateActionsForPlayer() {
 
-CombatAction CombatAI::createWalkAction(int hex_id) {
-	return CombatAction{ CombatActionType::WALK, -1, hex_id, -1 };
-}
-
-CombatAction CombatAI::createDefendAction() {
-	return CombatAction{ CombatActionType::DEFENSE, -1, -1, -1 };
-}
-
-CombatAction CombatAI::createSpellCastAction(int spell_id, int hex_id) {
-	throw std::exception("Not implemented yet");
-}
-
-CombatAction CombatAI::createAttackAction(int unit_id, int hex_id) {
-	return CombatAction{ CombatActionType::ATTACK, hex_id, unit_id, -1 };
-}
-
-std::vector<CombatAction> CombatAI::generateActionsForPlayer(const CombatUnit& activeStack) {
-	if (!activeStack.canMakeAction())
-		return std::vector<CombatAction>{};
-
-	std::vector<CombatAction> actions{};
-
-	if (activeStack.canWait())
-		actions.push_back(createWaitAction());
-
-	if (activeStack.canDefend())
-		actions.push_back(createDefendAction());
-
-	// get reachable hexes;
-	auto field = combat_manager.getCombatField();
-	auto range_hexes = field.getHexesInRange(activeStack.hexId, activeStack.currentStats.spd);
-	auto walkable_hexes = field.getWalkableHexesFromList(range_hexes);
-	auto reachable_hexes = field.getReachableHexesFromWalkableHexes(activeStack.hexId, activeStack.currentStats.spd, walkable_hexes, false, false);
-
-	for (auto hex : reachable_hexes)
-		actions.push_back(createWalkAction(hex));
-	
-	// get attackable enemy units; 
-	// if can shoot then only get all enemy units
-	auto units_in_range = combat_manager.getUnitsInRange(CombatSide::DEFENDER, range_hexes);
-	 
-	for (auto unit : units_in_range) {
-		auto adjacent_hexes = field.getById(unit.hexId).getAdjacentHexes();
-		auto adjacent_vec = std::vector<int>(std::begin(adjacent_hexes), std::end(adjacent_hexes));
-		auto walkable_adjacent = field.getWalkableHexesFromList(adjacent_vec);
-		auto reachable_adjacent = field.getReachableHexesFromWalkableHexes(activeStack.hexId, activeStack.currentStats.spd,
-																								 walkable_adjacent, false, false);
-
-		for (auto hex : reachable_adjacent) {
-			actions.push_back(createAttackAction(unit.getUnitId(), unit.hexId));
-		}
-	}
-	
-	// get castable spells;
-	if (activeStack.canCast())
-		throw std::exception("Not implemented yet");
-
-	if (activeStack.canHeroCast())
-		throw std::exception("Not implemented yet");
 }
 
 std::vector<CombatAction> CombatAI::generateActionsForAI() {

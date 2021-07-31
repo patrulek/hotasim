@@ -162,6 +162,9 @@
     <ClInclude Include="structures.h" />
     <ClInclude Include="unit_templates.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="combat_ai_hota_re.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
