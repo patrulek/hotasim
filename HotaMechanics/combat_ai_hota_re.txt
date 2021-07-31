@@ -278,3 +278,30 @@ void CombatAI::pickAction(CombatAI& ai, CombatState& state) {
 
 	// iterate over possible actions and evaluate them, then pick best action
 }
+
+
+
+---------------
+[ebp-1C] do [ebp-28] tutaj ustawiamy koñcowy rezultat
+
+Dla 100 ch³opów
+35D10 - tak, wygl¹da na obliczenie zadanych obra¿en + kontratak
+Dla ataku w 100 kuszników
+
+[ebp-50] - obra¿enia w stack (91)
+[ebp-4C] - obra¿enia z kontrataku (100)
+
+36490 - tutaj ustawiamy pozosta³e wartoœci
+[ebp-48] - 1666 (kij wie, co to jest)
+[ebp-44] - 36 (hex_target)
+[ebp-40] - 5 (liczba tur zanim dojdziemy)
+
+Dla ataku w 2 ch³opów
+
+[ebp-50] - obra¿enia w stack (0)
+[ebp-4C] - obra¿enia z kontrataku (100)
+
+36490 - tutaj ustawiamy pozosta³e wartoœci
+[ebp-48] - -500 (kij wie, co to jest)
+[ebp-44] - 121 (hex_target)
+[ebp-40] - 5 (liczba tur zanim dojdziemy)
