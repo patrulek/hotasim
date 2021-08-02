@@ -61,19 +61,6 @@ enum class SpellID {
 	HASTE
 };
 
-
-struct UnitState {
-	bool is_alive;
-	bool is_summon;
-	bool is_clone;
-	bool morale;
-	bool waiting;
-	bool done;
-	bool defending;
-	bool sacrificed;
-	bool retaliated;
-};
-
 struct Unit {
 	uint16 fightValue;
 	PrimaryStats stats;
@@ -86,4 +73,59 @@ struct Unit {
 
 enum class CombatResult {
 	NOT_STARTED, IN_PROGRESS, DRAW, PLAYER, ENEMY
+};
+
+enum class CombatType {
+	NEUTRAL, ENCOUNTER
+};
+
+struct UnitStack {
+	Unit unit;
+	int stack_number;
+};
+
+struct Hero {
+	PrimaryStats stats{};
+	HeroSkills skills{};
+	SpellBook spells{};
+	Equipment artifacts{};
+	std::vector<UnitStack> army{};
+
+	~Hero() {}
+
+	void setAttack(const int _attack) { stats.atk = _attack; }
+	void setDefense(const int _defense) { stats.def = _defense; }
+	void setPower(const int _power) { stats.pow = _power; }
+	void setKnowledge(const int _knowledge) { stats.kdg = _knowledge; }
+
+	void setHeroSkills(const HeroSkills& _skills) { skills = _skills; }
+	void addHeroSkill() { throw std::exception("Not implemented yet"); }
+	void removeHeroSkill() { throw std::exception("Not implemented yet"); }
+
+	void setSpellBook(const SpellBook& _spellbook) { spells = _spellbook; }
+	void addSpell() { throw std::exception("Not implemented yet"); }
+	void removeSpell() { throw std::exception("Not implemented yet"); }
+
+	void setEquipment(const Equipment& _equipment) { artifacts = _equipment; }
+	void addArtifact() { throw std::exception("Not implemented yet"); }
+	void removeArtifact() { throw std::exception("Not implemented yet"); }
+
+	void setHeroArmy(const std::vector<UnitStack>& _army) {
+		army = _army;
+		army.resize(7);
+	}
+
+	void addUnit(const Unit& _unit, const int _stack_size) {
+		addUnitStack(UnitStack{ _unit, _stack_size });
+	}
+
+	void addUnitStack(const UnitStack& _unit_stack) {
+		if (army.size() >= 7)
+			return;
+		army.push_back(_unit_stack);
+	}
+
+	void removeUnitStack(const UnitStack&) { throw std::exception("Not implemented yet"); }
+
+	void removeHeroArmy() { army.clear(); }
 };

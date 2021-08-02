@@ -114,15 +114,32 @@ public:
 	CombatFieldTemplate combatFieldTemplate{ CombatFieldTemplate::TMP1 };
 	CombatHex hexes[11][17];
 
-	CombatField() {
-		for (int y = 0; y < 11; ++y)
+	CombatField(const CombatFieldType _field_type)
+			: combatFieldId(_field_type) {
+		
+		initializeCombatHexes();
+		//if (combatFieldTemplate == CombatFieldTemplate::TMP1)
+		//	hexes[0][5].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	}
+
+	CombatField()
+		: CombatField(CombatFieldType::GRASS) {}
+
+	void initializeCombatHexes() {
+		for (int y = 0; y < 11; ++y) {
 			for (int x = 0; x < 17; ++x) {
 				hexes[y][x].id = y * 17 + x;
 				hexes[y][x].occupiedBy = CombatHexOccupation::EMPTY;
 			}
-
-		//if (combatFieldTemplate == CombatFieldTemplate::TMP1)
-		//	hexes[0][5].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+		}
+	}
+		
+	void setTemplate(std::vector<int>& _template) {
+		for (auto hex : _template) {
+			int y = hex / 17;
+			int x = hex % 17;
+			hexes[y][x].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+		}
 	}
 
 	CombatHex getById(int hex_id) const { return hexes[hex_id / 17][hex_id % 17]; }

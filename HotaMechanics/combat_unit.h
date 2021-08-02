@@ -11,6 +11,19 @@ class CombatHero;
 class CombatField;
 enum class CombatSide;
 
+
+struct UnitState {
+	bool is_alive;
+	bool is_summon;
+	bool is_clone;
+	bool morale;
+	bool waiting;
+	bool done;
+	bool defending;
+	bool sacrificed;
+	bool retaliated;
+};
+
 class CombatUnit {
 public:
 	Unit unit_template{};

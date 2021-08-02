@@ -140,7 +140,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="combat_permutation.cpp" />
+    <ClCompile Include="combat_simulator.cpp" />
     <ClCompile Include="HotaSim.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HotaMechanics\HotaMechanics.vcxproj">
+      <Project>{55e8a5ef-0f3f-4359-be83-249b546346b8}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="combat_permutation.h" />
+    <ClInclude Include="combat_simulator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

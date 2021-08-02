@@ -6,19 +6,6 @@
 #include <vector>
 #include <array>
 
-struct HeroArmy {
-	std::array<Unit, 7> units;
-	std::array<int, 7> number;
-};
-
-struct Hero {
-	PrimaryStats stats{};
-	HeroSkills skills{};
-	SpellBook spells{};
-	Equipment artifacts{};
-	HeroArmy army;
-};
-
 enum class CombatSide {
 	ATTACKER, DEFENDER
 };
