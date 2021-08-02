@@ -39,10 +39,8 @@ public:
 	CombatAI(const CombatManager& combat_manager);
 
 
-	int chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const;
+	std::vector<int> chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const;
 	int chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const;
-	// todo: implement in smart way; heroes 3 ai multiply calculated value by pseudorandom value in range 0.75-1.00 and then do some more calculations; the result value is a bit lower than calculated, fixed fight value gain/loss
-	float randomizeChoice(int fight_value_gain) const; 
 
 	std::vector<CombatAction> generateActionsForPlayer(const CombatUnit& activeStack) const;
 	std::vector<CombatAction> generateActionsForAI();

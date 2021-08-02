@@ -114,15 +114,115 @@ std::vector<CombatAction> CombatAI::generateActionsForPlayer(const CombatUnit& a
 }
 
 
-int CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const {
+// because of randomization which cant be mirrored in this project, this function can possibly return more
+// than one unit to attack (only if some specified conditions are met; for most cases there will be only one unit)
+std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const {
 	if (enemy_hero.getActiveUnits().size() == 1)
-		return enemy_hero.getActiveUnits()[0]->getUnitId();
+		return std::vector<int>{ enemy_hero.getActiveUnits()[0]->getUnitId() }; // todo: to could not always be [0]
 
-	throw std::exception("Not implemented yet");
+	int turns = 999;
+	std::vector<int> unit_ids{};
+	int fight_value_gain = 0;
+	int min_fight_value_gain = 0;
+	int max_fight_value_gain = 0;
+	int distance = 999;
 
-	// iterate over units
+	for (auto unit : enemy_hero.getActiveUnits()) {
+		int unit_distance = combat_manager.getCombatField().getById(activeStack.hexId).distanceToHex(unit->hexId);
+		int unit_turns = std::ceil((float)unit_distance / activeStack.currentStats.spd); // 1 = can attack; todo: check if should be distance - 1
+		int unit_fight_value_gain = combat_manager.calculateFightValueAdvantageAfterMeleeUnitAttack(activeStack, *unit);
+		
+		// if no unit picked, pick first
+		if (unit_ids.empty()) {
+			unit_ids.push_back(unit->getUnitId());
+			turns = unit_turns;
+			fight_value_gain = unit_fight_value_gain / unit_turns;
+			min_fight_value_gain = 0.75f * fight_value_gain;
+			max_fight_value_gain = fight_value_gain;
+			distance = unit_distance;
+			continue;
+		}
 
-	// if first unit, choose it
+		// if less turns to attack, pick this one
+		if (unit_turns < turns) {
+			unit_ids.clear();
+			unit_ids.push_back(unit->getUnitId());
+			turns = unit_turns;
+			fight_value_gain = unit_fight_value_gain / unit_turns;
+			min_fight_value_gain = 0.75f * fight_value_gain;
+			max_fight_value_gain = fight_value_gain;
+			distance = unit_distance;
+			continue;
+		}
+
+		// if more turns to attack, check next
+		if (unit_turns > turns)
+			continue;
+
+		// todo: this is simple randomization example; we'll checking fight_value range from 75%-100% of unit_fight_value_gain
+		// if attacking current unit is better, then replace 
+		if (unit_fight_value_gain * 0.75f > max_fight_value_gain) { // if cur_min_fv > ch_max_fv -> pick cur
+			unit_ids.clear();
+			unit_ids.push_back(unit->getUnitId());
+			turns = unit_turns;
+			fight_value_gain = unit_fight_value_gain / unit_turns;
+			min_fight_value_gain = 0.75f * fight_value_gain;
+			max_fight_value_gain = fight_value_gain;
+			distance = unit_distance;
+			continue;
+		}
+
+		// if attacking chosen unit is better, check next
+		if (unit_fight_value_gain < min_fight_value_gain) // if cur_max_fv < ch_min_fv -> pick ch
+			continue;
+
+		// fight_value_gain ranges for both units collide, so we need to add current unit to set
+		// and update set fight_value_gain ranges
+		unit_ids.push_back(unit->getUnitId());
+		min_fight_value_gain = std::min(min_fight_value_gain, (int)(0.75f * fight_value_gain));
+		max_fight_value_gain = std::max(max_fight_value_gain, fight_value_gain);
+
+		/* 
+		* That is how it looks like in H3 code, but as we cant mirror here pseudorandomness
+		* we introduce randomness in choosing unit, not calculating its final fight_value_gain
+		* 
+		// if current unit has more health lost than pick current
+		if (unit->health_lost > enemy_hero.getActiveUnits()[unit_ids[0]]->health_lost) {
+			unit_ids.clear();
+			unit_ids.push_back(unit->getUnitId());
+			turns = unit_turns;
+			fight_value_gain = unit_fight_value_gain;
+			distance = unit_distance;
+			continue;
+		}
+
+		// if current unit has less hp lost then go next
+		if (unit->health_lost < enemy_hero.getActiveUnits()[unit_ids[0]]->health_lost)
+			continue;
+
+		// if current unit is closer then pick current
+		if (unit_distance < distance) {
+			unit_ids.clear();
+			unit_ids.push_back(unit->getUnitId());
+			turns = unit_turns;
+			fight_value_gain = unit_fight_value_gain;
+			distance = unit_distance;
+			continue;
+		}
+
+		// if current unit is farther then go next
+		if (unit_distance > distance)
+			continue;
+
+		// if equal then pick current
+		unit_ids.push_back(unit->getUnitId());
+		turns = unit_turns;
+		fight_value_gain = unit_fight_value_gain;
+		distance = unit_distance;
+		*/
+	}
+
+	return unit_ids;
 
 	// if equal number of turns to attack 
 	// else pick unit with lesser
@@ -135,17 +235,14 @@ int CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero
 	//			if equal distance choose current unit
 	// else if chosen unit has less fight_value_gain, pick current unit
 
-	// fight_value_gain is randomized and divided by 
+
+	/* fight_value randomization works on TlsGetValue(39 - constant tlsindex for thread), so same action sequences will always result in equal results
+		for most combat states this randomization shouldnt matter anyway, because there are more rules directing to choosing proper unit
+		randomization return 75-100% of fight value
+		// heroes 3 ai multiply calculated value by pseudorandom value in range 0.75-1.00 and then do some more calculations; the result value is a bit lower than calculated, fixed fight value gain/loss
+	*/
 	// 21D98 - replace units
 	// 21DCA - go next
-}
-
-float CombatAI::randomizeChoice(int fight_value_gain) const {
-	/* randomization works on TlsGetValue(39 - constant tlsindex for thread), so same action sequences will always result in equal results 
-		for most combat states this randomization shouldnt matter anyway, because there are more rules directing to choosing proper unit
-	*/
-
-	return 1.0f * fight_value_gain; // todo: implement this; more info in declaration
 }
 
 int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const {
