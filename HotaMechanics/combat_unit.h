@@ -28,20 +28,30 @@ public:
 		: unit_template(unitTemplate), currentStats(unitTemplate.stats) {};
 	CombatUnit(const Unit& unitTemplate, /*const*/ CombatHero& hero)
 		: unit_template(unitTemplate), currentStats(unitTemplate.stats), hero(&hero) {};
+	CombatUnit(const CombatUnit& obj) = default;
 	CombatUnit() = default;
 
 	CombatSide getCombatSide() const;
 
 	int getUnitId() const;
 
+	void applyDamage(int damage);
+
+	float getBaseAverageDmg() const;
+
 	const std::vector<int> getHexesInSpeedRange(const CombatField& field) const;
+	const std::vector<int> getHexesInAttackRange(const CombatField& field) const;
 
 	float getSingleUnitFightValue() const {
 		return unit_template.fightValue;
 	}
 
+	float getSingleUnitFightValuePerOneHp() const {
+		return getSingleUnitFightValue() / currentStats.hp;
+	}
+
 	float getStackUnitFightValue() const {
-		return calculateStackHP() * getSingleUnitFightValue() / currentStats.hp;
+		return calculateStackHP() * getSingleUnitFightValuePerOneHp();
 	}
 
 	int calculateStackHP() const {
@@ -68,6 +78,10 @@ public:
 
 	bool canCast() const {
 		return false; // todo
+	}
+
+	bool canRetaliate() const {
+		return !state.retaliated;
 	}
 
 	bool canHeroCast() const;

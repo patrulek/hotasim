@@ -71,6 +71,7 @@ struct UnitState {
 	bool done;
 	bool defending;
 	bool sacrificed;
+	bool retaliated;
 };
 
 struct Unit {

@@ -33,6 +33,11 @@ public:
 
 	std::vector<CombatUnit> getUnitsInRange(CombatSide side, std::vector<int>& hexes) const;
 
+	int calculateMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;
+	int calculateCounterAttackMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;
+	int calculateFightValueAdvantageAfterMeleeUnitAttack(const CombatUnit& attacker, const CombatUnit& defender) const;
+	std::vector<int> calculateFightValueAdvantageOnHexes(const CombatUnit& activeStack, const CombatHero& enemy_hero) const;
+
 
 
 	CombatUnit& nextUnit(CombatState& state) {

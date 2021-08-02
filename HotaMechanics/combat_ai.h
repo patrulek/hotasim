@@ -31,12 +31,18 @@ public:
 	CombatAction possibleActions[512];
 	CombatAction action;
 	AIDifficulty difficulty;
+	bool similar_army_strength{ true }; // > 2x fight_value for one side
 
 	const CombatManager& combat_manager;
 	std::unique_ptr<CombatPathfinder> pathfinder;
 
 	CombatAI(const CombatManager& combat_manager);
 
+
+	int chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const;
+	int chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const;
+	// todo: implement in smart way; heroes 3 ai multiply calculated value by pseudorandom value in range 0.75-1.00 and then do some more calculations; the result value is a bit lower than calculated, fixed fight value gain/loss
+	float randomizeChoice(int fight_value_gain) const; 
 
 	std::vector<CombatAction> generateActionsForPlayer(const CombatUnit& activeStack) const;
 	std::vector<CombatAction> generateActionsForAI();
@@ -300,6 +306,26 @@ coœ tam checking extended_attack (dla targetowanej jednostki)
 
 zapisuje wynik w [esi+1C], [esi+20] (target_hex), [esi+24] (liczba tur)
 
+wybór tutaj wygl¹da tak:
+	- jeœli niewybrane ¿adne pole do ataku 
+		- wybierz bie¿¹ce
+	- w przeciwnym razie 
+		- jeœli ile tur minimum trzeba ¿eby dojœæ do jednostki (361C3) jest taka sama dla tego pola jak minimum
+			- jeœli fight_value_gain na tym wybranym wczeœniej hexie jest mniejsze ni¿ sprawdzanego pola (361D0)
+				- sprawdŸ nastêpne pole
+			- w przeciwnym razie jeœli jest wiêksze
+				- wybierz sprawdzane pole
+			- jeœli równe
+				- jeœli jednostka = kawalerzysta lub czempion
+					- wybierz pole, które jest dalej
+				- w przeciwnym przypadku
+					- jeœli pole jest bli¿ej
+						- wybierz bli¿sze pole
+					- jeœli pole jest dalej lub równej d³ugoœæi
+						- sprawdŸ nastêpne pole
+
+		- w przeciwnym razie sprawdŸ nastêpne pole
+
 35D10 -
 	424A0 - liczymy jaki zadamy dmg jednostce
 --- liczymy ---
@@ -448,11 +474,37 @@ total health for both stacks
 		sub_42CF0() - z jakiegoœ powodu tutaj czasem zamiast liczyæ dmg * fight_value, liczymy dmg * 1000 (kiedy fight value gracza > 2*fight_value_enemy)
 							enemy przy takiej przewadze liczy dmg*100
 
+#####
 
+1FCE0
+
+1FAA0 - sprwadzamy, czy mo¿emy wycastowaæ spell, czy jesteœmy strzelajkami i wyliczenie jakiegoœ fight_value (8040 dla 500 ch³opów na 200 impów)
+- sprawdzamy czy gracz spellbook,																									
+- sprawdzamy czy jest orb of inhibition (po którejkolwiek ze stron)
+- sprwadzanie czy mamy spelle (quick sand / 
+
+wyliczenie hp w stacku
+sprawdzenie czy strzelajki
+wyliczenie fight_value activeStack
 
 #####
 
 ogólny algorytm jest taki:
+
+(218B5)
+- oblicz fight_value_gain (tj. jedŸ po wszystkich jednostkach gracza i symuluj, tak jakby on atakowa³ pierwszy);  
+ - jeœli -fight_value_gain < 0 (tj. ai wiêcej straci ni¿ zyska) ustaw na wszystkich hexach to których jednostka gracza ma dostêp do ataku tê wartoœæ (2067B)
+ #####
+ 1FCE0
+ #####
+ - póŸniej sprawdzanie jaki jest dystans od nas do jednostki któr¹ chcemy zaatakowaæ
+ #####
+ 35D10 - ile zadamy obra¿eñ/zabijemy/ile nam zostanie hp
+ 36490 - tutaj wybieramy odpowiedni hex (idziemy zgodnie ze wskazówkami zegara)
+ #####
+ Po drodze jeszcze jak idziemy sprawdzamy czy siê nie zatrzymaæ, ¿eby nas wroga jednostka nie mog³a zaatakowaæ
+ #####
+ 
 
 - oblicz dla ka¿dego hexa wartoœæ równ¹: fight_value jakie zada ka¿da jednostka gracza (tj. dmg jednostki, póŸniej kontratak i z tego ró¿nicê w 
 		zadanym fight_value) dla ka¿dego hexa na mapie, tak jakby gracz atakowa³ pierwszy

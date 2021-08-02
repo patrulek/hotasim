@@ -70,6 +70,13 @@ public:
 		return std::find(std::begin(adjacent_hexes), std::end(adjacent_hexes), target_hex_id) != std::end(adjacent_hexes);
 	}
 
+	std::array<int, 6> getAdjacentHexesClockwise() const {
+		auto hexes = getAdjacentHexes();
+
+		return std::array<int, 6>{ hexes[1], hexes[3], hexes[5], hexes[4], hexes[2], hexes[0] };
+	}
+
+
 	std::array<int, 6> getAdjacentHexes() const {
 		std::array<int, 6> hexes{ -1, -1, -1, -1, -1, -1 };
 		int offset = -1 * (id / COLS % 2 != 0);

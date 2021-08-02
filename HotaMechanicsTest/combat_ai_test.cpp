@@ -7,7 +7,7 @@ std::unordered_map<std::string, Unit> unit_templates{
 		{"Peasant", { 15, {1, 1, 1, 1, 0, 0, 3, 1, 0}, SpellBook{}, "Peasant" }},
 		{ "Gremlin", { 55, {3, 3, 1, 2, 0, 0, 4, 4, 0}, SpellBook{}, "Gremlin" } },
 		{ "Goblin", { 60, {4, 2, 1, 2, 0, 0, 5, 5, 0}, SpellBook{}, "Goblin" } },
-		{ "Imp", { 50, {2, 3, 1, 2, 0, 0, 3, 4, 0}, SpellBook{}, "Imp" } }
+		{ "Imp", { 50, {2, 3, 1, 2, 0, 0, 5, 4, 0}, SpellBook{}, "Imp" } }
 };
 
 #include "../HotaMechanics/combat_manager.h"
@@ -194,4 +194,87 @@ TEST(CombatAI, shouldReturnNoSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHav
 	}
 	EXPECT_EQ(18, walking_actions);
 	EXPECT_EQ(6, attack_actions);
+}
+
+TEST(CombatAI, shouldChooseExactlyThisUnitToAttackIfOnlyOneUnitStackLeftInEnemyHero) {
+	auto unit = CombatUnit(unit_templates["Peasant"]);
+	unit.stackNumber = 500;
+	PrimaryStats hero_stats;
+	hero_stats.atk = 2; hero_stats.def = 1;
+
+
+	CombatHero hero2; // 0 atk, 0 def
+	auto unit2 = CombatUnit(unit_templates["Imp"]);
+	unit2.hero = &hero2;
+	unit2.stackNumber = 200;
+	unit2.applyHeroStats(hero2.stats);
+	unit2.initUnit();
+	hero2.units[0] = unit2;
+
+	auto& ai = getAI();
+
+	EXPECT_EQ(0, ai.chooseUnitToAttack(unit, hero2));
+
+	hero2.units[0] = CombatUnit();
+	hero2.units[5] = unit2;
+
+	EXPECT_EQ(5, ai.chooseUnitToAttack(unit, hero2));
+}
+
+TEST(CombatAI, DISABLED_shouldChooseProperUnitToAttackIfManyUnitStacksLeftInEnemyHero) {
+	// TODO
+}
+
+TEST(CombatAI, shouldChooseCorrectHexWhichMeleeAttackWillBePerformedFrom) {
+	CombatHero hero; // 0 atk, 0 def
+	auto unit = CombatUnit(unit_templates["Peasant"]);
+	unit.hero = &hero;
+	unit.stackNumber = 500;
+	unit.applyHeroStats(hero.stats);
+	unit.initUnit();
+	hero.units[0] = unit;
+
+
+	CombatHero hero2; // 0 atk, 0 def
+	auto unit2 = CombatUnit(unit_templates["Imp"]);
+	unit2.hero = &hero2;
+	unit2.stackNumber = 200;
+	unit2.applyHeroStats(hero2.stats);
+	unit2.initUnit();
+	hero2.units[0] = unit2;
+
+	auto& ai = getAI();
+	
+	auto field = ai.combat_manager.getCombatField();
+	for (int i = 0; i < 11; ++i)
+		for (int j = 0; j < 17; ++j)
+			field.hexes[i][j].occupiedBy = CombatHexOccupation::EMPTY;
+	field.hexes[2][13].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	field.hexes[2][14].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	field.hexes[3][8].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	field.hexes[3][9].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	field.hexes[3][10].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	field.hexes[3][11].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	field.hexes[5][8].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	field.hexes[5][9].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	field.hexes[5][11].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+	field.hexes[5][12].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+
+	unit.hexId = getHexId(5, 15);
+	hero.units[0] = unit;
+	unit2.hexId = getHexId(5, 1);
+	hero2.units[0] = unit2;
+	EXPECT_EQ(69, ai.chooseHexToMoveForAttack(unit, unit2));
+
+	unit.hexId = getHexId(4, 12);
+	hero.units[0] = unit;
+	unit2.hexId = getHexId(7, 5);
+	hero2.units[0] = unit2;
+	EXPECT_EQ(107, ai.chooseHexToMoveForAttack(unit, unit2));
+
+	unit.hexId = getHexId(4, 10);
+	hero.units[0] = unit;
+	unit2.hexId = getHexId(10, 8);
+	hero2.units[0] = unit2;
+	EXPECT_EQ(162, ai.chooseHexToMoveForAttack(unit, unit2));
 }

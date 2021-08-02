@@ -1,12 +1,12 @@
 #include "combat_hero.h"
 
 
-std::vector<CombatUnit> CombatHero::getActiveUnits() const {
-	auto units_ = std::vector<CombatUnit>();
+std::vector<const CombatUnit*> CombatHero::getActiveUnits() const {
+	auto units_ = std::vector<const CombatUnit*>();
 
 	for (int i = 0; i < 21; ++i) {
 		if (units[i].applied_hero_stats) // todo
-			units_.emplace_back(units[i]);
+			units_.emplace_back(&units[i]);
 	}
 
 	return units_;

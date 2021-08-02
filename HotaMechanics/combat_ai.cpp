@@ -34,7 +34,7 @@ int CombatAI::calculateHeroFightValue(const CombatHero& hero) const {
 	int hero_fight_value = 0;
 	
 	for (const auto unit : hero.getActiveUnits())
-		hero_fight_value += calculateStackUnitFightValue(unit);
+		hero_fight_value += calculateStackUnitFightValue(*unit);
 
 	return hero_fight_value;
 }
@@ -111,6 +111,101 @@ std::vector<CombatAction> CombatAI::generateActionsForPlayer(const CombatUnit& a
 		throw std::exception("Not implemented yet");
 
 	return actions;
+}
+
+
+int CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const {
+	if (enemy_hero.getActiveUnits().size() == 1)
+		return enemy_hero.getActiveUnits()[0]->getUnitId();
+
+	throw std::exception("Not implemented yet");
+
+	// iterate over units
+
+	// if first unit, choose it
+
+	// if equal number of turns to attack 
+	// else pick unit with lesser
+
+	// compare fight_value_gain (tylko ¿e kurewsko dziwnie, bo porównujemy zrandomizowane fight_value / liczbê tur pierwszej jednostki, z tylko zrandomizowanym fight_value drugiej <<bez dzielenia>>, wiêc tak druga zawsze bêdzie wybrana xd lol)
+
+	// if chosen unit	has greater fight_value_gain, then go next
+	// else if chosen unit has equal fight_value_gain, pick unit that has more hp lost
+	//		if equal hp lost then pick unit that is closer (probably)
+	//			if equal distance choose current unit
+	// else if chosen unit has less fight_value_gain, pick current unit
+
+	// fight_value_gain is randomized and divided by 
+	// 21D98 - replace units
+	// 21DCA - go next
+}
+
+float CombatAI::randomizeChoice(int fight_value_gain) const {
+	/* randomization works on TlsGetValue(39 - constant tlsindex for thread), so same action sequences will always result in equal results 
+		for most combat states this randomization shouldnt matter anyway, because there are more rules directing to choosing proper unit
+	*/
+
+	return 1.0f * fight_value_gain; // todo: implement this; more info in declaration
+}
+
+int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const {
+	auto adjacent_hexes = combat_manager.getCombatField().getById(target_unit.hexId).getAdjacentHexesClockwise();
+	auto hexes_fight_value = combat_manager.calculateFightValueAdvantageOnHexes(activeStack, *target_unit.hero);
+
+	int hex = -1;
+	int turns = -1;
+	int hex_fight_value_gain = 0;
+	int distance = -1;
+
+	for (auto adj_hex : adjacent_hexes) {
+		if (!combat_manager.getCombatField().getById(adj_hex).isWalkable())
+			continue;
+
+		int adj_distance = combat_manager.getCombatField().getById(adj_hex).distanceToHex(activeStack.hexId);
+		int adj_turns = std::ceil(adj_distance / activeStack.currentStats.spd);
+		int adj_hex_fight_value_gain = hexes_fight_value[adj_hex];
+
+		// if didnt choose any yet, check first possible
+		if (hex == -1) {
+			hex = adj_hex;
+			turns = adj_turns;
+			hex_fight_value_gain = adj_hex_fight_value_gain;
+			continue;
+		}
+
+		// if current hex is more turns away from us than already chosen, go next
+		if (adj_turns > turns)
+			continue;
+
+		// if current hex is worse in fight_value_gain terms, go next
+		if (adj_hex_fight_value_gain < hex_fight_value_gain)
+			continue;
+		// if is better than choose this field
+		else if (adj_hex_fight_value_gain > hex_fight_value_gain) {
+			hex = adj_hex;
+			turns = adj_turns;
+			hex_fight_value_gain = adj_hex_fight_value_gain;
+			continue;
+		} 
+
+		// if equal, check if we are unit that benefits from longer distances
+		if (false /*TODO: check if cavalier or champion*/) {
+			if (adj_distance > distance) {
+				hex = adj_hex;
+				turns = adj_turns;
+			}
+
+			continue;
+		}
+
+		// if not, just choose field that is closer
+		if (adj_distance < distance) {
+			hex = adj_hex;
+			turns = adj_turns;
+		}
+	}
+
+	return hex;
 }
 
 std::vector<CombatAction> CombatAI::generateActionsForAI() {

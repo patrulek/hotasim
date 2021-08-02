@@ -34,7 +34,7 @@ public:
 	CombatHero(const Hero& hero_template)
 		: hero_template(hero_template) {}
 
-	std::vector<CombatUnit> getActiveUnits() const;
+	std::vector<const CombatUnit*> getActiveUnits() const;
 
 	CombatSide getCombatSide() const {
 		return side;
