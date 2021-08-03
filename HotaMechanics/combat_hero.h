@@ -56,5 +56,13 @@ public:
 		return false; // todo
 	}
 
+	int getMana() const {
+		return stats.mana;
+	}
+
+	const Hero& getTemplate() const {
+		return hero_template;
+	}
+
 	int aliveStacks(CombatHero& hero) const;
 };

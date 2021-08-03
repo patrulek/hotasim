@@ -3,6 +3,8 @@
 #include "../HotaMechanics/combat_hero.h"
 #include "../HotaMechanics/combat_field.h"
 #include "../HotaMechanics/combat_manager.h"
+#include "../HotaMechanics/combat_ai.h"
+#include "../HotaMechanics/combat_state.h"
 
 CombatSimulator::CombatSimulator(const Hero& _attacker, const Hero& _defender, 
 											const CombatFieldType _field_type, const CombatType _combat_type)
@@ -13,6 +15,47 @@ CombatSimulator::CombatSimulator(const Hero& _attacker, const Hero& _defender,
 }
 
 CombatSimulator::~CombatSimulator() {}
+
+void CombatSimulator::setCombatManager(const CombatManager& _mgr) { 
+	manager = std::make_unique<CombatManager>(_mgr.getAttacker(), _mgr.getDefender(), _mgr.getCombatField(), _mgr.getCombatType());
+}
+
+
+int64_t CombatSimulator::evaluateCombatStateScore(const CombatState& _initial_state, const CombatState& _state) const {
+	int64_t attack_score = evaluateCombatStateAttackScore(_initial_state, _state); // the more enemy units we killed the better
+	int64_t defense_score = evaluateCombatStateDefenseScore(_initial_state, _state); // the less units we lost the better
+	int64_t turns_score = evaluateCombatStateTurnsScore(_initial_state, _state); // the less turns we fought the better
+	int64_t mana_score = evaluateCombatStateManaScore(_initial_state, _state); // the less mana weve lost the better
+
+	int64_t score = (attack_score << 48) | (defense_score << 32) | (turns_score << 16) | mana_score;
+	return score;
+}
+
+int64_t CombatSimulator::evaluateCombatStateAttackScore(const CombatState& _initial_state, const CombatState& _state) const {
+	float initial_fight_value = manager->getCombatAI().calculateBaseHeroFightValue(_initial_state.defender);
+	float current_fight_value = manager->getCombatAI().calculateBaseHeroFightValue(_state.defender);
+
+	return (1 << 15) * (1.0f - current_fight_value / initial_fight_value);
+}
+
+int64_t CombatSimulator::evaluateCombatStateDefenseScore(const CombatState& _initial_state, const CombatState& _state) const {
+	float initial_fight_value = manager->getCombatAI().calculateBaseHeroFightValue(_initial_state.attacker);
+	float current_fight_value = manager->getCombatAI().calculateBaseHeroFightValue(_state.attacker);
+
+	return (1 << 15) * (current_fight_value / initial_fight_value);
+}
+
+int64_t CombatSimulator::evaluateCombatStateTurnsScore(const CombatState& _initial_state, const CombatState& _state) const {
+	return (1 << 15) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f);
+}
+
+int64_t CombatSimulator::evaluateCombatStateManaScore(const CombatState& _initial_state, const CombatState& _state) const {
+	bool has_mana = _initial_state.attacker.getMana();
+
+	if (has_mana)
+		return (1 << 15) * (1.0f - (_state.attacker.getMana() - _initial_state.attacker.getMana()) / _initial_state.attacker.getMana());
+	return (1 << 15);
+}
 
 // TODO: make more permutations; for now dont change unit order
 void CombatSimulator::findBestAttackerPermutations() {
@@ -42,7 +85,7 @@ void CombatSimulator::prepareCombat(const ArmyPermutation& permutation, const in
 	auto combat_defender = prepareCombatHero(*defender, defender_permutation);
 	auto combat_field = prepareCombatField(_field_template);
 
-	manager = std::make_unique<CombatManager>(combat_attacker, combat_defender, combat_field);
+	manager = std::make_unique<CombatManager>(*combat_attacker, *combat_defender, *combat_field, combat_type);
 	manager->initialize();
 }
 

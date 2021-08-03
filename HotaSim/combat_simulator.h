@@ -1,7 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <cstdint>
 
+#include "../HotaMechanics/structures.h"
 #include "combat_permutation.h"
 
 // for initialization
@@ -13,6 +15,7 @@ enum class CombatType;
 class CombatManager;
 class CombatHero;
 class CombatField;
+class CombatState;
 
 class CombatSimulator
 {
@@ -21,8 +24,11 @@ public:
 	~CombatSimulator();
 
 	void initialize();
-
 	void start();
+
+	int64_t evaluateCombatStateScore(const CombatState& _initial_state, const CombatState& _state) const;
+
+	void setCombatManager(const CombatManager& _mgr);
 private:
 	void findBestAttackerPermutations();
 	void setDefenderPermutation();
@@ -30,6 +36,12 @@ private:
 	void prepareCombat(const ArmyPermutation& _permutation, const int _field_template);
 	std::shared_ptr<CombatField> prepareCombatField(const int _field_template);
 	std::shared_ptr<CombatHero> prepareCombatHero(const Hero& _hero_template, const ArmyPermutation& _permutation);
+
+	// combat state score
+	int64_t evaluateCombatStateAttackScore(const CombatState& _initial_state, const CombatState& _state) const;
+	int64_t evaluateCombatStateDefenseScore(const CombatState& _initial_state, const CombatState& _state) const;
+	int64_t evaluateCombatStateTurnsScore(const CombatState& _initial_state, const CombatState& _state) const;
+	int64_t evaluateCombatStateManaScore(const CombatState& _initial_state, const CombatState& _state) const;
 
 	// before combat start
 	std::unique_ptr<CombatManager> manager;

@@ -70,6 +70,14 @@ const CombatAI& CombatManager::getCombatAI() const {
 	return *ai;
 }
 
+const CombatHero& CombatManager::getAttacker() const { 
+	return *attacker; 
+}
+
+const CombatHero& CombatManager::getDefender() const { 
+	return *defender; 
+}
+
 CombatUnit& CombatManager::getActiveStack() {
 	//int unitId = current_state->unitOrder[current_state->currentUnit];
 	//int side = unitId / 21;

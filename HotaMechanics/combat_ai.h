@@ -80,7 +80,10 @@ public:
 	float calculateUnitFightValueModifier(const CombatUnit& unit) const;
 
 	int calculateStackUnitFightValue(const CombatUnit& unit) const;
-	int calculateHeroFightValue(const CombatHero& hero) const;
+	// calc for all units
+	int calculateHeroFightValue(const CombatHero& hero) const; 
+	// exclude summons, clones etc., only units based on army
+	int calculateBaseHeroFightValue(const CombatHero& hero) const;
 };
 
 

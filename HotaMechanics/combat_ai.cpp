@@ -116,6 +116,11 @@ int CombatAI::calculateHeroFightValue(const CombatHero& hero) const {
 	return hero_fight_value;
 }
 
+
+int CombatAI::calculateBaseHeroFightValue(const CombatHero& hero) const {
+	return calculateHeroFightValue(hero); // TODO: for now its the same, but later need to modify this
+}
+
 // because of randomization which cant be mirrored in this project, this function can possibly return more
 // than one unit to attack (only if some specified conditions are met; for most cases there will be only one unit)
 std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const {

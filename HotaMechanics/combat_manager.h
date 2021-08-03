@@ -24,6 +24,9 @@ public:
 
 	CombatUnit& getActiveStack();
 
+	const CombatHero& getAttacker() const;
+	const CombatHero& getDefender() const;
+	const CombatType getCombatType() const { return combat_type; }
 
 	CombatState duplicateCurrentState() const { return CombatState(*current_state); }
 	CombatState& getCurrentState() const { return *current_state; }
