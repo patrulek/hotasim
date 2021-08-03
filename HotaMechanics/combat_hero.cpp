@@ -31,7 +31,7 @@ std::vector<const CombatUnit*> CombatHero::getUnits() const {
 	return units_;
 }
 
-bool CombatHero::isAlive(CombatHero& hero) const {
+bool CombatHero::isAlive() const {
 	return true; // check if has any unit alive
 }
 

@@ -2,6 +2,7 @@
 
 #include "../HotaMechanics/combat_hero.h"
 #include "../HotaMechanics/combat_field.h"
+#include "../HotaMechanics/combat_manager.h"
 
 CombatSimulator::CombatSimulator(const Hero& _attacker, const Hero& _defender, 
 											const CombatFieldType _field_type, const CombatType _combat_type)
@@ -42,6 +43,7 @@ void CombatSimulator::prepareCombat(const ArmyPermutation& permutation, const in
 	auto combat_field = prepareCombatField(_field_template);
 
 	manager = std::make_unique<CombatManager>(combat_attacker, combat_defender, combat_field);
+	manager->initialize();
 }
 
 std::shared_ptr<CombatField> CombatSimulator::prepareCombatField(const int _field_template) {

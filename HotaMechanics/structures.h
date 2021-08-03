@@ -35,6 +35,16 @@ struct UnitPermutation {
 	}
 };
 
+
+struct CombatFieldSize {
+	static const int COLS = 17;
+	static const int ROWS = 11;
+};
+
+enum class CombatSide {
+	ATTACKER, DEFENDER
+};
+
 struct ArmyPermutation
 {
 	std::vector<UnitPermutation> permutations;

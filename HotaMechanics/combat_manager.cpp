@@ -4,6 +4,45 @@
 #include "combat_state.h"
 #include "combat_unit.h"
 
+void CombatManager::moveUnit(CombatUnit& _unit, int _target_hex) {
+	init_state->field.clearHex(_unit.getHex());
+	// TODO: check double_wide
+	_unit.moveTo(_target_hex);
+	init_state->field.fillHex(_target_hex, CombatHexOccupation::UNIT);
+	// TODO: check double_wide
+}
+
+void CombatManager::placeUnitsBeforeStart() {
+	int unit_order = 0;
+	for (auto unit : init_state->attacker.getUnits()) {
+		int hex = ai->pathfinder->getUnitStartHex(CombatSide::ATTACKER, unit_order++, init_state->attacker.getUnits().size(), unit->isDoubleWide(), combat_type);
+		moveUnit(const_cast<CombatUnit&>(*unit), hex);
+	}
+
+	unit_order = 0;
+	for (auto unit : init_state->defender.getUnits()) {
+		int hex = ai->pathfinder->getUnitStartHex(CombatSide::DEFENDER, unit_order++, init_state->defender.getUnits().size(), unit->isDoubleWide(), combat_type);
+		moveUnit(const_cast<CombatUnit&>(*unit), hex);
+	}
+}
+
+void CombatManager::createInitState() {
+	CombatHero attacker_(*attacker);
+	CombatHero defender_(*defender);
+	CombatField field_(*field);
+
+	init_state = std::make_unique<CombatState>(attacker_, defender_, field_);
+}
+
+void CombatManager::initialize() {
+	if (initialized)
+		return;
+
+	createInitState();
+	placeUnitsBeforeStart();
+	setCurrentState(*init_state);
+	initialized = true;
+}
 
 std::vector<int> CombatManager::calculateFightValueAdvantageOnHexes(const CombatUnit& activeStack, const CombatHero& enemy_hero) const {
 	std::vector<int> hexes_fight_value(187, 0);
@@ -15,10 +54,10 @@ std::vector<int> CombatManager::calculateFightValueAdvantageOnHexes(const Combat
 		if (fight_value_gain <= 0)
 			continue;
 		
-		auto hexes_in_attack_range = unit->getHexesInAttackRange(current_state->field);
-		auto walkable_hexes = current_state->field.getWalkableHexesFromList(hexes_in_attack_range);
-		auto reachable_hexes = current_state->field.getReachableHexesFromWalkableHexes(unit->hexId, unit->currentStats.spd + 1, walkable_hexes, false, false);
-		reachable_hexes.push_back(unit->hexId); // add also unit position
+		auto hexes_in_attack_range = ai->pathfinder->getHexesInRange(unit->getHex(), unit->currentStats.spd + 1);
+		auto walkable_hexes = ai->pathfinder->getWalkableHexesFromList(hexes_in_attack_range, current_state->field);
+		auto reachable_hexes = ai->pathfinder->getReachableHexesFromWalkableHexes(unit->getHex(), unit->currentStats.spd + 1, walkable_hexes, false, false, current_state->field);
+		reachable_hexes.push_back(unit->getHex()); // add also unit position
 
 		for (auto hex : reachable_hexes) {
 			int hex_fight_value_gain = std::min(max_fight_value_gain, fight_value_gain);
@@ -79,14 +118,15 @@ int CombatManager::calculateFightValueAdvantageAfterMeleeUnitAttack(const Combat
 
 std::vector<CombatUnit> CombatManager::getUnitsInRange(CombatSide side, std::vector<int>& hexes) const {
 	std::vector<CombatUnit> units_in_range;
+	auto hero = side == CombatSide::ATTACKER ? *attacker : *defender;
 
-	for (auto unit : current_state->heroes[(int)side].getUnits()) {
+	for (auto unit : hero.getUnits()) {
 		if (!unit->isAlive())
 			continue;
 
 		// if unit isnt common unit -> continue
 
-		bool found = std::find(std::begin(hexes), std::end(hexes), unit->hexId) != std::end(hexes);
+		bool found = std::find(std::begin(hexes), std::end(hexes), unit->getHex()) != std::end(hexes);
 		if (found)
 			units_in_range.push_back(*unit);
 	}
@@ -95,7 +135,7 @@ std::vector<CombatUnit> CombatManager::getUnitsInRange(CombatSide side, std::vec
 }
 
 const CombatField& CombatManager::getCombatField() const {
-	return current_state->field;
+	return *field;
 }
 
 const CombatAI& CombatManager::getCombatAI() const {
@@ -103,16 +143,18 @@ const CombatAI& CombatManager::getCombatAI() const {
 }
 
 CombatUnit& CombatManager::getActiveStack() {
-	int unitId = current_state->unitOrder[current_state->currentUnit];
-	int side = unitId / 21;
-	return const_cast<CombatUnit&>(*current_state->heroes[side].getUnits()[unitId % 21]);
+	//int unitId = current_state->unitOrder[current_state->currentUnit];
+	//int side = unitId / 21;
+	return const_cast<CombatUnit&>(*current_state->attacker.getUnits()[0]);//const_cast<CombatUnit&>(*current_state->heroes[side].getUnits()[unitId % 21]);
 }
 
-CombatManager::CombatManager(const CombatHero& attacker, const CombatHero& defender, const CombatField& field)
-	: init_state(CombatState(attacker, defender, field))
+CombatManager::CombatManager(const CombatHero& _attacker, const CombatHero& _defender, const CombatField& _field, const CombatType _combat_type)
+	: combat_type(_combat_type)
 {
+	attacker = std::make_unique<CombatHero>(_attacker);
+	defender = std::make_unique<CombatHero>(_defender);
+	field = std::make_unique<CombatField>(_field);
 	ai = std::make_unique<CombatAI>(*this);
-	current_state = std::make_unique<CombatState>(init_state);
 }
 
 CombatManager::~CombatManager() {
@@ -120,6 +162,9 @@ CombatManager::~CombatManager() {
 }
 
 CombatState CombatManager::nextState() {
+	if (!initialized)
+		throw std::exception("Combat manager still didnt initialized");
+
 	updateCombat();
 	setCombatResult();
 	return duplicateCurrentState();
@@ -127,8 +172,8 @@ CombatState CombatManager::nextState() {
 
 
 void CombatManager::setCombatResult() {
-	bool player_alive = current_state->heroes[0].isAlive(current_state->heroes[0]);
-	bool enemy_alive = current_state->heroes[0].isAlive(current_state->heroes[1]);
+	bool player_alive = current_state->attacker.isAlive();//current_state->heroes[0].isAlive(current_state->heroes[0]);
+	bool enemy_alive = current_state->defender.isAlive();//current_state->heroes[0].isAlive(current_state->heroes[1]);
 
 	if (player_alive && enemy_alive) current_state->result = CombatResult::IN_PROGRESS;
 	else if (player_alive)				current_state->result = CombatResult::PLAYER;

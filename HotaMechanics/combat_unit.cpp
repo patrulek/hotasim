@@ -7,12 +7,12 @@ void CombatUnit::applyHeroStats() {
 	applyHeroStats(hero->getStats());
 }
 
-const std::vector<int> CombatUnit::getHexesInSpeedRange(const CombatField& field) const {
-	return field.getHexesInRange(hexId, currentStats.spd);
+void CombatUnit::moveTo(const int _target_hex) {
+	hex = _target_hex;
 }
 
-const std::vector<int> CombatUnit::getHexesInAttackRange(const CombatField& field) const {
-	return field.getHexesInRange(hexId, currentStats.spd + 1);
+void CombatUnit::walkTo(const int _target_hex) {
+	throw std::exception("Not implemented yet");
 }
 
 int CombatUnit::getUnitId() const {

@@ -21,10 +21,11 @@ int main()
    defender.addUnit(unit_templates["Peasant"], 500);
 
    CombatFieldType field_type = CombatFieldType::GRASS;
+   CombatType combat_type = CombatType::NEUTRAL;
    // ---------------------
 
    // create combat simulator
-   CombatSimulator hotaSim(attacker, defender, field_type);
+   CombatSimulator hotaSim(attacker, defender, field_type, combat_type);
 
    // ---------------------
 

@@ -62,16 +62,16 @@ namespace CombatManagerTest {
 		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(8, 1);
+		unit->moveTo(getHexId(8, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
 		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 		unit2->applyHeroStats();
 		unit2->initUnit();
-		unit2->hexId = getHexId(8, 2);
+		unit2->moveTo(getHexId(8, 2));
 
 		CombatField field;
-		CombatManager mgr(hero, hero2, field);
+		CombatManager mgr(hero, hero2, field, CombatType::NEUTRAL);
 
 		// 200 imps should do 315 dmg on average to 500 peasants without any attack/defense and/or spells modifiers
 		EXPECT_EQ(315, mgr.calculateMeleeUnitAverageDamage(*unit, *unit2));
@@ -83,7 +83,7 @@ namespace CombatManagerTest {
 		unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(8, 1);
+		unit->moveTo(getHexId(8, 1));
 		// 100 imps should do 157 dmg on average to 500 peasants without any attack/defense and/or spells modifiers
 		EXPECT_EQ(157, mgr.calculateMeleeUnitAverageDamage(*unit, *unit2));
 
@@ -94,7 +94,7 @@ namespace CombatManagerTest {
 		unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(8, 1);
+		unit->moveTo(getHexId(8, 1));
 		// 50 imps should do 78 dmg on average to 500 peasants without any attack/defense and/or spells modifiers
 		EXPECT_EQ(78, mgr.calculateMeleeUnitAverageDamage(*unit, *unit2));
 
@@ -105,7 +105,7 @@ namespace CombatManagerTest {
 		unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(8, 1);
+		unit->moveTo(getHexId(8, 1));
 
 		// 30 goblins should do 51 dmg on average to peasants without any attack/defense and/or spells modifiers
 		EXPECT_EQ(51, mgr.calculateMeleeUnitAverageDamage(*unit, *unit2));
@@ -117,17 +117,17 @@ namespace CombatManagerTest {
 		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(8, 1);
+		unit->moveTo(getHexId(8, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 100));
 		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 		unit2->applyHeroStats();
 		unit2->initUnit();
 		unit2->state.retaliated = false;
-		unit2->hexId = getHexId(8, 2);
+		unit2->moveTo(getHexId(8, 2));
 
 		CombatField field;
-		CombatManager mgr(hero, hero2, field);
+		CombatManager mgr(hero, hero2, field, CombatType::NEUTRAL);
 
 		// 200 imps should kill all peasants, so 0 dmg in counterattack
 		EXPECT_EQ(0, mgr.calculateCounterAttackMeleeUnitAverageDamage(*unit, *unit2));
@@ -138,7 +138,7 @@ namespace CombatManagerTest {
 		unit2->applyHeroStats();
 		unit2->initUnit();
 		unit2->state.retaliated = true;
-		unit2->hexId = getHexId(8, 2);
+		unit2->moveTo(getHexId(8, 2));
 
 		// 200 imps will not kill all peasants, but they already retaliated so 0 dmg
 		EXPECT_EQ(0, mgr.calculateCounterAttackMeleeUnitAverageDamage(*unit, *unit2));
@@ -150,17 +150,17 @@ namespace CombatManagerTest {
 		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(8, 1);
+		unit->moveTo(getHexId(8, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
 		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 		unit2->applyHeroStats();
 		unit2->initUnit();
 		unit2->state.retaliated = false;
-		unit2->hexId = getHexId(8, 2);
+		unit2->moveTo(getHexId(8, 2));
 
 		CombatField field;
-		CombatManager mgr(hero, hero2, field);
+		CombatManager mgr(hero, hero2, field, CombatType::NEUTRAL);
 
 		// 200 imps should kill 315 peasants, so 185 peasants should retaliate 175 dmg to imps
 		EXPECT_EQ(175, mgr.calculateCounterAttackMeleeUnitAverageDamage(*unit, *unit2));
@@ -175,16 +175,16 @@ namespace CombatManagerTest {
 		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(8, 1);
+		unit->moveTo(getHexId(8, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
 		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 		unit2->applyHeroStats();
 		unit2->initUnit();
-		unit2->hexId = getHexId(8, 2);
+		unit2->moveTo(getHexId(8, 2));
 
 		CombatField field;
-		CombatManager mgr(hero, hero2, field);
+		CombatManager mgr(hero, hero2, field, CombatType::NEUTRAL);
 
 		// fight value gain when 200 imps attack 500 peasants first
 		EXPECT_EQ(2538, mgr.calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, *unit2));
@@ -198,16 +198,16 @@ namespace CombatManagerTest {
 		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(8, 1);
+		unit->moveTo(getHexId(8, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
 		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 		unit2->applyHeroStats();
 		unit2->initUnit();
-		unit2->hexId = getHexId(8, 2);
+		unit2->moveTo(getHexId(8, 2));
 
 		CombatField field;
-		CombatManager mgr(hero, hero2, field);
+		CombatManager mgr(hero, hero2, field, CombatType::NEUTRAL);
 
 		std::vector<int> expected(187, 0);
 		EXPECT_EQ(expected, mgr.calculateFightValueAdvantageOnHexes(*unit2, hero));
@@ -218,16 +218,16 @@ namespace CombatManagerTest {
 		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(5, 1);
+		unit->moveTo(getHexId(5, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
 		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 		unit2->applyHeroStats();
 		unit2->initUnit();
-		unit2->hexId = getHexId(5, 15);
+		unit2->moveTo(getHexId(5, 15));
 
 		CombatField field;
-		CombatManager mgr(hero, hero2, field);
+		CombatManager mgr(hero, hero2, field, CombatType::NEUTRAL);
 
 		int fv = -2538;
 		std::vector<int> expected{
@@ -253,16 +253,16 @@ namespace CombatManagerTest {
 		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();
 		unit->initUnit();
-		unit->hexId = getHexId(5, 1);
+		unit->moveTo(getHexId(5, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
 		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 		unit2->applyHeroStats();
 		unit2->initUnit();
-		unit2->hexId = getHexId(5, 15);
+		unit2->moveTo(getHexId(5, 15));
 
 		CombatField field;
-		CombatManager mgr(hero, hero2, field);
+		CombatManager mgr(hero, hero2, field, CombatType::NEUTRAL);
 
 		int fv = -7500; // TODO: implement case when attacker fight value > 2 * defender fight value; check if there isnt case for 5 * also
 		std::vector<int> expected{

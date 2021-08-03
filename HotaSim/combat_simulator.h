@@ -12,6 +12,7 @@ enum class CombatType;
 // for combat simulation
 class CombatManager;
 class CombatHero;
+class CombatField;
 
 class CombatSimulator
 {

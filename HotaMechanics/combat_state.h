@@ -6,13 +6,11 @@
 #include "structures.h"
 
 struct CombatState {
-	CombatState(const CombatHero& attacker, const CombatHero& defender, const CombatField& field) {
-		heroes[0] = attacker;
-		heroes[1] = defender;
-		this->field = field;
-	}
+	CombatState(const CombatHero& _attacker, const CombatHero& _defender, const CombatField& _field)
+		: attacker(_attacker), defender(_defender), field(_field) {}
 
-	CombatHero heroes[2];
+	CombatHero attacker;
+	CombatHero defender;
 	CombatField field;
 	int8 turn{ -1 };
 	int8 currentUnit{ -1 };

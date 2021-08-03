@@ -53,39 +53,39 @@ public:
 
 	void evaluateAction(CombatAI& ai, CombatAction action, CombatState& state);
 
-	// E4580
-	float multiplierModifier(CombatUnit& activeStack, int side);
+	//// E4580
+	//float multiplierModifier(CombatUnit& activeStack, int side);
 
-	// 42770
-	int calculateSingleUnitValue(CombatUnit& activeStack, int side);
+	//// 42770
+	//int calculateSingleUnitValue(CombatUnit& activeStack, int side);
 
-	// 42B80
-	int calculateUnitValue(CombatUnit& activeStack, int side);
+	//// 42B80
+	//int calculateUnitValue(CombatUnit& activeStack, int side);
 
-	// 1EC40 (combat_mgr->get_current_active_side(), activeStack, diffDef, diffAtk, 0 or 1)
-	int calculateSummedUnitValueForSide(CombatState& state, int side, int minMeleeDiffAtk, int minDiffDef, int something);
+	//// 1EC40 (combat_mgr->get_current_active_side(), activeStack, diffDef, diffAtk, 0 or 1)
+	//int calculateSummedUnitValueForSide(CombatState& state, int side, int minMeleeDiffAtk, int minDiffDef, int something);
 
-	// 1F1E0 (activeStack, 0, combat_mgr->get_current_active_side())
-	void sub1F1E0();
+	//// 1F1E0 (activeStack, 0, combat_mgr->get_current_active_side())
+	//void sub1F1E0();
 
-	// 22130 ()
-	void calledWhenTacticsState(CombatUnit& unit);
+	//// 22130 ()
+	//void calledWhenTacticsState(CombatUnit& unit);
 
 
 
 	// 35B10 (current_active_side, activeStack)
-	void calculateUnitsFightValues(CombatAI& ai, CombatState& state);
+	//void calculateUnitsFightValues(CombatAI& ai, CombatState& state);
 
 
 
 	// 22100 (activeStack, 0, 0, combat_mgr->get_current_active_side())
-	void generateRelevantUnitsLists(CombatAI& ai, CombatState& state);
+	//void generateRelevantUnitsLists(CombatAI& ai, CombatState& state);
 
 	// part of 22370
-	int unitPreconditions(CombatUnit& unit);
+	//int unitPreconditions(CombatUnit& unit);
 
 	// 22370 - pick ai action	
-	void pickAction(CombatAI& ai, CombatState& state);
+	//void pickAction(CombatAI& ai, CombatState& state);
 
 
 	float calculateUnitAttackFightValueModifier(const CombatUnit& unit) const;

@@ -54,7 +54,7 @@ CombatAI& getAI() {
 	static CombatHero defender;
 	static CombatField field;
 
-	static CombatManager combat_manager(attacker, defender, field);
+	static CombatManager combat_manager(attacker, defender, field, CombatType::NEUTRAL);
 	static auto& ai = combat_manager.getCombatAI();
 	return const_cast<CombatAI&>(ai);
 }
@@ -172,7 +172,7 @@ TEST(CombatAI, shouldReturnNoAttackNorSpellcastActionsForPlayerMeleeUnitWhenHero
 
 	unit->applyHeroStats();
 	unit->initUnit();
-	unit->hexId = getHexId(8, 1);
+	unit->moveTo(getHexId(8, 1));
 
 	auto actions = ai.generateActionsForPlayer(*unit);
 	EXPECT_EQ(22, actions.size()); // 20 walking actions, 1 wait action, 1 defend action
@@ -187,7 +187,7 @@ TEST(CombatAI, shouldReturnNoAttackNorSpellcastActionsForPlayerMeleeUnitWhenHero
 	/// --- ///
 
 	auto& field = const_cast<CombatField&>(ai.combat_manager.getCombatField());
-	field.hexes[8][2].occupiedBy = CombatHexOccupation::UNIT; // this unit prevents from going to 2 hexes, so there should be 20 actions now
+	field.fillHex(getHexId(8, 2), CombatHexOccupation::SOLID_OBSTACLE); // this obstacle prevents from going to 2 hexes, so there should be 20 actions now
 
 	actions = ai.generateActionsForPlayer(*unit);
 	EXPECT_EQ(20, actions.size()); // 18 walking actions, 1 wait action, 1 defend action
@@ -218,19 +218,19 @@ TEST(CombatAI, shouldReturnNoSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHav
 	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 	unit->applyHeroStats();
 	unit->initUnit();
-	unit->hexId = getHexId(8, 1);
+	unit->moveTo(getHexId(8, 1));
 
 	auto hero2 = createHero(createArmy("Peasant", 100));
 	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 	unit2->applyHeroStats();
 	unit2->initUnit();
-	unit2->hexId = getHexId(8, 2);
+	unit2->moveTo(getHexId(8, 2));
 
 	auto& ai = getAI();
 	auto& field = const_cast<CombatField&>(ai.combat_manager.getCombatField());
-	const_cast<CombatManager&>(ai.combat_manager).getCurrentState().heroes[0] = hero;
-	const_cast<CombatManager&>(ai.combat_manager).getCurrentState().heroes[1] = hero2;
-	field.hexes[8][2].occupiedBy = CombatHexOccupation::UNIT;
+	const_cast<CombatManager&>(ai.combat_manager).getCurrentState().attacker = hero;
+	const_cast<CombatManager&>(ai.combat_manager).getCurrentState().defender = hero2;
+	field.fillHex(getHexId(8, 2), CombatHexOccupation::UNIT); // this unit prevents from going to 2 hexes
 
 	auto actions = ai.generateActionsForPlayer(*unit);
 	EXPECT_EQ(26, actions.size()); // 18 walking actions, 6 attack actions, 1 wait action, 1 defend action
@@ -263,18 +263,18 @@ TEST(CombatAI, shouldChooseExactlyThisUnitToAttackIfOnlyOneUnitStackLeftInEnemyH
 TEST(CombatAI, shouldChooseSecondUnitStackToChaseWhenEqualStacksAndCannotAttackBoth) {
 	auto hero = createHero(createArmy("Peasant", 500));
 	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
-	unit->hexId = getHexId(5, 15);
+	unit->moveTo(getHexId(5, 15));
 
 	auto hero2 = createHero(createArmy("Imp", 100, "Imp", 100));
 	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 	unit2->applyHeroStats();
 	unit2->initUnit();
-	unit2->hexId = getHexId(2, 1);
+	unit2->moveTo(getHexId(2, 1));
 
 	auto unit3 = const_cast<CombatUnit*>(hero2.getUnits().back());
 	unit3->applyHeroStats();
 	unit3->initUnit();
-	unit3->hexId = getHexId(8, 1);
+	unit3->moveTo(getHexId(8, 1));
 
 	auto& ai = getAI();
 	auto field = ai.combat_manager.getCombatField();
@@ -283,19 +283,19 @@ TEST(CombatAI, shouldChooseSecondUnitStackToChaseWhenEqualStacksAndCannotAttackB
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).size());
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).front());
 
-	unit->hexId = getHexId(7, 13);
+	unit->moveTo(getHexId(7, 13));
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).size());
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).front());
 
-	unit->hexId = getHexId(7, 10);
+	unit->moveTo(getHexId(7, 10));
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).size());
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).front());
 
-	unit->hexId = getHexId(7, 7);
+	unit->moveTo(getHexId(7, 7));
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).size());
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).front());
 
-	unit->hexId = getHexId(7, 4);
+	unit->moveTo(getHexId(7, 4));
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).size());
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).front());
 }
@@ -304,18 +304,18 @@ TEST(CombatAI, shouldChooseSecondUnitStackToChaseWhenEqualStacksAndCannotAttackB
 TEST(CombatAI, shouldChooseRandomlyFromTwoStacksIfEqualStacksAndCanAttackBoth) {
 	auto hero = createHero(createArmy("Peasant", 500));
 	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
-	unit->hexId = getHexId(5, 15);
+	unit->moveTo(getHexId(5, 15));
 
 	auto hero2 = createHero(createArmy("Imp", 100, "Imp", 100));
 	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
 	unit2->applyHeroStats();
 	unit2->initUnit();
-	unit2->hexId = getHexId(2, 1);
+	unit2->moveTo(getHexId(2, 1));
 
 	auto unit3 = const_cast<CombatUnit*>(hero2.getUnits().back());
 	unit3->applyHeroStats();
 	unit3->initUnit();
-	unit3->hexId = getHexId(8, 1);
+	unit3->moveTo(getHexId(8, 1));
 
 	auto& ai = getAI();
 	auto field = ai.combat_manager.getCombatField();
@@ -324,34 +324,34 @@ TEST(CombatAI, shouldChooseRandomlyFromTwoStacksIfEqualStacksAndCanAttackBoth) {
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).size());
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).front());
 
-	unit->hexId = getHexId(7, 13);
-	unit2->hexId = getHexId(7, 1);
-	unit3->hexId = getHexId(6, 1);
+	unit->moveTo(getHexId(7, 13));
+	unit2->moveTo(getHexId(7, 1));
+	unit3->moveTo(getHexId(6, 1));
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).size());
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).front());
 
-	unit->hexId = getHexId(7, 10);
+	unit->moveTo(getHexId(7, 10));
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).size());
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).front());
 
-	unit->hexId = getHexId(7, 7);
+	unit->moveTo(getHexId(7, 7));
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).size());
 	EXPECT_EQ(1, ai.chooseUnitToAttack(*unit, hero2).front());
 
-	unit->hexId = getHexId(7, 4);
+	unit->moveTo(getHexId(7, 4));
 	EXPECT_EQ(2, ai.chooseUnitToAttack(*unit, hero2).size());
 }
 
 TEST(CombatAI, shouldChooseCorrectHexWhichMeleeAttackWillBePerformedFrom) {
 	auto hero = createHero(createArmy("Peasant", 500));
 	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
-	unit->hexId = getHexId(5, 15);
+	unit->moveTo(getHexId(5, 15));
 	unit->applyHeroStats();
 	unit->initUnit();
 
 	auto hero2 = createHero(createArmy("Imp", 200));
 	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
-	unit2->hexId = getHexId(5, 1);
+	unit2->moveTo(getHexId(5, 1));
 	unit2->applyHeroStats();
 	unit2->initUnit();
 
@@ -362,11 +362,11 @@ TEST(CombatAI, shouldChooseCorrectHexWhichMeleeAttackWillBePerformedFrom) {
 
 	EXPECT_EQ(69, ai.chooseHexToMoveForAttack(*unit, *unit2));
 
-	unit->hexId = getHexId(4, 12);
-	unit2->hexId = getHexId(7, 5);
+	unit->moveTo(getHexId(4, 12));
+	unit2->moveTo(getHexId(7, 5));
 	EXPECT_EQ(107, ai.chooseHexToMoveForAttack(*unit, *unit2));
 
-	unit->hexId = getHexId(4, 10);
-	unit2->hexId = getHexId(10, 8);
+	unit->moveTo(getHexId(4, 10));
+	unit2->moveTo(getHexId(10, 8));
 	EXPECT_EQ(162, ai.chooseHexToMoveForAttack(*unit, *unit2));
 }

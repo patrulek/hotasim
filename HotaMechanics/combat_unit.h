@@ -25,13 +25,14 @@ struct UnitState {
 };
 
 class CombatUnit {
+private:
+	int hex{ -1 };
 public:
 	Unit unit_template{};
 	UnitState state{ 0 };
 	PrimaryStats currentStats;
 	uint16 stackNumber{ 0 };
 	uint16 health_lost{ 0 };
-	int hexId{ -1 };
 	std::array<SpellID, 8> active_spells{};
 	bool applied_hero_stats{ false };
 
@@ -48,14 +49,16 @@ public:
 
 	CombatSide getCombatSide() const;
 
+
+	void moveTo(const int _target_hex);
+	void walkTo(const int _target_hex);
+	int getHex() const { return hex; };
+
 	int getUnitId() const;
 
 	void applyDamage(int damage);
 
 	float getBaseAverageDmg() const;
-
-	const std::vector<int> getHexesInSpeedRange(const CombatField& field) const;
-	const std::vector<int> getHexesInAttackRange(const CombatField& field) const;
 
 	float getSingleUnitFightValue() const {
 		return unit_template.fightValue;
@@ -83,6 +86,10 @@ public:
 
 	void initUnit() {
 		state.is_alive = true;
+	}
+
+	bool isDoubleWide() const {
+		return false; // TODO
 	}
 
 	void applySpell(const int spell_id, const int power) {
@@ -151,10 +158,6 @@ public:
 
 	bool cannotMove(CombatUnit& unit) {
 		return false; // flags & 0x15;
-	}
-
-	bool isDoubleWide(CombatUnit& unit) {
-		return false; // flags & 1;
 	}
 
 	bool hasAtkModSpellActive() const {

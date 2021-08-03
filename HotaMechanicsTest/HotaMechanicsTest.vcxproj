@@ -36,6 +36,7 @@
     <ClCompile Include="combat_ai_test.cpp" />
     <ClCompile Include="combat_field_test.cpp" />
     <ClCompile Include="combat_manager_test.cpp" />
+    <ClCompile Include="combat_pathfinder_test.cpp" />
     <ClCompile Include="combat_unit_test.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>

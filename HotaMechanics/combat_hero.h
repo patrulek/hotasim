@@ -6,10 +6,6 @@
 #include <vector>
 #include <array>
 
-enum class CombatSide {
-	ATTACKER, DEFENDER
-};
-
 class CombatHero {
 private:
 
@@ -54,7 +50,7 @@ public:
 		return (it - std::begin(units_placement)) * found - !found;
 	}
 
-	bool isAlive(CombatHero& hero) const;
+	bool isAlive() const;
 
 	bool canCast() const {
 		return false; // todo
