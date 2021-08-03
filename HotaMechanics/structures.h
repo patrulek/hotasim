@@ -23,6 +23,27 @@ struct PrimaryStats {
 	uint16 shots;
 };
 
+
+
+struct UnitPermutation {
+	int unit_id;
+	int unit_order;
+	int unit_number;
+
+	bool operator==(const UnitPermutation& _obj) const {
+		return unit_id == _obj.unit_id && unit_order == _obj.unit_order && unit_number == _obj.unit_number;
+	}
+};
+
+struct ArmyPermutation
+{
+	std::vector<UnitPermutation> permutations;
+
+	bool operator==(const ArmyPermutation& _obj) const {
+		return permutations == _obj.permutations;
+	}
+};
+
 enum class HeroSkills {
 
 };
@@ -112,7 +133,6 @@ struct Hero {
 
 	void setHeroArmy(const std::vector<UnitStack>& _army) {
 		army = _army;
-		army.resize(7);
 	}
 
 	void addUnit(const Unit& _unit, const int _stack_size) {
@@ -128,4 +148,13 @@ struct Hero {
 	void removeUnitStack(const UnitStack&) { throw std::exception("Not implemented yet"); }
 
 	void removeHeroArmy() { army.clear(); }
+
+	ArmyPermutation generateBaseArmyPermutation() const {
+		ArmyPermutation permutation;
+
+		for (int i = 0; i < army.size(); ++i)
+			permutation.permutations.push_back(UnitPermutation{ i, i, army[i].stack_number });
+
+		return permutation;
+	}
 };

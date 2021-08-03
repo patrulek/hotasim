@@ -3,6 +3,10 @@
 #include "combat_field.h"
 #include "combat_hero.h"
 
+void CombatUnit::applyHeroStats() {
+	applyHeroStats(hero->getStats());
+}
+
 const std::vector<int> CombatUnit::getHexesInSpeedRange(const CombatField& field) const {
 	return field.getHexesInRange(hexId, currentStats.spd);
 }

@@ -135,10 +135,19 @@ public:
 	}
 		
 	void setTemplate(std::vector<int>& _template) {
+		if (_template.size() != 187)
+			throw std::exception("Wrong template size");
+
+		int id = 0;
+
 		for (auto hex : _template) {
-			int y = hex / 17;
-			int x = hex % 17;
-			hexes[y][x].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+			int y = id / 17;
+			int x = (id++) % 17;
+
+			if (hex)
+				hexes[y][x].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
+			else
+				hexes[y][x].occupiedBy = CombatHexOccupation::EMPTY;
 		}
 	}
 

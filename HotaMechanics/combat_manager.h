@@ -44,7 +44,7 @@ public:
 		// get next unit in turn
 		// 
 
-		return state.heroes[0].units[0]; // 
+		return const_cast<CombatUnit&>(*state.heroes[0].getUnits()[0]); // 
 	}
 
 	bool isUnitMove(CombatState& state) {

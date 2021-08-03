@@ -1,13 +1,32 @@
 #include "combat_hero.h"
 
+#include <algorithm>
+#include <iterator>
 
-std::vector<const CombatUnit*> CombatHero::getActiveUnits() const {
-	auto units_ = std::vector<const CombatUnit*>();
+void CombatHero::initialize() {
+	stats = hero_template.stats;
 
-	for (int i = 0; i < 21; ++i) {
-		if (units[i].applied_hero_stats) // todo
-			units_.emplace_back(&units[i]);
-	}
+	if( army_permutation.permutations.empty() )
+		army_permutation = hero_template.generateBaseArmyPermutation();
+
+	// if have artifacts modify stats
+	// if have secondary skills modify stats
+}
+
+void CombatHero::addUnitFromArmy(UnitPermutation _unit_perm) {
+	const auto& unit_template = hero_template.army[_unit_perm.unit_id].unit;
+	units.emplace_back(CombatUnit{ unit_template, _unit_perm.unit_number, *this });
+	units_placement[_unit_perm.unit_order] = &units.back();
+}
+
+void CombatHero::generateUnitsFromArmy() {
+	for (auto unit_perm : army_permutation.permutations)
+		addUnitFromArmy(unit_perm);
+}
+
+std::vector<const CombatUnit*> CombatHero::getUnits() const {
+	std::vector<const CombatUnit*> units_{};
+	std::transform(std::begin(units), std::end(units), std::back_inserter(units_), [](const auto& _obj) { return &_obj; });
 
 	return units_;
 }

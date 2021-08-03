@@ -11,29 +11,47 @@ enum class CombatSide {
 };
 
 class CombatHero {
-public:
+private:
+
 	Hero hero_template;
-	PrimaryStats stats{};
-	CombatUnit units[21];
+	PrimaryStats stats;
+	std::vector<CombatUnit> units;
+	std::array<CombatUnit*, 21> units_placement;
 	CombatSide side;
+	ArmyPermutation army_permutation;
+
+	void initialize();
+	void addUnitFromArmy(UnitPermutation _unit_perm);
+public:
 
 	CombatHero() = default;
 	CombatHero(const Hero& hero_template)
-		: hero_template(hero_template) {}
+			: hero_template(hero_template) {
+		initialize();
+		generateUnitsFromArmy();
+	}
 
-	std::vector<const CombatUnit*> getActiveUnits() const;
+	CombatHero(const Hero& _hero_template, const ArmyPermutation& _army_permutation)
+		: hero_template(_hero_template), army_permutation(_army_permutation) {
+		initialize();
+		generateUnitsFromArmy();
+	}
+
+	std::vector<const CombatUnit*> getUnits() const;
+	const PrimaryStats& getStats() const {
+		return stats;
+	}
 
 	CombatSide getCombatSide() const {
 		return side;
 	}
 
-	int getUnitId(const CombatUnit& unit) const {
-		for (int i = 0; i < 21; ++i) {
-			if (&units[i] == &unit) // todo
-				return i;
-		}
+	void generateUnitsFromArmy();
 
-		return -1;
+	int getUnitId(const CombatUnit& unit) const {
+		auto it = std::find_if(std::begin(units_placement), std::end(units_placement), [&unit](auto _obj) { return _obj == &unit; });
+		bool found = (it != std::end(units_placement));
+		return (it - std::begin(units_placement)) * found - !found;
 	}
 
 	bool isAlive(CombatHero& hero) const;

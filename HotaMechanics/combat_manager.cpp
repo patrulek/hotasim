@@ -9,7 +9,7 @@ std::vector<int> CombatManager::calculateFightValueAdvantageOnHexes(const Combat
 	std::vector<int> hexes_fight_value(187, 0);
 	int max_fight_value_gain = ai->calculateStackUnitFightValue(activeStack);
 
-	for (auto unit : enemy_hero.getActiveUnits()) {
+	for (auto unit : enemy_hero.getUnits()) {
 		int fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, activeStack);
 		
 		if (fight_value_gain <= 0)
@@ -80,7 +80,7 @@ int CombatManager::calculateFightValueAdvantageAfterMeleeUnitAttack(const Combat
 std::vector<CombatUnit> CombatManager::getUnitsInRange(CombatSide side, std::vector<int>& hexes) const {
 	std::vector<CombatUnit> units_in_range;
 
-	for (auto unit : current_state->heroes[(int)side].getActiveUnits()) {
+	for (auto unit : current_state->heroes[(int)side].getUnits()) {
 		if (!unit->isAlive())
 			continue;
 
@@ -105,7 +105,7 @@ const CombatAI& CombatManager::getCombatAI() const {
 CombatUnit& CombatManager::getActiveStack() {
 	int unitId = current_state->unitOrder[current_state->currentUnit];
 	int side = unitId / 21;
-	return current_state->heroes[side].units[unitId % 21];
+	return const_cast<CombatUnit&>(*current_state->heroes[side].getUnits()[unitId % 21]);
 }
 
 CombatManager::CombatManager(const CombatHero& attacker, const CombatHero& defender, const CombatField& field)

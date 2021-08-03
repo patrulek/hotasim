@@ -41,6 +41,8 @@ public:
 		: unit_template(unitTemplate), currentStats(unitTemplate.stats) {};
 	CombatUnit(const Unit& unitTemplate, /*const*/ CombatHero& hero)
 		: unit_template(unitTemplate), currentStats(unitTemplate.stats), hero(&hero) {};
+	CombatUnit(const Unit& _unit_template, const int _stack_number, CombatHero& _hero)
+		: unit_template(_unit_template), currentStats(_unit_template.stats), stackNumber(_stack_number), hero(&_hero) {};
 	CombatUnit(const CombatUnit& obj) = default;
 	CombatUnit() = default;
 
@@ -76,6 +78,8 @@ public:
 		currentStats.def += (hero_stats.def * !applied_hero_stats);
 		applied_hero_stats = true;
 	}
+
+	void applyHeroStats();
 
 	void initUnit() {
 		state.is_alive = true;

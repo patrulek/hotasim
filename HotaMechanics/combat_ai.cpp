@@ -33,7 +33,7 @@ int CombatAI::calculateStackUnitFightValue(const CombatUnit& unit) const {
 int CombatAI::calculateHeroFightValue(const CombatHero& hero) const {
 	int hero_fight_value = 0;
 	
-	for (const auto unit : hero.getActiveUnits())
+	for (const auto unit : hero.getUnits())
 		hero_fight_value += calculateStackUnitFightValue(*unit);
 
 	return hero_fight_value;
@@ -117,8 +117,8 @@ std::vector<CombatAction> CombatAI::generateActionsForPlayer(const CombatUnit& a
 // because of randomization which cant be mirrored in this project, this function can possibly return more
 // than one unit to attack (only if some specified conditions are met; for most cases there will be only one unit)
 std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const {
-	if (enemy_hero.getActiveUnits().size() == 1)
-		return std::vector<int>{ enemy_hero.getActiveUnits()[0]->getUnitId() }; // todo: to could not always be [0]
+	if (enemy_hero.getUnits().size() == 1)
+		return std::vector<int>{ enemy_hero.getUnits()[0]->getUnitId() }; // todo: to could not always be [0]
 
 	int turns = 999;
 	std::vector<int> unit_ids{};
@@ -127,7 +127,7 @@ std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, con
 	int max_fight_value_gain = 0;
 	int distance = 999;
 
-	for (auto unit : enemy_hero.getActiveUnits()) {
+	for (auto unit : enemy_hero.getUnits()) {
 		int unit_distance = combat_manager.getCombatField().getById(activeStack.hexId).distanceToHex(unit->hexId);
 		int unit_turns = std::ceil((float)unit_distance / activeStack.currentStats.spd); // 1 = can attack; todo: check if should be distance - 1
 		int unit_fight_value_gain = combat_manager.calculateFightValueAdvantageAfterMeleeUnitAttack(activeStack, *unit);
@@ -448,7 +448,7 @@ void CombatAI::calculateUnitsFightValues(CombatAI& ai, CombatState& state) {
 
 	// iterate over player units
 	for (int i = 0; i < 1 /*21 get player unit number*/; ++i) {
-		CombatUnit& unit = state.heroes[0].units[i];
+		CombatUnit& unit = const_cast<CombatUnit&>(*state.heroes[0].getUnits()[i]);
 		int unitStackNumber = unit.stackNumber;
 		bool arrowTower = unit.isArrowTower(unit);
 		int diffAtk = unit.calcDiffAtk();
@@ -463,7 +463,7 @@ void CombatAI::calculateUnitsFightValues(CombatAI& ai, CombatState& state) {
 
 	// iterate over ai units
 	for (int i = 0; i < 1 /*21 get player unit number*/; ++i) {
-		CombatUnit& unit = state.heroes[1].units[i];
+		CombatUnit& unit = const_cast<CombatUnit&>(*state.heroes[1].getUnits()[i]);
 		int unitStackNumber = unit.stackNumber;
 		bool arrowTower = unit.isArrowTower(unit);
 		int diffAtk = unit.calcDiffAtk();
