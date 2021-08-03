@@ -59,11 +59,6 @@ CombatAI& getAI() {
 	return const_cast<CombatAI&>(ai);
 }
 
-
-bool isAttackOrSpellcastAction(CombatAction action) {
-	return action.action == CombatActionType::ATTACK || action.action == CombatActionType::SPELLCAST;
-}
-
 std::vector<UnitStack> createArmy(const std::string tmp1, const int size1,
 											const std::string tmp2 = "", const int size2 = 0,
 											const std::string tmp3 = "", const int size3 = 0,
@@ -163,86 +158,6 @@ TEST(CombatAI, shouldReturnSummedUnitFightValuesForHero) {
 		const_cast<CombatUnit*>(unit)->applyHeroStats();
 
 	EXPECT_EQ(1612 + 789, ai.calculateHeroFightValue(hero));
-}
-
-TEST(CombatAI, shouldReturnNoAttackNorSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHaveSpellbookAndNoHostileUnitsInRange) {
-	auto hero = createHero(createArmy("Peasant", 100));
-	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
-	auto& ai = getAI();
-
-	unit->applyHeroStats();
-	unit->initUnit();
-	unit->moveTo(getHexId(8, 1));
-
-	auto actions = ai.generateActionsForPlayer(*unit);
-	EXPECT_EQ(22, actions.size()); // 20 walking actions, 1 wait action, 1 defend action
-
-	int walking_actions = 0;
-	for (auto action : actions) {
-		EXPECT_FALSE(isAttackOrSpellcastAction(action));
-		walking_actions += (action.action == CombatActionType::WALK);
-	}
-	EXPECT_EQ(20, walking_actions);
-
-	/// --- ///
-
-	auto& field = const_cast<CombatField&>(ai.combat_manager.getCombatField());
-	field.fillHex(getHexId(8, 2), CombatHexOccupation::SOLID_OBSTACLE); // this obstacle prevents from going to 2 hexes, so there should be 20 actions now
-
-	actions = ai.generateActionsForPlayer(*unit);
-	EXPECT_EQ(20, actions.size()); // 18 walking actions, 1 wait action, 1 defend action
-
-	walking_actions = 0;
-	for (auto action : actions) {
-		EXPECT_FALSE(isAttackOrSpellcastAction(action));
-		walking_actions += (action.action == CombatActionType::WALK);
-	}
-	EXPECT_EQ(18, walking_actions);
-
-	/// --- ///
-
-	unit->state.waiting = true; // were changing unit state, so now wait action should be gone
-	actions = ai.generateActionsForPlayer(*unit);
-	EXPECT_EQ(19, actions.size()); // 18 walking actions, 1 defend action
-
-	walking_actions = 0;
-	for (auto action : actions) {
-		EXPECT_FALSE(isAttackOrSpellcastAction(action));
-		walking_actions += (action.action == CombatActionType::WALK);
-	}
-	EXPECT_EQ(18, walking_actions);
-}
-
-TEST(CombatAI, shouldReturnNoSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHaveSpellbookAndHostileUnitsInRange) {
-	auto hero = createHero(createArmy("Peasant", 100));
-	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
-	unit->applyHeroStats();
-	unit->initUnit();
-	unit->moveTo(getHexId(8, 1));
-
-	auto hero2 = createHero(createArmy("Peasant", 100));
-	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
-	unit2->applyHeroStats();
-	unit2->initUnit();
-	unit2->moveTo(getHexId(8, 2));
-
-	auto& ai = getAI();
-	auto& field = const_cast<CombatField&>(ai.combat_manager.getCombatField());
-	const_cast<CombatManager&>(ai.combat_manager).getCurrentState().attacker = hero;
-	const_cast<CombatManager&>(ai.combat_manager).getCurrentState().defender = hero2;
-	field.fillHex(getHexId(8, 2), CombatHexOccupation::UNIT); // this unit prevents from going to 2 hexes
-
-	auto actions = ai.generateActionsForPlayer(*unit);
-	EXPECT_EQ(26, actions.size()); // 18 walking actions, 6 attack actions, 1 wait action, 1 defend action
-
-	int walking_actions = 0;
-	int attack_actions = 0;
-	for (auto action : actions) {
-		walking_actions += (action.action == CombatActionType::WALK);
-		attack_actions += (action.action == CombatActionType::ATTACK);
-	}
-	EXPECT_EQ(18, walking_actions);
-	EXPECT_EQ(6, attack_actions);
 }
 
 TEST(CombatAI, shouldChooseExactlyThisUnitToAttackIfOnlyOneUnitStackLeftInEnemyHero) {
@@ -359,6 +274,7 @@ TEST(CombatAI, shouldChooseCorrectHexWhichMeleeAttackWillBePerformedFrom) {
 	
 	auto field = ai.combat_manager.getCombatField();
 	field.setTemplate(getCombatFieldTemplate(1));
+	ai.calculateFightValueAdvantageOnHexes(*unit, hero2, field);
 
 	EXPECT_EQ(69, ai.chooseHexToMoveForAttack(*unit, *unit2));
 
@@ -369,4 +285,224 @@ TEST(CombatAI, shouldChooseCorrectHexWhichMeleeAttackWillBePerformedFrom) {
 	unit->moveTo(getHexId(4, 10));
 	unit2->moveTo(getHexId(10, 8));
 	EXPECT_EQ(162, ai.chooseHexToMoveForAttack(*unit, *unit2));
+}
+
+TEST(CombatAI, shouldReturnCorrectMeleeUnitDmgWithoutAnyModifiers) {
+	auto hero = createHero(createArmy("Imp", 200));
+	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(8, 1));
+
+	auto hero2 = createHero(createArmy("Peasant", 500));
+	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+	unit2->applyHeroStats();
+	unit2->initUnit();
+	unit2->moveTo(getHexId(8, 2));
+
+	auto& ai = getAI();
+
+	// 200 imps should do 315 dmg on average to 500 peasants without any attack/defense and/or spells modifiers
+	EXPECT_EQ(315, ai.calculateMeleeUnitAverageDamage(*unit, *unit2));
+
+	// 500 peasants should do 475 dmg on average to 200 imps without any attack/defense and/or spells modifiers
+	EXPECT_EQ(475, ai.calculateMeleeUnitAverageDamage(*unit2, *unit));
+
+	hero = createHero(createArmy("Imp", 100));
+	unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(8, 1));
+	// 100 imps should do 157 dmg on average to 500 peasants without any attack/defense and/or spells modifiers
+	EXPECT_EQ(157, ai.calculateMeleeUnitAverageDamage(*unit, *unit2));
+
+	// 500 peasants should do 400 dmg on average to 100 imps (killing all) without any attack/defense and/or spells modifiers
+	EXPECT_EQ(400, ai.calculateMeleeUnitAverageDamage(*unit2, *unit));
+
+	hero = createHero(createArmy("Imp", 50));
+	unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(8, 1));
+	// 50 imps should do 78 dmg on average to 500 peasants without any attack/defense and/or spells modifiers
+	EXPECT_EQ(78, ai.calculateMeleeUnitAverageDamage(*unit, *unit2));
+
+	// 500 peasants should do 200 dmg on average to 50 imps (killing all) without any attack/defense and/or spells modifiers
+	EXPECT_EQ(200, ai.calculateMeleeUnitAverageDamage(*unit2, *unit));
+
+	hero = createHero(createArmy("Goblin", 30));
+	unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(8, 1));
+
+	// 30 goblins should do 51 dmg on average to peasants without any attack/defense and/or spells modifiers
+	EXPECT_EQ(51, ai.calculateMeleeUnitAverageDamage(*unit, *unit2));
+}
+
+
+TEST(CombatAI, shouldReturnZeroForCounterattackMeleeUnitDmgWithoutAnyModifiersWhenUnitIsKilledOrCantRetaliate) {
+	auto hero = createHero(createArmy("Imp", 200));
+	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(8, 1));
+
+	auto hero2 = createHero(createArmy("Peasant", 100));
+	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+	unit2->applyHeroStats();
+	unit2->initUnit();
+	unit2->state.retaliated = false;
+	unit2->moveTo(getHexId(8, 2));
+
+	auto& ai = getAI();
+
+	// 200 imps should kill all peasants, so 0 dmg in counterattack
+	EXPECT_EQ(0, ai.calculateCounterAttackMeleeUnitAverageDamage(*unit, *unit2));
+
+
+	hero2 = createHero(createArmy("Peasant", 500));
+	unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+	unit2->applyHeroStats();
+	unit2->initUnit();
+	unit2->state.retaliated = true;
+	unit2->moveTo(getHexId(8, 2));
+
+	// 200 imps will not kill all peasants, but they already retaliated so 0 dmg
+	EXPECT_EQ(0, ai.calculateCounterAttackMeleeUnitAverageDamage(*unit, *unit2));
+}
+
+
+TEST(CombatAI, shouldReturnCorrectValueForCounterattackMeleeUnitDmgWithoutAnyModifiersWhenUnitIsNotKilledAndCanRetaliate) {
+	auto hero = createHero(createArmy("Imp", 200));
+	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(8, 1));
+
+	auto hero2 = createHero(createArmy("Peasant", 500));
+	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+	unit2->applyHeroStats();
+	unit2->initUnit();
+	unit2->state.retaliated = false;
+	unit2->moveTo(getHexId(8, 2));
+
+	auto& ai = getAI();
+
+	// 200 imps should kill 315 peasants, so 185 peasants should retaliate 175 dmg to imps
+	EXPECT_EQ(175, ai.calculateCounterAttackMeleeUnitAverageDamage(*unit, *unit2));
+
+	// 500 peasants should kill 118 imps, so 82 imps should retaliate 129 to peasants
+	EXPECT_EQ(129, ai.calculateCounterAttackMeleeUnitAverageDamage(*unit2, *unit));
+}
+
+
+TEST(CombatAI, shouldReturnCorrectFightValueGainForMeleeUnitAttackWithoutAnyModifiersWhenSimilarArmyStrength) {
+	auto hero = createHero(createArmy("Imp", 200));
+	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(8, 1));
+
+	auto hero2 = createHero(createArmy("Peasant", 500));
+	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+	unit2->applyHeroStats();
+	unit2->initUnit();
+	unit2->moveTo(getHexId(8, 2));
+
+	auto& ai = getAI();
+
+	// fight value gain when 200 imps attack 500 peasants first
+	EXPECT_EQ(2538, ai.calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, *unit2));
+
+	// fight value gain when 500 peasants attack 200 imps first
+	EXPECT_EQ(4002, ai.calculateFightValueAdvantageAfterMeleeUnitAttack(*unit2, *unit));
+}
+
+TEST(CombatAI, shouldReturnOnlyZeroFightValueGainOnHexesForMeleeUnitWhenAttackerWeakerThanDefender) {
+	auto hero = createHero(createArmy("Imp", 50));
+	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(8, 1));
+
+	auto hero2 = createHero(createArmy("Peasant", 500));
+	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+	unit2->applyHeroStats();
+	unit2->initUnit();
+	unit2->moveTo(getHexId(8, 2));
+
+	auto& ai = getAI();
+	auto field = ai.combat_manager.getCombatField();
+
+	std::vector<int> expected(187, 0);
+	EXPECT_EQ(expected, ai.calculateFightValueAdvantageOnHexes(*unit2, hero, field));
+}
+
+TEST(CombatAI, shouldReturnCorrectFightValueGainOnHexesForMeleeUnitWhenAttackerLittleStrongerThanDefender) {
+	auto hero = createHero(createArmy("Imp", 200));
+	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(5, 1));
+
+	auto hero2 = createHero(createArmy("Peasant", 500));
+	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+	unit2->applyHeroStats();
+	unit2->initUnit();
+	unit2->moveTo(getHexId(5, 15));
+
+	auto& ai = getAI();
+	auto field = ai.combat_manager.getCombatField();
+
+	int fv = -2538;
+	std::vector<int> expected{
+		0, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	};
+
+	EXPECT_EQ(expected, ai.calculateFightValueAdvantageOnHexes(*unit2, hero, field));
+}
+
+
+TEST(CombatAI, DISABLED_shouldReturnMaximumFightValueGainOnHexesForMeleeUnitWhenAttackerIncrediblyStrongerThanDefender) {
+	auto hero = createHero(createArmy("Imp", 301));
+	auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+	unit->applyHeroStats();
+	unit->initUnit();
+	unit->moveTo(getHexId(5, 1));
+
+	auto hero2 = createHero(createArmy("Peasant", 500));
+	auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+	unit2->applyHeroStats();
+	unit2->initUnit();
+	unit2->moveTo(getHexId(5, 15));
+
+	auto& ai = getAI();
+	auto field = ai.combat_manager.getCombatField();
+
+	int fv = -7500; // TODO: implement case when attacker fight value > 2 * defender fight value; check if there isnt case for 5 * also
+	std::vector<int> expected{
+		0, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, fv, fv, fv, fv, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	};
+	EXPECT_EQ(expected, ai.calculateFightValueAdvantageOnHexes(*unit2, hero, field));
 }

@@ -4,8 +4,85 @@
 #include <cmath>
 
 CombatAI::CombatAI(const CombatManager& _combat_manager)
-	: combat_manager(_combat_manager) {}
+	: combat_manager(_combat_manager) {
 
+	pathfinder = std::make_unique<CombatPathfinder>();
+}
+
+
+
+std::vector<int> CombatAI::calculateFightValueAdvantageOnHexes(const CombatUnit& activeStack, const CombatHero& enemy_hero, const CombatField& _field)  {
+	std::vector<int> hexes_fight_value(CombatFieldSize::ROWS * CombatFieldSize::COLS, 0);
+	int max_fight_value_gain = calculateStackUnitFightValue(activeStack);
+
+	for (auto unit : enemy_hero.getUnits()) {
+		int fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, activeStack);
+
+		if (fight_value_gain <= 0)
+			continue;
+
+		auto hexes_in_attack_range = pathfinder->getHexesInRange(unit->getHex(), unit->currentStats.spd + 1);
+		auto walkable_hexes = pathfinder->getWalkableHexesFromList(hexes_in_attack_range, _field);
+		auto reachable_hexes = pathfinder->getReachableHexesFromWalkableHexes(unit->getHex(), unit->currentStats.spd + 1, walkable_hexes, false, false, _field);
+		reachable_hexes.push_back(unit->getHex()); // add also unit position
+
+		for (auto hex : reachable_hexes) {
+			int hex_fight_value_gain = std::min(max_fight_value_gain, fight_value_gain);
+			hexes_fight_value[hex] = std::max(hexes_fight_value[hex], hex_fight_value_gain);
+		}
+	}
+
+	std::for_each(std::begin(hexes_fight_value), std::end(hexes_fight_value), [](auto& obj) { obj = -obj; });
+	hexes_fight_value_gain = hexes_fight_value;
+	return hexes_fight_value;
+}
+
+int CombatAI::calculateMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const {
+	int attacker_base_dmg = attacker.getBaseAverageDmg() * attacker.stackNumber;
+	float attacker_bonus_dmg = attacker_base_dmg;
+
+	int attack_advantage = attacker.currentStats.atk - defender.currentStats.def;
+	attacker_bonus_dmg *= (((attack_advantage > 0) * 0.05f) + ((attack_advantage < 0) * 0.025f)) * attack_advantage;
+
+	int defender_total_health = defender.stackNumber * defender.currentStats.hp - defender.health_lost;
+
+	// cant do more dmg than total health of defender
+	return std::min((int)(attacker_base_dmg + attacker_bonus_dmg), defender_total_health);
+}
+
+
+int CombatAI::calculateCounterAttackMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const {
+	CombatUnit attacker_copy(attacker);
+	CombatUnit defender_copy(defender);
+
+	int first_attack_dmg = calculateMeleeUnitAverageDamage(attacker_copy, defender_copy);
+	defender_copy.applyDamage(first_attack_dmg);
+
+	if (!defender_copy.isAlive() || !defender_copy.canRetaliate())
+		return 0;
+
+	int counter_attack_dmg = calculateMeleeUnitAverageDamage(defender_copy, attacker_copy);
+
+	return counter_attack_dmg;
+}
+
+
+int CombatAI::calculateFightValueAdvantageAfterMeleeUnitAttack(const CombatUnit& attacker, const CombatUnit& defender) const {
+	CombatUnit attacker_copy(attacker);
+	CombatUnit defender_copy(defender);
+
+	int first_attack_dmg = calculateMeleeUnitAverageDamage(attacker_copy, defender_copy);
+	defender_copy.applyDamage(first_attack_dmg);
+
+	int counter_attack_dmg = calculateMeleeUnitAverageDamage(defender_copy, attacker_copy);
+	attacker_copy.applyDamage(counter_attack_dmg);
+
+	// TODO: when one side fight value > 2 * second side fight value -> then * 1000 for stronger side, and * 100 for weaker side
+	int attacker_fight_value_gain = first_attack_dmg * defender_copy.getSingleUnitFightValuePerOneHp();
+	int defender_fight_value_gain = counter_attack_dmg * attacker_copy.getSingleUnitFightValuePerOneHp();
+
+	return attacker_fight_value_gain - defender_fight_value_gain;
+}
 
 float CombatAI::calculateUnitAttackFightValueModifier(const CombatUnit& unit) const {
 	// if has special abilities
@@ -39,81 +116,6 @@ int CombatAI::calculateHeroFightValue(const CombatHero& hero) const {
 	return hero_fight_value;
 }
 
-
-CombatAction CombatAI::createWaitAction() const {
-	return CombatAction{ CombatActionType::WAIT, -1, -1, true };
-}
-
-CombatAction CombatAI::createWalkAction(int hex_id) const {
-	return CombatAction{ CombatActionType::WALK, -1, hex_id, true };
-}
-
-CombatAction CombatAI::createDefendAction() const {
-	return CombatAction{ CombatActionType::DEFENSE, -1, -1, true };
-}
-
-CombatAction CombatAI::createSpellCastAction(int spell_id, int unit_id, int hex_id) const {
-	throw std::exception("Not implemented yet");
-}
-
-CombatAction CombatAI::createAttackAction(int unit_id, int hex_id) const {
-	return CombatAction{ CombatActionType::ATTACK, unit_id, hex_id, true };
-}
-
-std::vector<CombatAction> CombatAI::generateActionsForPlayer(const CombatUnit& activeStack) const {
-	if (!activeStack.canMakeAction())
-		return std::vector<CombatAction>{};
-
-	std::vector<CombatAction> actions{};
-
-	if (activeStack.canWait())
-		actions.push_back(createWaitAction());
-
-	if (activeStack.canDefend())
-		actions.push_back(createDefendAction());
-
-	// get reachable hexes;
-	auto field = combat_manager.getCombatField();
-	auto range_hexes = pathfinder->getHexesInRange(activeStack.getHex(), activeStack.currentStats.spd);
-	auto walkable_hexes = pathfinder->getWalkableHexesFromList(range_hexes, field);
-	auto reachable_hexes = pathfinder->getReachableHexesFromWalkableHexes(activeStack.getHex(), activeStack.currentStats.spd, walkable_hexes, false, false, field);
-
-	for (auto hex : reachable_hexes)
-		actions.push_back(createWalkAction(hex));
-	
-	// get attackable enemy units; 
-	// if can shoot then only get all enemy units
-	auto units_in_range = combat_manager.getUnitsInRange(CombatSide::DEFENDER, range_hexes);
-	 
-	for (auto unit : units_in_range) {
-		auto adjacent_hexes = pathfinder->getAdjacentHexes(unit.getHex());
-		auto adjacent_vec = std::vector<int>(std::begin(adjacent_hexes), std::end(adjacent_hexes));
-		auto walkable_adjacent = pathfinder->getWalkableHexesFromList(adjacent_vec, field);
-		auto reachable_adjacent = pathfinder->getReachableHexesFromWalkableHexes(activeStack.getHex(), activeStack.currentStats.spd,
-																								 walkable_adjacent, false, false, field);
-
-		
-		// if were staying in one of adjacent hexes to target, add that hex
-		bool staying_around = std::find(std::begin(adjacent_hexes), std::end(adjacent_hexes), activeStack.getHex()) != std::end(adjacent_hexes);
-		if (staying_around)
-			reachable_adjacent.push_back(activeStack.getHex());
-
-		for (auto hex : reachable_adjacent) {
-			actions.push_back(createAttackAction(unit.getUnitId(), unit.getHex()));
-		}
-	}
-	
-	// get castable spells;
-	if (activeStack.canCast())
-		throw std::exception("Not implemented yet");
-
-	if (activeStack.canHeroCast())
-		throw std::exception("Not implemented yet");
-
-	return actions;
-}
-
-
 // because of randomization which cant be mirrored in this project, this function can possibly return more
 // than one unit to attack (only if some specified conditions are met; for most cases there will be only one unit)
 std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const {
@@ -130,7 +132,7 @@ std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, con
 	for (auto unit : enemy_hero.getUnits()) {
 		int unit_distance = pathfinder->distanceBetweenHexes(activeStack.getHex(), unit->getHex());
 		int unit_turns = std::ceil((float)unit_distance / activeStack.currentStats.spd); // 1 = can attack; todo: check if should be distance - 1
-		int unit_fight_value_gain = combat_manager.calculateFightValueAdvantageAfterMeleeUnitAttack(activeStack, *unit);
+		int unit_fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(activeStack, *unit);
 		
 		// if no unit picked, pick first
 		if (unit_ids.empty()) {
@@ -247,7 +249,6 @@ std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, con
 
 int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const {
 	auto adjacent_hexes = pathfinder->getAdjacentHexesClockwise(target_unit.getHex());
-	auto hexes_fight_value = combat_manager.calculateFightValueAdvantageOnHexes(activeStack, *target_unit.hero);
 
 	int hex = -1;
 	int turns = -1;
@@ -260,7 +261,7 @@ int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const Comb
 
 		int adj_distance = pathfinder->distanceBetweenHexes(adj_hex, activeStack.getHex());
 		int adj_turns = std::ceil(adj_distance / activeStack.currentStats.spd);
-		int adj_hex_fight_value_gain = hexes_fight_value[adj_hex];
+		int adj_hex_fight_value_gain = hexes_fight_value_gain[adj_hex];
 
 		// if didnt choose any yet, check first possible
 		if (hex == -1) {
@@ -303,18 +304,6 @@ int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const Comb
 	}
 
 	return hex;
-}
-
-std::vector<CombatAction> CombatAI::generateActionsForAI() {
-	// check if spellcast possible
-	// check if attack possible
-	// check if wait / defend / surrender possible and has a sense
-	// check if move possible
-	return std::vector<CombatAction>{};
-}
-
-void CombatAI::evaluateAction(CombatAI& ai, CombatAction action, CombatState& state) {
-
 }
 
 // E4580

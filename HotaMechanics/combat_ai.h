@@ -19,17 +19,10 @@ enum class AIDifficulty {
 };
 
 class CombatAI {
-public:
-	int playerUnitsSize;
-	CombatUnit playerRelevantUnits[21];
-	float playerUnitsFightValues[21];
-	
-	int aiUnitsSize;
-	CombatUnit aiRelevantUnits[21];
-	float aiUnitsFightValues[21];
+private:
+	std::vector<int> hexes_fight_value_gain;
 
-	CombatAction possibleActions[512];
-	CombatAction action;
+public:
 	AIDifficulty difficulty;
 	bool similar_army_strength{ true }; // > 2x fight_value for one side
 
@@ -42,16 +35,10 @@ public:
 	std::vector<int> chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const;
 	int chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const;
 
-	std::vector<CombatAction> generateActionsForPlayer(const CombatUnit& activeStack) const;
-	std::vector<CombatAction> generateActionsForAI();
-
-	CombatAction createWaitAction() const;
-	CombatAction createWalkAction(int hex_id) const;
-	CombatAction createDefendAction() const;
-	CombatAction createSpellCastAction(int spell_id, int unit_id, int hex_id) const;
-	CombatAction createAttackAction(int unit_id, int hex_id) const;
-
-	void evaluateAction(CombatAI& ai, CombatAction action, CombatState& state);
+	int calculateMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;
+	int calculateCounterAttackMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;
+	int calculateFightValueAdvantageAfterMeleeUnitAttack(const CombatUnit& attacker, const CombatUnit& defender) const;
+	std::vector<int> calculateFightValueAdvantageOnHexes(const CombatUnit& activeStack, const CombatHero& enemy_hero, const CombatField& _field);
 
 	//// E4580
 	//float multiplierModifier(CombatUnit& activeStack, int side);

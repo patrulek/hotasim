@@ -33,11 +33,6 @@ public:
 
 	std::vector<CombatUnit> getUnitsInRange(CombatSide side, std::vector<int>& hexes) const;
 
-	int calculateMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;
-	int calculateCounterAttackMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;
-	int calculateFightValueAdvantageAfterMeleeUnitAttack(const CombatUnit& attacker, const CombatUnit& defender) const;
-	std::vector<int> calculateFightValueAdvantageOnHexes(const CombatUnit& activeStack, const CombatHero& enemy_hero) const;
-
 	void setCurrentState(CombatState& _current_state) { current_state = &_current_state; }
 
 	//CombatUnit& nextUnit(CombatState& state) {
@@ -74,6 +69,10 @@ public:
 		//return state_;
 	}
 
+	// action utils
+	std::vector<CombatAction> generateActionsForPlayer(const CombatUnit& activeStack);
+	std::vector<CombatAction> generateActionsForAI();
+
 private:
 	void setCombatResult();
 
@@ -94,6 +93,15 @@ private:
 		// apply secondary skills for units from hero
 		// apply precombat artifacts spells
 	}
+
+
+	CombatAction createWaitAction() const;
+	CombatAction createWalkAction(int hex_id) const;
+	CombatAction createDefendAction() const;
+	CombatAction createSpellCastAction(int spell_id, int unit_id, int hex_id) const;
+	CombatAction createAttackAction(int unit_id, int hex_id) const;
+
+	void evaluateAction(CombatAI& ai, CombatAction action, CombatState& state);
 
 	// state utils
 	void createInitState();
