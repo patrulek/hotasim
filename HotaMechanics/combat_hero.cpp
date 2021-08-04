@@ -4,6 +4,7 @@
 #include <iterator>
 
 void CombatHero::initialize() {
+	units.reserve(21);
 	stats = hero_template.stats;
 
 	if( army_permutation.permutations.empty() )
@@ -16,7 +17,7 @@ void CombatHero::initialize() {
 void CombatHero::addUnitFromArmy(UnitPermutation _unit_perm) {
 	const auto& unit_template = hero_template.army[_unit_perm.unit_id].unit;
 	units.emplace_back(CombatUnit{ unit_template, _unit_perm.unit_number, *this });
-	units_placement[_unit_perm.unit_order] = &units.back();
+	units.back().initUnit();
 }
 
 void CombatHero::generateUnitsFromArmy() {

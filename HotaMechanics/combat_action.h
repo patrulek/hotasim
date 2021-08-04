@@ -6,7 +6,7 @@
 #include <vector>
 
 enum class CombatActionType {
-	WALK, ATTACK, WAIT, DEFENSE, SPELLCAST
+	WALK, ATTACK, WAIT, DEFENSE, SPELLCAST, PRE_BATTLE, PRE_TURN
 };
 
 class CombatAction {

@@ -3,6 +3,7 @@
 
 #include "structures.h"
 
+#include <string>
 #include <array>
 #include <vector>
 
@@ -36,19 +37,30 @@ public:
 	std::array<SpellID, 8> active_spells{};
 	bool applied_hero_stats{ false };
 
-	/*const*/ CombatHero*/*&*/ hero;
+	const CombatHero* hero;
 
-	CombatUnit(const Unit& unitTemplate)
-		: unit_template(unitTemplate), currentStats(unitTemplate.stats) {};
-	CombatUnit(const Unit& unitTemplate, /*const*/ CombatHero& hero)
-		: unit_template(unitTemplate), currentStats(unitTemplate.stats), hero(&hero) {};
-	CombatUnit(const Unit& _unit_template, const int _stack_number, CombatHero& _hero)
+	explicit CombatUnit(const Unit& _unit_template, const int _stack_number, const CombatHero& _hero)
 		: unit_template(_unit_template), currentStats(_unit_template.stats), stackNumber(_stack_number), hero(&_hero) {};
-	CombatUnit(const CombatUnit& obj) = default;
-	CombatUnit() = default;
+
+	explicit CombatUnit(const CombatUnit& _unit, const CombatHero& _hero)
+		: hero(&_hero) {
+		unit_template = _unit.unit_template;
+		state = _unit.state;
+		currentStats = _unit.currentStats;
+		stackNumber = _unit.stackNumber;
+		health_lost = _unit.health_lost;
+		active_spells = _unit.active_spells;
+		applied_hero_stats = _unit.applied_hero_stats;
+	}
+	
+	CombatUnit() = delete;
 
 	CombatSide getCombatSide() const;
 
+	std::string to_string() {
+		return unit_template.name + " : " + std::to_string(stackNumber) + " : " + std::to_string(hex) + " : "
+			+ (getCombatSide() == CombatSide::ATTACKER ? "player_unit" : "ai_unit");
+	}
 
 	void moveTo(const int _target_hex);
 	void walkTo(const int _target_hex);

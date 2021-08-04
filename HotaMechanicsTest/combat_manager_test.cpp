@@ -101,7 +101,7 @@ namespace CombatManagerTest {
 	
 
 
-	TEST(CombatManager, shouldReturnNoAttackNorSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHaveSpellbookAndNoHostileUnitsInRange) {
+	TEST(CombatManager, DISABLED_shouldReturnNoAttackNorSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHaveSpellbookAndNoHostileUnitsInRange) {
 		auto hero = createHero(createArmy("Peasant", 100));
 		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 
@@ -155,7 +155,7 @@ namespace CombatManagerTest {
 		EXPECT_EQ(18, walking_actions);
 	}
 
-	TEST(CombatManager, shouldReturnNoSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHaveSpellbookAndHostileUnitsInRange) {
+	TEST(CombatManager, DISABLED_shouldReturnNoSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHaveSpellbookAndHostileUnitsInRange) {
 		auto hero = createHero(createArmy("Peasant", 100));
 		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
 		unit->applyHeroStats();

@@ -53,7 +53,7 @@ public:
 	CombatFieldTemplate combatFieldTemplate{ CombatFieldTemplate::TMP1 };
 	CombatHex hexes[11][17];
 
-	CombatField(const CombatFieldType _field_type)
+	explicit CombatField(const CombatFieldType _field_type)
 			: combatFieldId(_field_type) {
 		
 		initializeCombatHexes();
@@ -61,8 +61,7 @@ public:
 		//	hexes[0][5].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
 	}
 
-	CombatField()
-		: CombatField(CombatFieldType::GRASS) {}
+	CombatField() = delete;
 
 	void initializeCombatHexes() {
 		for (int y = 0; y < CombatFieldSize::ROWS; ++y) {

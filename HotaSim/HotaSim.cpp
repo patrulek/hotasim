@@ -26,6 +26,8 @@ int main()
 
    // create combat simulator
    CombatSimulator hotaSim(attacker, defender, field_type, combat_type);
+   hotaSim.initialize();
+   hotaSim.start();
 
    // ---------------------
 

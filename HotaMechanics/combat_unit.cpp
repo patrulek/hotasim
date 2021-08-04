@@ -16,24 +16,17 @@ void CombatUnit::walkTo(const int _target_hex) {
 }
 
 int CombatUnit::getUnitId() const {
-	if (hero)
-		return hero->getUnitId(*this);
-	return -1;
+	return hero->getUnitId(*this);
 }
 
 CombatSide CombatUnit::getCombatSide() const {
-	if (hero) {
-		// todo: check if hypnotized
-		return hero->getCombatSide();
-	}
-	return CombatSide::ATTACKER;
+	// todo: check if hypnotized
+	return hero->getCombatSide();
 }
 
 
 bool CombatUnit::canHeroCast() const {
-	if (hero)
-		return hero->canCast();
-	return false;
+	return hero->canCast();
 }
 
 

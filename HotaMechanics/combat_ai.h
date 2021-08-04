@@ -23,13 +23,21 @@ private:
 	std::vector<int> hexes_fight_value_gain;
 
 public:
+	CombatAI(const CombatManager& combat_manager);
+	CombatAI(const CombatAI& _obj) = delete;
+	CombatAI(CombatAI&& _obj) = delete;
+	CombatAI() = delete;
+
+	CombatAI& operator=(const CombatAI& _obj) = delete;
+	CombatAI& operator=(CombatAI&& _obj) = delete;
+
+
 	AIDifficulty difficulty;
 	bool similar_army_strength{ true }; // > 2x fight_value for one side
 
 	const CombatManager& combat_manager;
 	std::unique_ptr<CombatPathfinder> pathfinder;
 
-	CombatAI(const CombatManager& combat_manager);
 
 
 	std::vector<int> chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const;

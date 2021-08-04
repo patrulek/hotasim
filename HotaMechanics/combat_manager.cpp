@@ -5,23 +5,23 @@
 #include "combat_unit.h"
 
 void CombatManager::moveUnit(CombatUnit& _unit, int _target_hex) {
-	init_state->field.clearHex(_unit.getHex());
+	current_state->field.clearHex(_unit.getHex());
 	// TODO: check double_wide
 	_unit.moveTo(_target_hex);
-	init_state->field.fillHex(_target_hex, CombatHexOccupation::UNIT);
+	current_state->field.fillHex(_target_hex, CombatHexOccupation::UNIT);
 	// TODO: check double_wide
 }
 
 void CombatManager::placeUnitsBeforeStart() {
 	int unit_order = 0;
-	for (auto unit : init_state->attacker.getUnits()) {
-		int hex = ai->pathfinder->getUnitStartHex(CombatSide::ATTACKER, unit_order++, init_state->attacker.getUnits().size(), unit->isDoubleWide(), combat_type);
+	for (auto& unit : current_state->attacker.getUnits()) {
+		int hex = ai->pathfinder->getUnitStartHex(CombatSide::ATTACKER, unit_order++, current_state->attacker.getUnits().size(), unit->isDoubleWide(), combat_type);
 		moveUnit(const_cast<CombatUnit&>(*unit), hex);
 	}
 
 	unit_order = 0;
-	for (auto unit : init_state->defender.getUnits()) {
-		int hex = ai->pathfinder->getUnitStartHex(CombatSide::DEFENDER, unit_order++, init_state->defender.getUnits().size(), unit->isDoubleWide(), combat_type);
+	for (auto& unit : current_state->defender.getUnits()) {
+		int hex = ai->pathfinder->getUnitStartHex(CombatSide::DEFENDER, unit_order++, current_state->defender.getUnits().size(), unit->isDoubleWide(), combat_type);
 		moveUnit(const_cast<CombatUnit&>(*unit), hex);
 	}
 }
@@ -32,6 +32,11 @@ void CombatManager::createInitState() {
 	CombatField field_(*field);
 
 	init_state = std::make_unique<CombatState>(attacker_, defender_, field_);
+	current_state = std::make_unique<CombatState>(attacker_, defender_, field_);
+}
+
+void CombatManager::setCurrentState(CombatState& _state) {
+	current_state = std::make_unique<CombatState>(_state);
 }
 
 void CombatManager::initialize() {
@@ -40,7 +45,6 @@ void CombatManager::initialize() {
 
 	createInitState();
 	placeUnitsBeforeStart();
-	setCurrentState(*init_state);
 	initialized = true;
 }
 
@@ -79,9 +83,13 @@ const CombatHero& CombatManager::getDefender() const {
 }
 
 CombatUnit& CombatManager::getActiveStack() {
-	//int unitId = current_state->unitOrder[current_state->currentUnit];
-	//int side = unitId / 21;
-	return const_cast<CombatUnit&>(*current_state->attacker.getUnits()[0]);//const_cast<CombatUnit&>(*current_state->heroes[side].getUnits()[unitId % 21]);
+	if (current_state->order.empty())
+		throw std::exception("Cant get active stack from empty queue");
+
+	int unit_id = current_state->order.front();
+	auto& hero = unit_id / 21 == 0 ? current_state->attacker : current_state->defender;
+	auto unit = const_cast<CombatUnit*>(hero.getUnits()[0]);
+	return *unit;
 }
 
 CombatManager::CombatManager(const CombatHero& _attacker, const CombatHero& _defender, const CombatField& _field, const CombatType _combat_type)
@@ -97,19 +105,75 @@ CombatManager::~CombatManager() {
 
 }
 
-CombatState CombatManager::nextState() {
+void CombatManager::nextState() {
 	if (!initialized)
 		throw std::exception("Combat manager still didnt initialized");
 
-	updateCombat();
-	setCombatResult();
-	return duplicateCurrentState();
+	if (isNewCombat()) {
+		nextStateByAction(createPreBattleAction());
+		return;
+	}
+
+	if (isNewTurn()) {
+		nextStateByAction(createPreTurnAction());
+		return;
+	}
+
+	auto actions = generateActionsForAI();
+	if (actions.empty())
+		throw std::exception("Empty AI action list should never happen");
+	
+	nextStateByAction(actions.front()); // there is possibility for many actions which will create even more branching; TODO: later
 }
 
+#include <iostream>
+
+void CombatManager::nextStateByAction(const CombatAction& action) {
+	if (!initialized)
+		throw std::exception("Combat manager still didnt initialized");
+
+	last_action = std::make_unique<CombatAction>(action);
+	last_state = std::make_unique<CombatState>(*current_state);
+
+	bool next_unit = false;
+
+	if (action.action == CombatActionType::PRE_BATTLE) {
+		// TODO:
+		// apply secondary skills for units from hero
+		// apply precombat artifacts spells
+		current_state->turn = 0;
+		orderUnitsInTurn();
+		std::cout << "Processed action: PRE_BATTLE\n";
+	}
+	else if (action.action == CombatActionType::PRE_TURN) {
+		// reactivate spellbook
+		// decrease spell active on units
+		// place units in order
+		++current_state->turn;
+		orderUnitsInTurn();
+		std::cout << "Processed action: PRE_TURN (" << current_state->turn << ")\n";
+	}
+	else if (action.action == CombatActionType::DEFENSE) {
+		// todo:
+		next_unit = action.param2;
+
+		auto& active_stack = getActiveStack();
+		std::cout << "Processed action: DEFENSE (" << active_stack.to_string().c_str() << ")\n";
+	}
+
+	setCombatResult();
+
+	if( next_unit)
+		nextUnit();
+}
+
+void CombatManager::nextUnit() {
+	current_state->order.pop_front();
+}
 
 void CombatManager::setCombatResult() {
-	bool player_alive = current_state->attacker.isAlive();//current_state->heroes[0].isAlive(current_state->heroes[0]);
-	bool enemy_alive = current_state->defender.isAlive();//current_state->heroes[0].isAlive(current_state->heroes[1]);
+	bool player_alive = current_state->attacker.isAlive();
+	bool enemy_alive = current_state->defender.isAlive();
 
 	if (player_alive && enemy_alive) current_state->result = CombatResult::IN_PROGRESS;
 	else if (player_alive)				current_state->result = CombatResult::PLAYER;
@@ -117,38 +181,28 @@ void CombatManager::setCombatResult() {
 	else										current_state->result = CombatResult::DRAW;
 }
 
+const bool CombatManager::isCombatFinished() const {
+	return current_state->result != CombatResult::IN_PROGRESS && current_state->result != CombatResult::NOT_STARTED;
+}
+
 void CombatManager::orderUnitsInTurn()
 {
-	for (int i = 0; i < 84; ++i)
-		current_state->unitOrder[i] = -1;
-}
+	auto units = current_state->attacker.getUnits();
+	auto defender_units = current_state->defender.getUnits();
+	units.insert(std::end(units), std::begin(defender_units), std::end(defender_units));
+	std::sort(std::begin(units), std::end(units), [](auto _obj1, auto _obj2) { return _obj1->currentStats.spd > _obj2->currentStats.spd; });
 
-void CombatManager::preTurnUpdate()
-{
-	// reactivate spellbook
-	// decrease spell active on units
-	// place units in order
-	orderUnitsInTurn();
-}
+	current_state->order.clear();
 
-void CombatManager::updateTurn()
-{
-	if (isNewTurn()) {
-		preTurnUpdate();
+	for (auto unit : units) {
+		int offset = unit->getCombatSide() == CombatSide::ATTACKER ? 0 : 21;
+		current_state->order.push_back(unit->getUnitId() + offset);
 	}
-}
-
-void CombatManager::updateCombat()
-{
-	if (isNewCombat())
-		preCombatUpdate();
-
-	updateTurn();
 }
 
 bool CombatManager::isNewTurn()
 {
-	return true; // check if unitid > unitsDone;
+	return current_state->order.empty();
 }
 
 bool CombatManager::isNewCombat()
@@ -157,7 +211,13 @@ bool CombatManager::isNewCombat()
 }
 
 
+CombatAction CombatManager::createPreBattleAction() const {
+	return CombatAction{ CombatActionType::PRE_BATTLE, -1, -1, false };
+}
 
+CombatAction CombatManager::createPreTurnAction() const {
+	return CombatAction{ CombatActionType::PRE_TURN, -1, -1, false };
+}
 
 CombatAction CombatManager::createWaitAction() const {
 	return CombatAction{ CombatActionType::WAIT, -1, -1, true };
@@ -179,17 +239,19 @@ CombatAction CombatManager::createAttackAction(int unit_id, int hex_id) const {
 	return CombatAction{ CombatActionType::ATTACK, unit_id, hex_id, true };
 }
 
-std::vector<CombatAction> CombatManager::generateActionsForPlayer(const CombatUnit& activeStack) {
+std::vector<CombatAction> CombatManager::generateActionsForPlayer() {
+	auto activeStack = getActiveStack();
+
 	if (!activeStack.canMakeAction())
 		return std::vector<CombatAction>{};
 
 	std::vector<CombatAction> actions{};
 
-	if (activeStack.canWait())
-		actions.push_back(createWaitAction());
-
 	if (activeStack.canDefend())
 		actions.push_back(createDefendAction());
+
+	if (activeStack.canWait())
+		actions.push_back(createWaitAction());
 
 	// get reachable hexes;
 	auto field = current_state->field;
@@ -238,9 +300,17 @@ std::vector<CombatAction> CombatManager::generateActionsForAI() {
 	// check if attack possible
 	// check if wait / defend / surrender possible and has a sense
 	// check if move possible
-	return std::vector<CombatAction>{};
-}
 
-void CombatManager::evaluateAction(CombatAI& ai, CombatAction action, CombatState& state) {
+	// TODO: defense for now
+	auto activeStack = getActiveStack();
 
+	if (!activeStack.canMakeAction())
+		return std::vector<CombatAction>{};
+
+	std::vector<CombatAction> actions{};
+
+	if (activeStack.canDefend())
+		actions.push_back(createDefendAction());
+
+	return actions;
 }

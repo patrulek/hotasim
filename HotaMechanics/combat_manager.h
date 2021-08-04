@@ -15,28 +15,38 @@ class CombatUnit;
 class CombatManager {
 
 public:
-	CombatManager(const CombatHero& attacker, const CombatHero& defender, const CombatField& field, const CombatType _combat_type);
+	explicit CombatManager(const CombatHero& attacker, const CombatHero& defender, const CombatField& field, const CombatType _combat_type);
+	CombatManager(CombatManager&& _obj) = delete;
+	CombatManager(const CombatManager& _obj) = delete;
+	CombatManager() = delete;
+
+	CombatManager& operator=(const CombatManager& _obj) = delete;
+
 	~CombatManager();
+
+
+
 
 	void initialize();
 
-	CombatState nextState();
 
 	CombatUnit& getActiveStack();
+
+	const bool isCombatFinished() const;
 
 	const CombatHero& getAttacker() const;
 	const CombatHero& getDefender() const;
 	const CombatType getCombatType() const { return combat_type; }
 
-	CombatState duplicateCurrentState() const { return CombatState(*current_state); }
 	CombatState& getCurrentState() const { return *current_state; }
-	//const CombatState& getInitialState() const { return init_state; }
+	const CombatState& getInitialState() const { return *init_state; }
+	const CombatAction& getLastAction() const { return *last_action; }
 	const CombatAI& getCombatAI() const;
 	const CombatField& getCombatField() const;
 
 	std::vector<CombatUnit> getUnitsInRange(CombatSide side, std::vector<int>& hexes) const;
 
-	void setCurrentState(CombatState& _current_state) { current_state = &_current_state; }
+	void setCurrentState(CombatState& _current_state);
 
 	//CombatUnit& nextUnit(CombatState& state) {
 		// get next unit in turn
@@ -45,16 +55,14 @@ public:
 	//	return const_cast<CombatUnit&>(*state.heroes[0].getUnits()[0]); // 
 	//}
 
-	bool isUnitMove(CombatState& state) {
-		return state.currentUnit != -1; // check if unit move or turnupdate
-	}
 
-	bool isPlayerMove(CombatState& state) {
-		return isUnitMove(state) && state.unitOrder[state.currentUnit] < 21;
-	}
-
-	void resolveAction(CombatState& state, CombatAction action) {
-
+	bool isPlayerMove() {
+		try {
+			return getActiveStack().getCombatSide() == CombatSide::ATTACKER;
+		}
+		catch(const std::exception&) {
+			return false;
+		}
 	}
 
 	bool isTacticsState(CombatState& state) const {
@@ -66,45 +74,32 @@ public:
 	//	return state.heroes[side].aliveStacks(state.heroes[side]);
 	//}
 
-	CombatState nextStateByAction(CombatState& state, CombatAction action) {
-		//CombatState state_ = duplicate(state);
-		//resolveAction(state_, action);
-		//return state_;
-	}
+	void nextUnit();
+
+	void nextState();
+	void nextStateByAction(const CombatAction& action);
 
 	// action utils
-	std::vector<CombatAction> generateActionsForPlayer(const CombatUnit& activeStack);
+	std::vector<CombatAction> generateActionsForPlayer();
 	std::vector<CombatAction> generateActionsForAI();
-
 private:
 	void setCombatResult();
 
 	void orderUnitsInTurn();
-	void preTurnUpdate();
-	void updateTurn();
-
-	void updateCombat();
 
 
 	bool isNewTurn();
 
 	bool isNewCombat();
 
-	void preCombatUpdate() {
-		// update combat field
-		// place units over combat field
-		// apply secondary skills for units from hero
-		// apply precombat artifacts spells
-	}
-
-
+	CombatAction createPreTurnAction() const;
+	CombatAction createPreBattleAction() const;
 	CombatAction createWaitAction() const;
 	CombatAction createWalkAction(int hex_id) const;
 	CombatAction createDefendAction() const;
 	CombatAction createSpellCastAction(int spell_id, int unit_id, int hex_id) const;
 	CombatAction createAttackAction(int unit_id, int hex_id) const;
 
-	void evaluateAction(CombatAI& ai, CombatAction action, CombatState& state);
 
 	// state utils
 	void createInitState();
@@ -113,32 +108,20 @@ private:
 	void placeUnitsBeforeStart();
 	void moveUnit(CombatUnit& _unit, int _target_hex);
 
+	// during combat
+
 	// post-initialization
 	bool initialized{ false };
+	bool state_changed{ false };
+	std::unique_ptr<CombatAction> last_action;
+	std::unique_ptr<CombatState> last_state;
 	std::unique_ptr<CombatState> init_state;
-	CombatState* current_state;
+	std::unique_ptr<CombatState> current_state;
 
 	// pre-initialization
 	std::unique_ptr<CombatHero> attacker;
 	std::unique_ptr<CombatHero> defender;
 	std::unique_ptr<CombatField> field;
-	const CombatType combat_type;
+	CombatType combat_type;
 	std::unique_ptr<CombatAI> ai;
 };
-
-/*
-FLOW:
-
-CombatState initState = initCombat(...); // before battle
-
-CombatState state = initState;
-
-while( state.result == (NOT_STARTED || IN_PROGRESS) ) {
-	if( isUnitMove(state) )
-		state = nextStateByAction(nextState, action);
-	else
-		state = nextState(state);
-}
-
-
-*/

@@ -5,6 +5,9 @@
 #include "../HotaMechanics/combat_manager.h"
 #include "../HotaMechanics/combat_ai.h"
 #include "../HotaMechanics/combat_state.h"
+#include "../HotaMechanics/combat_action.h"
+
+#include <list>
 
 CombatSimulator::CombatSimulator(const Hero& _attacker, const Hero& _defender, 
 											const CombatFieldType _field_type, const CombatType _combat_type)
@@ -16,10 +19,18 @@ CombatSimulator::CombatSimulator(const Hero& _attacker, const Hero& _defender,
 
 CombatSimulator::~CombatSimulator() {}
 
+void CombatSimulator::updateBestState(const CombatState& _state, const std::list<CombatState>& _states, const std::list<CombatAction>& _actions) {
+	if (evaluateCombatStateScore(manager->getInitialState(), _state) <= evaluateCombatStateScore(manager->getInitialState(), *best_state))
+		return;
+
+	best_state = std::make_unique<CombatState>(_state);
+	states_timeline = _states;
+	actions_timeline = _actions;
+}
+
 void CombatSimulator::setCombatManager(const CombatManager& _mgr) { 
 	manager = std::make_unique<CombatManager>(_mgr.getAttacker(), _mgr.getDefender(), _mgr.getCombatField(), _mgr.getCombatType());
 }
-
 
 int64_t CombatSimulator::evaluateCombatStateScore(const CombatState& _initial_state, const CombatState& _state) const {
 	int64_t attack_score = evaluateCombatStateAttackScore(_initial_state, _state); // the more enemy units we killed the better
@@ -72,17 +83,35 @@ void CombatSimulator::setDefenderPermutation() {
 		defender_permutation.permutations.push_back(UnitPermutation{ i, i, defender->army[i].stack_number });
 }
 
+#include <iostream>
+
 void CombatSimulator::start() {
 	for (int i = 0; i < 1 /* combat field templates */; ++i) {
 		for (auto permutation : permutations) {
 			prepareCombat(permutation, i);
+			
+			std::list<CombatState> states;
+			std::list<CombatAction> actions;
+			int action_cnt = 0;
+
+			while (!manager->isCombatFinished()) {
+				std::cout << "Actions: " << action_cnt++ << " | Turns: " << manager->getCurrentState().turn << std::endl;
+
+				if (manager->isPlayerMove()) {
+					CombatAction action = manager->generateActionsForPlayer()[0]; // TODO: for now only defend
+					manager->nextStateByAction(action);
+				}
+				else {
+					manager->nextState();
+				}
+			}
 		}
 	}
 }
 
 void CombatSimulator::prepareCombat(const ArmyPermutation& permutation, const int _field_template) {
-	auto combat_attacker = prepareCombatHero(*attacker, permutation);
-	auto combat_defender = prepareCombatHero(*defender, defender_permutation);
+	auto combat_attacker = prepareCombatHero(*attacker, permutation, CombatSide::ATTACKER);
+	auto combat_defender = prepareCombatHero(*defender, defender_permutation, CombatSide::DEFENDER);
 	auto combat_field = prepareCombatField(_field_template);
 
 	manager = std::make_unique<CombatManager>(*combat_attacker, *combat_defender, *combat_field, combat_type);
@@ -96,8 +125,8 @@ std::shared_ptr<CombatField> CombatSimulator::prepareCombatField(const int _fiel
 	return combat_field;
 }
 
-std::shared_ptr<CombatHero> CombatSimulator::prepareCombatHero(const Hero& hero_template, const ArmyPermutation& permutation) {
-	std::shared_ptr<CombatHero> hero = std::make_shared<CombatHero>(hero_template);
+std::shared_ptr<CombatHero> CombatSimulator::prepareCombatHero(const Hero& hero_template, const ArmyPermutation& permutation, const CombatSide _side) {
+	std::shared_ptr<CombatHero> hero = std::make_shared<CombatHero>(hero_template, permutation, _side);
 
 	return hero;
 }
