@@ -44,17 +44,14 @@ public:
 	const CombatAI& getCombatAI() const;
 	const CombatField& getCombatField() const;
 
-	std::vector<CombatUnit> getUnitsInRange(CombatSide side, std::vector<int>& hexes) const;
+	std::vector<CombatUnit*> getUnitsInRange(CombatSide side, std::vector<int>& hexes) const;
 
 	void setCurrentState(CombatState& _current_state);
 
-	//CombatUnit& nextUnit(CombatState& state) {
-		// get next unit in turn
-		// 
 
-	//	return const_cast<CombatUnit&>(*state.heroes[0].getUnits()[0]); // 
-	//}
-
+	bool isUnitMove() {
+		return !isNewCombat() && !isNewTurn();
+	}
 
 	bool isPlayerMove() {
 		try {
@@ -74,6 +71,8 @@ public:
 	//	return state.heroes[side].aliveStacks(state.heroes[side]);
 	//}
 
+	void removeFromOrderList(const int _unit_id);
+	void restoreLastUnit();
 	void nextUnit();
 
 	void nextState();
@@ -89,17 +88,29 @@ private:
 
 
 	bool isNewTurn();
-
 	bool isNewCombat();
 
-	CombatAction createPreTurnAction() const;
+	const bool isUnitAction(const CombatAction& _action);
+	
+
 	CombatAction createPreBattleAction() const;
+	CombatAction createPreTurnAction() const;
 	CombatAction createWaitAction() const;
 	CombatAction createWalkAction(int hex_id) const;
 	CombatAction createDefendAction() const;
 	CombatAction createSpellCastAction(int spell_id, int unit_id, int hex_id) const;
 	CombatAction createAttackAction(int unit_id, int hex_id) const;
 
+	void processPreBattleAction(const CombatAction& _action);
+	void processPreTurnAction(const CombatAction& _action);
+	void processWaitAction(const CombatAction& _action);
+	void processWalkAction(const CombatAction& _action);
+	void processDefendAction(const CombatAction& _action);
+	void processSpellCastAction(const CombatAction& _action);
+	void processAttackAction(const CombatAction& _action);
+
+	void processCombatAction(const CombatAction& _action);
+	void processUnitAction(const CombatAction& _action);
 
 	// state utils
 	void createInitState();
@@ -107,6 +118,11 @@ private:
 	// unit utils
 	void placeUnitsBeforeStart();
 	void moveUnit(CombatUnit& _unit, int _target_hex);
+	void makeUnitAttack(int _unit_id, int _target_hex);
+	void makeUnitFly(int _target_hex);
+	void makeUnitWalk(int _target_hex);
+	void makeUnitDefend();
+	void makeUnitWait();
 
 	// during combat
 

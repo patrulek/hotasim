@@ -17,8 +17,10 @@ public:
 	int distanceBetweenHexes(const int _source_hex, const int _target_hex);
 	bool isAdjacentHex(const int _source_hex, const int _target_hex) const;
 
+
 	std::array<int, 6> getAdjacentHexes(const int _source_hex) const;
 	std::array<int, 6> getAdjacentHexesClockwise(const int _source_hex) const;
+	std::array<int, 6> getAdjacentHexesCounterClockwise(const int _source_hex) const;
 
 	std::vector<int> getHexesInRange(const int _source_hex, const int _range);
 	std::vector<int> getWalkableHexesFromList(std::vector<int>& _hexes, const CombatField& _field); // from hexes in range check which one is not occupied

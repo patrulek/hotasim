@@ -38,8 +38,10 @@ std::vector<int> CombatPathfinder::findPath(const int _source_hex, const int _ta
 	std::vector<int> next_to_check{};
 	std::unordered_set<int> checked;
 	std::unordered_map<int, int> paths;
+	std::unordered_map<int, int> distances;
 	bool found = false;
 	paths[_source_hex] = -1;
+	int dist = 1;
 
 	while (!to_check.empty()) {
 		int hex_id = to_check.back();
@@ -51,14 +53,14 @@ std::vector<int> CombatPathfinder::findPath(const int _source_hex, const int _ta
 			break;
 		}
 
-		auto adjacent_hexes = getAdjacentHexes(hex_id);
+		auto adjacent_hexes = getAdjacentHexesClockwise(hex_id);
 		auto walkable = std::vector<int>(std::begin(adjacent_hexes), std::end(adjacent_hexes));
 		walkable = getWalkableHexesFromList(walkable, _field);
 
 		for (auto hex : walkable) {
 			if (paths.find(hex) != std::end(paths)) {
-				int distance = hex_id != -1 ? distanceBetweenHexes(hex_id, _source_hex) : -1;
-				int distance2 = paths[hex] != -1 ? distanceBetweenHexes(paths[hex], _source_hex) : -1;
+				int distance = hex_id != -1 ? distances[hex_id] + 1 : 999;// ? distanceBetweenHexes(hex_id, _source_hex) : -1;
+				int distance2 = paths[hex] != -1 ? distances[hex] : 999; //distanceBetweenHexes(paths[hex], _source_hex) : -1;
 
 				if (distance < distance2)
 					paths[hex] = hex_id;
@@ -70,14 +72,18 @@ std::vector<int> CombatPathfinder::findPath(const int _source_hex, const int _ta
 
 		checked.insert(std::begin(walkable), std::end(walkable));
 
-		for (auto check : walkable)
+		for (auto check : walkable) {
 			paths[check] = hex_id;
+			distances[check] = dist;
+		}
 
 		next_to_check.insert(std::end(next_to_check), std::begin(walkable), std::end(walkable));
 
 		if (to_check.empty()) {
 			to_check = next_to_check;
+			std::reverse(std::begin(to_check), std::end(to_check));
 			next_to_check.clear();
+			++dist;
 		}
 	}
 
@@ -160,6 +166,11 @@ std::array<int, 6> CombatPathfinder::getAdjacentHexesClockwise(const int _source
 	return std::array<int, 6>{ hexes[1], hexes[3], hexes[5], hexes[4], hexes[2], hexes[0] };
 }
 
+std::array<int, 6> CombatPathfinder::getAdjacentHexesCounterClockwise(const int _source_hex) const {
+	auto hexes = getAdjacentHexes(_source_hex);
+
+	return std::array<int, 6>{ hexes[0], hexes[2], hexes[4], hexes[5], hexes[3], hexes[1] };
+}
 
 std::array<int, 6> CombatPathfinder::getAdjacentHexes(const int _source_hex) const {
 	std::array<int, 6> hexes{ -1, -1, -1, -1, -1, -1 };
@@ -197,23 +208,23 @@ int CombatPathfinder::distanceBetweenHexes(const int _source_hex, const int _tar
 	if (_target_hex == -1)
 		return -1;
 
-	if (distances.find(distanceHash(_source_hex, _target_hex)) != std::end(distances))
-		return distances[distanceHash(_source_hex, _target_hex)];
+	//if (distances.find(distanceHash(_source_hex, _target_hex)) != std::end(distances))
+	//	return distances[distanceHash(_source_hex, _target_hex)];
 
 	if (isAdjacentHex(_source_hex, _target_hex)) {
-		distances[distanceHash(_source_hex, _target_hex)] = 1;
+	//	distances[distanceHash(_source_hex, _target_hex)] = 1;
 		return 1;
 	}
 
 	bool same_row = _source_hex / CombatFieldSize::COLS == _target_hex / CombatFieldSize::COLS;
 	if (same_row) {
-		distances[distanceHash(_source_hex, _target_hex)] = abs(_target_hex - _source_hex);
+	//	distances[distanceHash(_source_hex, _target_hex)] = abs(_target_hex - _source_hex);
 		return abs(_target_hex - _source_hex);
 	}
 
 	bool same_col = _source_hex % CombatFieldSize::COLS == _target_hex % CombatFieldSize::COLS;
 	if (same_col) {
-		distances[distanceHash(_source_hex, _target_hex)] = abs((_target_hex - _source_hex) / CombatFieldSize::COLS);
+	//	distances[distanceHash(_source_hex, _target_hex)] = abs((_target_hex - _source_hex) / CombatFieldSize::COLS);
 		return abs((_target_hex - _source_hex) / CombatFieldSize::COLS);
 	}
 
@@ -230,7 +241,7 @@ int CombatPathfinder::distanceBetweenHexes(const int _source_hex, const int _tar
 		even_rows += (y % 2 == 0);
 	}
 
-	distances[distanceHash(_source_hex, _target_hex)] = row_dist + col_dist - (row_dist >= std::max(odd_rows, even_rows) ? std::max(odd_rows, even_rows) : row_dist);
+	//distances[distanceHash(_source_hex, _target_hex)] = row_dist + col_dist - (row_dist >= std::max(odd_rows, even_rows) ? std::max(odd_rows, even_rows) : row_dist);
 	return row_dist + col_dist - (row_dist >= std::max(odd_rows, even_rows) ? std::max(odd_rows, even_rows) : row_dist);
 }
 

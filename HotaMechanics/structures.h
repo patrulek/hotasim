@@ -168,3 +168,6 @@ struct Hero {
 		return permutation;
 	}
 };
+
+int getRandomInt(int _min, int _max);
+float getRandomFloat(float _min, float _max);

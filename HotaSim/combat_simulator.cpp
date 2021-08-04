@@ -90,20 +90,21 @@ void CombatSimulator::start() {
 		for (auto permutation : permutations) {
 			prepareCombat(permutation, i);
 			
-			std::list<CombatState> states;
-			std::list<CombatAction> actions;
+			//std::list<CombatState> states;
+			//std::list<CombatAction> actions;
 			int action_cnt = 0;
 
 			while (!manager->isCombatFinished()) {
 				std::cout << "Actions: " << action_cnt++ << " | Turns: " << manager->getCurrentState().turn << std::endl;
 
-				if (manager->isPlayerMove()) {
-					CombatAction action = manager->generateActionsForPlayer()[0]; // TODO: for now only defend
-					manager->nextStateByAction(action);
+				if (manager->isUnitMove()) {
+					auto actions = manager->isPlayerMove() ? manager->generateActionsForPlayer() : manager->generateActionsForAI();
+					int choice = getRandomInt(0, actions.size() - 1);
+					manager->nextStateByAction(actions[choice]);
+					continue;
 				}
-				else {
-					manager->nextState();
-				}
+				
+				manager->nextState();
 			}
 		}
 	}

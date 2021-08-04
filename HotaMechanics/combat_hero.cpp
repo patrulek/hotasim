@@ -33,7 +33,7 @@ std::vector<const CombatUnit*> CombatHero::getUnits() const {
 }
 
 bool CombatHero::isAlive() const {
-	return true; // check if has any unit alive
+	return std::any_of(std::begin(units), std::end(units), [](const auto& _unit) { return _unit.isAlive(); });
 }
 
 int CombatHero::aliveStacks(CombatHero& hero) const {

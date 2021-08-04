@@ -24,6 +24,19 @@ CombatSide CombatUnit::getCombatSide() const {
 	return hero->getCombatSide();
 }
 
+void CombatUnit::defend() {
+	state.defending = true;
+	state.done = true;
+}
+
+void CombatUnit::wait() {
+	state.waiting = true;
+}
+
+void CombatUnit::resetState() {
+	state.defending = state.done = state.morale = state.retaliated = state.waiting = false;
+}
+
 
 bool CombatUnit::canHeroCast() const {
 	return hero->canCast();

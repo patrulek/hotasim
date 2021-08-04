@@ -22,6 +22,7 @@ struct CombatState {
 	CombatHero defender;
 	CombatField field;
 	int turn{ -1 };
+	int last_unit{ -1 };
 	std::list<int> order;	// for attacker it will be 0-20; for defender it will be 21-41
 	CombatResult result{ CombatResult::NOT_STARTED };
 };

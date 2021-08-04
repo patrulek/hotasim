@@ -57,7 +57,7 @@ public:
 
 	CombatSide getCombatSide() const;
 
-	std::string to_string() {
+	std::string to_string() const {
 		return unit_template.name + " : " + std::to_string(stackNumber) + " : " + std::to_string(hex) + " : "
 			+ (getCombatSide() == CombatSide::ATTACKER ? "player_unit" : "ai_unit");
 	}
@@ -69,6 +69,10 @@ public:
 	int getUnitId() const;
 
 	void applyDamage(int damage);
+
+	void defend();
+	void wait();
+	void resetState();
 
 	float getBaseAverageDmg() const;
 
@@ -164,7 +168,7 @@ public:
 		return false; // creaturetype == 149
 	}
 
-	bool canFly(CombatUnit& unit) {
+	bool canFly() {
 		return false; // flags & 2;
 	}
 
@@ -185,10 +189,11 @@ public:
 
 	// 42380 - additionaly checking if we have moat;
 	int calcDiffDef() const {
+		int bonus_def = state.defending;
 		//if has moat;
 
 		// if hasdefmodspellactive; isFrenzyActive
 
-		return currentStats.def - unit_template.stats.def;
+		return currentStats.def + bonus_def - unit_template.stats.def;
 	}
 };
