@@ -154,6 +154,7 @@
     <ClInclude Include="combat_permutation.h" />
     <ClInclude Include="combat_sequencetree.h" />
     <ClInclude Include="combat_simulator.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

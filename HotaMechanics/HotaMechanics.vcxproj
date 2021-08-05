@@ -141,27 +141,34 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="combat_ai.cpp" />
+    <ClCompile Include="combat_calculator.cpp" />
     <ClCompile Include="combat_hero.cpp" />
+    <ClCompile Include="combat_manager_creator.cpp" />
+    <ClCompile Include="combat_manager_executor.cpp" />
+    <ClCompile Include="combat_manager_generator.cpp" />
+    <ClCompile Include="combat_manager_processor.cpp" />
+    <ClCompile Include="combat_manager_turnordering.cpp" />
     <ClCompile Include="combat_pathfinder.cpp" />
-    <ClCompile Include="combat_state.cpp" />
     <ClCompile Include="combat_field.cpp" />
     <ClCompile Include="combat_manager.cpp" />
     <ClCompile Include="combat_unit.cpp" />
     <ClCompile Include="HotaMechanics.cpp" />
-    <ClCompile Include="structures.cpp" />
     <ClCompile Include="unit_templates.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="combat_ai.h" />
+    <ClInclude Include="combat_calculator.h" />
     <ClInclude Include="combat_field.h" />
     <ClInclude Include="combat_hero.h" />
     <ClInclude Include="combat_manager.h" />
-    <ClInclude Include="combat_action.h" />
     <ClInclude Include="combat_pathfinder.h" />
     <ClInclude Include="combat_state.h" />
     <ClInclude Include="combat_unit.h" />
+    <ClInclude Include="constants.h" />
     <ClInclude Include="structures.h" />
     <ClInclude Include="unit_templates.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="combat_ai_hota_re.txt" />

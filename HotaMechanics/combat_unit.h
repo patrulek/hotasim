@@ -7,194 +7,110 @@
 #include <array>
 #include <vector>
 
-class CombatHex;
-class CombatHero;
-class CombatField;
-enum class CombatSide;
+namespace HotaMechanics {
+	class CombatHex;
+	class CombatHero;
+	class CombatField;
 
+	struct CombatUnitState {
+		bool is_alive{ false };
+		bool is_summon{ false };
+		bool is_clone{ false };
+		bool morale{ false };
+		bool waiting{ false };
+		bool done{ false };
+		bool defending{ false };
+		bool sacrificed{ false };
+		bool retaliated{ false };
+		bool applied_hero_stats{ false };
+	};
 
-struct UnitState {
-	bool is_alive;
-	bool is_summon;
-	bool is_clone;
-	bool morale;
-	bool waiting;
-	bool done;
-	bool defending;
-	bool sacrificed;
-	bool retaliated;
-};
+	class CombatUnit {
+	public:
+		CombatUnit() = delete;
+		explicit CombatUnit(const Unit& _unit_template, const int _stack_number, const CombatHero& _hero);
+		explicit CombatUnit(const CombatUnit& _unit, const CombatHero& _hero);
+		CombatUnit(CombatUnit&& _unit, const CombatHero& _hero);
+		
+		// state change by action --------
+		void moveTo(const int _target_hex);
 
-class CombatUnit {
-private:
-	int hex{ -1 };
-public:
-	Unit unit_template{};
-	UnitState state{ 0 };
-	PrimaryStats currentStats;
-	uint16 stackNumber{ 0 };
-	uint16 health_lost{ 0 };
-	std::array<SpellID, 8> active_spells{};
-	bool applied_hero_stats{ false };
+		void defend();
+		void wait();
 
-	const CombatHero* hero;
+		void applyDamage(const int _damage);
+		// -------------------------------
 
-	explicit CombatUnit(const Unit& _unit_template, const int _stack_number, const CombatHero& _hero)
-		: unit_template(_unit_template), currentStats(_unit_template.stats), stackNumber(_stack_number), hero(&_hero) {};
+		// state change ------------------
+		void resetState();
+		void initUnit();
+		void applyHeroStats();
+		void setDone();
+		void unsetDone();
+		void setRetaliated();
+		// -------------------------------
 
-	explicit CombatUnit(const CombatUnit& _unit, const CombatHero& _hero)
-		: hero(&_hero) {
-		unit_template = _unit.unit_template;
-		state = _unit.state;
-		hex = _unit.hex;
-		currentStats = _unit.currentStats;
-		stackNumber = _unit.stackNumber;
-		health_lost = _unit.health_lost;
-		active_spells = _unit.active_spells;
-		applied_hero_stats = _unit.applied_hero_stats;
-	}
-	
-	CombatUnit() = delete;
+		// check unit state --------------
+		const bool canDefend() const { return !state.defending; }
+		const bool isAlive() const { return state.is_alive; }
+		const bool canMakeAction() const { return state.is_alive && !state.done; }
+		const bool canWait() const {	return !state.waiting; }
+			// C8DE0 - get unit number shots and check if arrow tower
+		const bool canShoot() const { return stats.combat_stats.shots > 0; }// 0 && false; // unit->getNumberShots && unit->isArrowTower()}
+		const bool canFly() const { return false; }// flags & 2; }
+		const bool canCast() const { return false; } // todo}
+		const bool canRetaliate() const { return !state.retaliated; }
+		// -------------------------------
 
-	CombatSide getCombatSide() const;
+		// check hero state --------------
+		bool canHeroCast() const;
+		// -------------------------------
 
-	std::string to_string() const {
-		return unit_template.name + " : " + std::to_string(stackNumber) + " : " + std::to_string(hex) + " : "
-			+ (getCombatSide() == CombatSide::ATTACKER ? "player_unit" : "ai_unit");
-	}
+		// check unit abilities ----------
+		const bool isDoubleWide() const { return false; } // TODO }
+		const bool isShooter() const { return false; } // TODO}
 
-	void moveTo(const int _target_hex);
-	void walkTo(const int _target_hex);
-	int getHex() const { return hex; };
+			// C86D0 - check if arrow tower, ballista or 150 (cannon? undefined?)
+		const bool isShootingSiege() const { return false; } // isBallista, isArrowTower, isCannon(150 id)? }
+		const bool isArrowTower() const { return false; } // creaturetype == 149}
+		const bool isFlyer() const { return false; } // TODO }
+		// -------------------------------
 
-	int getUnitId() const;
+		// complex getters ---------------
+			// 42270 - not sure
+		const int getAttackGain() const;
+			// 42380 - additionaly checking if we have moat;
+		const int getDefenseGain() const;
+		const float getBaseAverageDmg() const;
+		const float getFightValuePerOneHp() const;
+		const float getFightValuePerUnitStack() const;
+		const int getUnitStackHP() const;
+		// -------------------------------
 
-	void applyDamage(int damage);
+		//	hero getters ------------------
+		const int getUnitId() const;
+		const Constants::CombatSide getCombatSide() const;
+		// -------------------------------
 
-	void defend();
-	void wait();
-	void resetState();
+		// simple getters ----------------
+		const CombatStats& getCombatStats() const { return stats.combat_stats; }
+		const BaseStats& getBaseStats() const { return stats.base_stats; }
+		const PrimaryStats& getPrimaryStats() const { return stats.primary_stats; }
+		int16_t getHealthLost() const { return health_lost; }
+		int16_t getHex() const { return hex; };
+		const Unit& getTemplate() const { return unit_template; }
+		int16_t getStackNumber() const { return stack_number; }
+		float getFightValue() const { return unit_template.stats.fight_value; }
+		// -------------------------------
+	private:
+		const Unit& unit_template;
+		const CombatHero* hero;
 
-	float getBaseAverageDmg() const;
-
-	float getSingleUnitFightValue() const {
-		return unit_template.fightValue;
-	}
-
-	float getSingleUnitFightValuePerOneHp() const {
-		return getSingleUnitFightValue() / currentStats.hp;
-	}
-
-	float getStackUnitFightValue() const {
-		return calculateStackHP() * getSingleUnitFightValuePerOneHp();
-	}
-
-	int calculateStackHP() const {
-		return stackNumber * currentStats.hp - health_lost;
-	}
-
-	void applyHeroStats(const PrimaryStats& hero_stats) {
-		currentStats.atk += (hero_stats.atk * !applied_hero_stats);
-		currentStats.def += (hero_stats.def * !applied_hero_stats);
-		applied_hero_stats = true;
-	}
-
-	void applyHeroStats();
-
-	void initUnit() {
-		state.is_alive = true;
-	}
-
-	bool isDoubleWide() const {
-		return false; // TODO
-	}
-
-	void applySpell(const int spell_id, const int power) {
-		return;
-	}
-
-	void deactiveSpell(const int spell_id) {
-		return;
-	}
-
-	bool canCast() const {
-		return false; // todo
-	}
-
-	bool canRetaliate() const {
-		return !state.retaliated;
-	}
-
-	bool canHeroCast() const;
-
-	int* getReachableHexes(CombatUnit& unit) {
-		// get hexes in straight line range
-		// remove hexes occupied by units and solid obstacles
-		// find path to hex and remove if cannot move there
-
-		return nullptr;
-	}
-
-	float calculateUnitDamage(CombatUnit& unit, CombatUnit& target) {
-		return .0f;
-	}
-
-	bool isAlive() const {
-		return state.is_alive;
-	}
-
-	bool canMakeAction() const {
-		return state.is_alive && !state.done;
-	}
-
-	bool canWait() const {
-		return !state.waiting;
-	}
-
-	bool canDefend() const {
-		return !state.defending;
-	}
-
-	// C8DE0 - get unit number shots and check if arrow tower
-	bool canShoot(CombatUnit& unit) {
-		return currentStats.shots > 0; // 0 && false; // unit->getNumberShots && unit->isArrowTower()
-	}
-
-	// C86D0 - check if arrow tower, ballista or 150 (cannon? undefined?)
-	bool isShootingSiege(CombatUnit& unit) {
-		return 0; // isBallista, isArrowTower, isCannon(150 id)?
-	}
-
-	bool isArrowTower(CombatUnit& unit) {
-		return false; // creaturetype == 149
-	}
-
-	bool canFly() {
-		return false; // flags & 2;
-	}
-
-	bool cannotMove(CombatUnit& unit) {
-		return false; // flags & 0x15;
-	}
-
-	bool hasAtkModSpellActive() const {
-		return false; // isFrenzyActive, precision, bloodlust
-	}
-
-	// 42270 - not sure
-	int calcDiffAtk() const {
-		if (hasAtkModSpellActive())
-			;
-		return currentStats.atk - unit_template.stats.atk;
-	}
-
-	// 42380 - additionaly checking if we have moat;
-	int calcDiffDef() const {
-		int bonus_def = state.defending;
-		//if has moat;
-
-		// if hasdefmodspellactive; isFrenzyActive
-
-		return currentStats.def + bonus_def - unit_template.stats.def;
-	}
-};
+		UnitStats stats;
+		int16_t hex{ -1 };
+		int16_t stack_number{ 0 };
+		int16_t health_lost{ 0 };
+		CombatUnitState state{ 0 };
+		std::array<Constants::Spells, 8> active_spells{};
+	};
+} // HotaMechanics

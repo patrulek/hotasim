@@ -1,28 +1,23 @@
 #pragma once
 
-#include "combat_field.h"
 #include "combat_hero.h"
+#include "combat_field.h"
 
-#include "structures.h"
+namespace HotaMechanics {
+	struct CombatState {
+		explicit CombatState(const CombatHero& _attacker, const CombatHero& _defender, const CombatField& _field)
+			: attacker(_attacker), defender(_defender), field(_field) {}
+		CombatState() = delete;
 
-#include <list>
+		int16_t turn{ -1 };
+		int16_t last_unit{ -1 };
+		Constants::CombatResult result{ Constants::CombatResult::NOT_STARTED };
 
-struct CombatState {
-	CombatState(const CombatHero& _attacker, const CombatHero& _defender, const CombatField& _field)
-		: attacker(_attacker), defender(_defender), field(_field) {}
+		CombatHero attacker;
+		CombatHero defender;
+		CombatField field;
 
-	CombatState() = delete;
-	CombatState(const CombatState& _obj) = default;
-	CombatState(CombatState&& _obj) = default;
+		std::list<int16_t> order;	// for attacker it will be 0-20; for defender it will be 21-41
+	};
 
-	CombatState& operator=(const CombatState& _obj) = default;
-	CombatState& operator=(CombatState&& _obj) = default;
-
-	CombatHero attacker;
-	CombatHero defender;
-	CombatField field;
-	int turn{ -1 };
-	int last_unit{ -1 };
-	std::list<int> order;	// for attacker it will be 0-20; for defender it will be 21-41
-	CombatResult result{ CombatResult::NOT_STARTED };
-};
+}; // HotaMechanics

@@ -3,171 +3,101 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <list>
 
-using int8 = char;
-using uint8 = unsigned char;
-using uint16 = unsigned short;
-using uint32 = unsigned int;
-using uint64 = unsigned long long;
+#include <cstdint>
 
-struct PrimaryStats {
-	uint16 atk;
-	uint16 def;
-	uint16 min_dmg;
-	uint16 max_dmg;
-	uint16 pow;
-	uint16 kdg;
-	uint16 spd;
-	uint16 hp;
-	uint16 mana;
-	uint16 shots;
-};
+#include "constants.h"
 
+namespace HotaMechanics {
+	union BaseStats {
+		int stats;
+		struct {
+			int8_t atk;
+			int8_t def;
+			int8_t pow;
+			int8_t kgd;
+		};
+	};
 
+	union CombatStats {
+		int stats;
+		struct {
+			uint8_t min_dmg;
+			uint8_t max_dmg;
+			int8_t spd;
+			int8_t shots;
+		};
+	};
 
-struct UnitPermutation {
-	int unit_id;
-	int unit_order;
-	int unit_number;
+	union PrimaryStats {
+		int stats;
+		struct {
+			int16_t hp;
+			int16_t mana;
+		};
+	};
 
-	bool operator==(const UnitPermutation& _obj) const {
-		return unit_id == _obj.unit_id && unit_order == _obj.unit_order && unit_number == _obj.unit_number;
-	}
-};
+	struct UnitStats {
+		BaseStats base_stats;
+		CombatStats combat_stats;
+		PrimaryStats primary_stats;
+		uint16_t fight_value;
+	};
 
+	struct HeroStats {
+		BaseStats base_stats;
+		PrimaryStats primary_stats;
+	};
 
-struct CombatFieldSize {
-	static const int COLS = 17;
-	static const int ROWS = 11;
-};
+	struct UnitPermutation {
+		int8_t unit_id;
+		int8_t unit_order;
+		int16_t unit_number;
 
-enum class CombatSide {
-	ATTACKER, DEFENDER
-};
+		bool operator==(const UnitPermutation& _obj) const {
+			return unit_id == _obj.unit_id && unit_order == _obj.unit_order && unit_number == _obj.unit_number;
+		}
+	};
 
-struct ArmyPermutation
-{
-	std::vector<UnitPermutation> permutations;
+	struct ArmyPermutation
+	{
+		std::vector<UnitPermutation> permutations;
 
-	bool operator==(const ArmyPermutation& _obj) const {
-		return permutations == _obj.permutations;
-	}
-};
+		bool operator==(const ArmyPermutation& _obj) const {
+			return permutations == _obj.permutations;
+		}
+	};
 
-enum class HeroSkills {
+	struct SpellBook {
+		std::vector<Constants::Spells> spells;
+	};
 
-};
+	struct Equipment {
 
-enum class UnitSkills {
+	};
 
-};
+	struct Unit {
+		UnitStats stats;
+		std::string name;
+	};
 
-enum class SpellArea {
-	ENEMY_UNIT, ENEMY_HERO, FRIENDLY_UNIT, FRIENDLY_HERO, ALL, SINGLE_HEX // etc
-};
+	struct UnitStack {
+		Unit unit;
+		int16_t stack_number;
+	};
 
-enum class SpellEffect {
-	MOD_SPEED, MOD_ATTACK, MOD_DEFENCE, DAMAGE // etc
-};
+	struct Hero {
+		HeroStats stats;
+		std::vector<UnitStack> army;
 
-enum class Spells {
-	/* 1st level */
-	/* 2nd level */
-	/* 3rd level */
-	/* 4th level */
-	/* 5th level */
-	/* unit spells */
-};
+		~Hero() {}
+	};
 
-struct SpellBook {
-	std::vector<Spells> spells;
-};
-
-struct Equipment {
-
-};
-
-enum class SpellID {
-	SLOW,
-	HASTE
-};
-
-struct Unit {
-	uint16 fightValue;
-	PrimaryStats stats;
-	SpellBook spellbook;
-	std::string name;
-
-	//Unit(const Unit& unit) : fightValue(unit.fightValue), flags(unit.flags), stats(unit.stats), spells(unit.spells) {}
-};
-
-
-enum class CombatResult {
-	NOT_STARTED, IN_PROGRESS, DRAW, PLAYER, ENEMY
-};
-
-enum class CombatType {
-	NEUTRAL, ENCOUNTER
-};
-
-struct UnitStack {
-	Unit unit;
-	int stack_number;
-};
-
-struct Hero {
-	PrimaryStats stats{};
-	HeroSkills skills{};
-	SpellBook spells{};
-	Equipment artifacts{};
-	std::vector<UnitStack> army{};
-
-	~Hero() {}
-
-	void setAttack(const int _attack) { stats.atk = _attack; }
-	void setDefense(const int _defense) { stats.def = _defense; }
-	void setPower(const int _power) { stats.pow = _power; }
-	void setKnowledge(const int _knowledge) { stats.kdg = _knowledge; }
-
-	void setHeroSkills(const HeroSkills& _skills) { skills = _skills; }
-	void addHeroSkill() { throw std::exception("Not implemented yet"); }
-	void removeHeroSkill() { throw std::exception("Not implemented yet"); }
-
-	void setSpellBook(const SpellBook& _spellbook) { spells = _spellbook; }
-	void addSpell() { throw std::exception("Not implemented yet"); }
-	void removeSpell() { throw std::exception("Not implemented yet"); }
-
-	void setEquipment(const Equipment& _equipment) { artifacts = _equipment; }
-	void addArtifact() { throw std::exception("Not implemented yet"); }
-	void removeArtifact() { throw std::exception("Not implemented yet"); }
-
-	void setHeroArmy(const std::vector<UnitStack>& _army) {
-		army = _army;
-	}
-
-	void addUnit(const Unit& _unit, const int _stack_size) {
-		addUnitStack(UnitStack{ _unit, _stack_size });
-	}
-
-	void addUnitStack(const UnitStack& _unit_stack) {
-		if (army.size() >= 7)
-			return;
-		army.push_back(_unit_stack);
-	}
-
-	void removeUnitStack(const UnitStack&) { throw std::exception("Not implemented yet"); }
-
-	void removeHeroArmy() { army.clear(); }
-
-	ArmyPermutation generateBaseArmyPermutation() const {
-		ArmyPermutation permutation;
-
-		for (int i = 0; i < army.size(); ++i)
-			permutation.permutations.push_back(UnitPermutation{ i, i, army[i].stack_number });
-
-		return permutation;
-	}
-};
-
-int getRandomInt(int _min, int _max);
-float getRandomFloat(float _min, float _max);
+	struct CombatAction {
+		Constants::CombatActionType action;
+		int16_t param1; // unit_id (target for attack/spellcast) : walk_distance (for walk action)
+		int16_t target; // hex_id (for walk/melee attack/spellcast)
+		int16_t param2; // true/false (whether action ends unit turn; hero spellcast dont)
+	};
+}; // HotaMechanics

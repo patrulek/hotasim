@@ -53,6 +53,7 @@ class CombatSequenceTree
 public:
 	std::shared_ptr<CombatSequenceNode> root{ nullptr };
 	std::shared_ptr<CombatSequenceNode> current{ nullptr };
+	int64_t size{ 0 };
 
 	CombatSequenceTree(const CombatState& _initial_state, const int64_t _initial_state_score = 0x0000800080008000) {
 		root = std::make_shared<CombatSequenceNode>(_initial_state, _initial_state_score);
@@ -62,6 +63,7 @@ public:
 	void addState(const CombatState& _state, const int _action, const int _action_size, const int64_t _state_score) {
 		current->addChild(_state, _action, _action_size, _state_score);
 		current = current->children.back();
+		++size;
 	}
 
 	bool isCurrentRoot() const {
@@ -79,7 +81,11 @@ public:
 		return sum;
 	}
 
-	int size() {
+	int getSize() const {
+		return size;
+	}
+
+	int calcSize() {
 		CombatSequenceNode* main_branch = root.get();
 		return branchSize(main_branch);
 	}

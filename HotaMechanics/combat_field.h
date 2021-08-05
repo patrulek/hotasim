@@ -5,99 +5,59 @@
 #include <cmath>
 #include <algorithm>
 #include <array>
-#include <iostream>
 
 #include "structures.h"
 
-enum class CombatHexOccupation {
-	EMPTY, UNIT, SOFT_OBSTACLE, SOLID_OBSTACLE // etc
-};
+namespace HotaMechanics {
+	class CombatHex {
 
-class CombatHex {
+	public:
+		CombatHex() = default;
+		CombatHex(const int16_t _id, const Constants::CombatHexOccupation _occupied_by = Constants::CombatHexOccupation::EMPTY)
+			: id(_id), occupied_by(_occupied_by) {}
 
-	int id;
-	CombatHexOccupation occupied_by;
+		// change state -----------------
+		void occupyHex(const Constants::CombatHexOccupation type) { occupied_by = type; }
+		// ------------------------------
 
-public:
+		// check state ------------------
+		const bool isWalkable() const;
+		// ------------------------------
 
-	int getId() const { return id; }
-	void setId(const int _id) { id = _id; }
-	CombatHexOccupation getOccupation() const { return occupied_by; }
+		// simple getters ---------------
+		const int getId() const { return id; }
+		const Constants::CombatHexOccupation getOccupation() const { return occupied_by; }
+		// ------------------------------
+	private:
+		int16_t id{ -1 };
+		Constants::CombatHexOccupation occupied_by{ Constants::CombatHexOccupation::EMPTY };
+	};
 
-	void occupyHex(CombatHexOccupation type) {
-		occupied_by = type;
-	}
+	class CombatField {
+	public:
+		CombatField() = delete;
+		explicit CombatField(const Constants::CombatFieldType _field_type, const Constants::CombatFieldTemplate _field_template = Constants::CombatFieldTemplate::EMPTY);
 
-	bool isWalkable() const {
-		bool first_col = id % CombatFieldSize::COLS == 0;
-		bool last_col = id % CombatFieldSize::COLS == CombatFieldSize::COLS - 1;
-
-		return !(occupied_by == CombatHexOccupation::SOLID_OBSTACLE || occupied_by == CombatHexOccupation::UNIT)
-			&& !(first_col || last_col);
-	}
-
-	CombatHex() = default;
-};
-
-enum class CombatFieldType {
-	GRASS, DIRT // ...
-};
-
-enum class CombatFieldTemplate {
-	TMP1, TMP2 // ...
-};
-
-class CombatField {
-public:
-	CombatFieldType combatFieldId{ CombatFieldType::GRASS };
-	CombatFieldTemplate combatFieldTemplate{ CombatFieldTemplate::TMP1 };
-	CombatHex hexes[11][17];
-
-	explicit CombatField(const CombatFieldType _field_type)
-			: combatFieldId(_field_type) {
-		
-		initializeCombatHexes();
-		//if (combatFieldTemplate == CombatFieldTemplate::TMP1)
-		//	hexes[0][5].occupiedBy = CombatHexOccupation::SOLID_OBSTACLE;
-	}
-
-	CombatField() = delete;
-
-	void initializeCombatHexes() {
-		for (int y = 0; y < CombatFieldSize::ROWS; ++y) {
-			for (int x = 0; x < CombatFieldSize::COLS; ++x) {
-				hexes[y][x].setId(y * CombatFieldSize::COLS + x);
-				hexes[y][x].occupyHex(CombatHexOccupation::EMPTY);
-			}
+		// change state ----------------------
+		void fillHex(const int16_t _target_hex, const Constants::CombatHexOccupation _occupied_by) {
+			hexes[_target_hex].occupyHex(_occupied_by);
 		}
-	}
-
-	void fillHex(int _target_hex, CombatHexOccupation _occupied_by) {
-		hexes[_target_hex / CombatFieldSize::COLS][_target_hex % CombatFieldSize::COLS].occupyHex(_occupied_by);
-	}
-
-	void clearHex(int _target_hex) {
-		fillHex(_target_hex, CombatHexOccupation::EMPTY);
-	}
-		
-	void setTemplate(std::vector<int>& _template) {
-		if (_template.size() != CombatFieldSize::ROWS * CombatFieldSize::COLS)
-			throw std::exception("Wrong template size");
-
-		int id = 0;
-
-		for (auto hex : _template) {
-			int y = id / CombatFieldSize::COLS;
-			int x = (id++) % CombatFieldSize::COLS;
-
-			if (hex)
-				hexes[y][x].occupyHex(CombatHexOccupation::SOLID_OBSTACLE);
-			else
-				hexes[y][x].occupyHex(CombatHexOccupation::EMPTY);
+		void clearHex(const int16_t _target_hex) {
+			fillHex(_target_hex, Constants::CombatHexOccupation::EMPTY);
 		}
-	}
+		void setTemplate(const std::vector<int>& _template);
+		// ----------------------------------
 
-	CombatHex getById(int hex_id) const { return hexes[hex_id / CombatFieldSize::COLS][hex_id % CombatFieldSize::COLS]; }
-	bool isHexWalkable(const int _hex_id) const { return _hex_id != -1 && getById(_hex_id).isWalkable(); }
+		// check state ----------------------
+		const bool isHexWalkable(const int16_t _hex_id) const { return _hex_id != -1 && getById(_hex_id).isWalkable(); }
+		// ----------------------------------
 
-};
+		// simple getters -------------------
+		CombatHex getById(const int16_t _hex_id) const { return hexes[_hex_id]; }
+		// ----------------------------------
+	private:
+		Constants::CombatFieldType combatFieldId{ Constants::CombatFieldType::GRASS };
+		Constants::CombatFieldTemplate combatFieldTemplate{ Constants::CombatFieldTemplate::EMPTY };
+		std::array<CombatHex, Constants::FIELD_SIZE> hexes;
+	};
+}; // HotaMechanics

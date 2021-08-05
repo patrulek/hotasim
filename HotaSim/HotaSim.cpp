@@ -3,10 +3,15 @@
 
 #include <iostream>
 
+#include "../HotaMechanics/structures.h"
 #include "../HotaMechanics/combat_manager.h"
 #include "../HotaMechanics/unit_templates.h"
 
+
 #include "combat_simulator.h"
+
+using namespace HotaMechanics;
+using namespace HotaMechanics::Constants;
 
 int main()
 {

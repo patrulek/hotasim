@@ -5,4 +5,7 @@
 
 #include "structures.h"
 
-extern std::unordered_map<std::string, Unit> unit_templates;
+namespace HotaMechanics {
+	std::unordered_map<std::string, Unit> unit_templates();
+
+}; // HotaMechanics

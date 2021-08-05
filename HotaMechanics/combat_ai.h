@@ -2,99 +2,50 @@
 
 
 #include <cmath>
+#include <array>
 #include <memory>
 
 #include "structures.h"
 
-#include "combat_manager.h"
-#include "combat_unit.h"
-#include "combat_state.h"
 #include "combat_pathfinder.h"
-#include "combat_action.h"
 
-class CombatManager;
+namespace HotaMechanics {
+	class CombatManager;
+	class CombatUnit;
+	class CombatHero;
+	class CombatField;
 
-enum class AIDifficulty {
-	EASY /*80%, 100%*/, NORMAL /*130%, 160%, 200%*/
-};
+	class CombatAI {
 
-class CombatAI {
-private:
-	std::vector<int> hexes_fight_value_gain;
+	public:
+		CombatAI(const CombatManager& combat_manager);
+		CombatAI(const CombatAI& _obj) = delete;
+		CombatAI(CombatAI&& _obj) = delete;
+		CombatAI() = delete;
 
-public:
-	CombatAI(const CombatManager& combat_manager);
-	CombatAI(const CombatAI& _obj) = delete;
-	CombatAI(CombatAI&& _obj) = delete;
-	CombatAI() = delete;
+		CombatAI& operator=(const CombatAI& _obj) = delete;
+		CombatAI& operator=(CombatAI&& _obj) = delete;
 
-	CombatAI& operator=(const CombatAI& _obj) = delete;
-	CombatAI& operator=(CombatAI&& _obj) = delete;
+		// AI decision making ------------
+		void calculateFightValueAdvantageOnHexes(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const CombatField& _field);
+		const std::vector<int> chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero) const;
+		const int chooseHexToMoveForAttack(const CombatUnit& _active_stack, const CombatUnit& _target_unit) const;
+		const int chooseWalkDistanceFromPath(const CombatUnit& _active_stack, int _target_hex, const CombatField& _field) const;
+		// -------------------------------
 
+		// simple getters ----------------
+		const CombatPathfinder& getPathfinder() const { return *pathfinder; }
+		// -------------------------------
+	private:
+		const CombatManager& combat_manager;
+		std::unique_ptr<CombatPathfinder> pathfinder;
 
-	AIDifficulty difficulty;
-	bool similar_army_strength{ true }; // > 2x fight_value for one side
+		Constants::AIDifficulty difficulty{ Constants::AIDifficulty::NORMAL };
+		bool similar_army_strength{ true }; // > 2x fight_value for one side
 
-	const CombatManager& combat_manager;
-	std::unique_ptr<CombatPathfinder> pathfinder;
-
-
-
-	std::vector<int> chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const;
-	int chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const;
-	int chooseWalkDistanceFromPath(const CombatUnit& active_stack, int _target_hex, const CombatField& _field) const;
-
-	int calculateMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;
-	int calculateCounterAttackMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;
-	int calculateFightValueAdvantageAfterMeleeUnitAttack(const CombatUnit& attacker, const CombatUnit& defender) const;
-	std::vector<int> calculateFightValueAdvantageOnHexes(const CombatUnit& activeStack, const CombatHero& enemy_hero, const CombatField& _field);
-
-	//// E4580
-	//float multiplierModifier(CombatUnit& activeStack, int side);
-
-	//// 42770
-	//int calculateSingleUnitValue(CombatUnit& activeStack, int side);
-
-	//// 42B80
-	//int calculateUnitValue(CombatUnit& activeStack, int side);
-
-	//// 1EC40 (combat_mgr->get_current_active_side(), activeStack, diffDef, diffAtk, 0 or 1)
-	//int calculateSummedUnitValueForSide(CombatState& state, int side, int minMeleeDiffAtk, int minDiffDef, int something);
-
-	//// 1F1E0 (activeStack, 0, combat_mgr->get_current_active_side())
-	//void sub1F1E0();
-
-	//// 22130 ()
-	//void calledWhenTacticsState(CombatUnit& unit);
-
-
-
-	// 35B10 (current_active_side, activeStack)
-	//void calculateUnitsFightValues(CombatAI& ai, CombatState& state);
-
-
-
-	// 22100 (activeStack, 0, 0, combat_mgr->get_current_active_side())
-	//void generateRelevantUnitsLists(CombatAI& ai, CombatState& state);
-
-	// part of 22370
-	//int unitPreconditions(CombatUnit& unit);
-
-	// 22370 - pick ai action	
-	//void pickAction(CombatAI& ai, CombatState& state);
-
-
-	float calculateUnitAttackFightValueModifier(const CombatUnit& unit) const;
-	float calculateUnitDefenceFightValueModifier(const CombatUnit& unit) const;
-	float calculateUnitFightValueModifier(const CombatUnit& unit) const;
-
-	int calculateStackUnitFightValue(const CombatUnit& unit) const;
-	// calc for all units
-	int calculateHeroFightValue(const CombatHero& hero) const; 
-	// exclude summons, clones etc., only units based on army
-	int calculateBaseHeroFightValue(const CombatHero& hero) const;
-};
-
+		std::array<int, Constants::FIELD_SIZE> hexes_fight_value_gain;
+	};
+}; // HotaMechanics
 
 /*
 * tips:
@@ -102,6 +53,41 @@ public:
 *	- póŸniej jeœli liczba tur jest równa, to wybiera albo silniejszy stack, albo ten któremu zada wiêcej dmg
 * 
 AI FLOW:
+
+
+		//// E4580
+		//float multiplierModifier(CombatUnit& activeStack, int side);
+
+		//// 42770
+		//int calculateSingleUnitValue(CombatUnit& activeStack, int side);
+
+		//// 42B80
+		//int calculateUnitValue(CombatUnit& activeStack, int side);
+
+		//// 1EC40 (combat_mgr->get_current_active_side(), activeStack, diffDef, diffAtk, 0 or 1)
+		//int calculateSummedUnitValueForSide(CombatState& state, int side, int minMeleeDiffAtk, int minDiffDef, int something);
+
+		//// 1F1E0 (activeStack, 0, combat_mgr->get_current_active_side())
+		//void sub1F1E0();
+
+		//// 22130 ()
+		//void calledWhenTacticsState(CombatUnit& unit);
+
+
+
+		// 35B10 (current_active_side, activeStack)
+		//void calculateUnitsFightValues(CombatAI& ai, CombatState& state);
+
+
+
+		// 22100 (activeStack, 0, 0, combat_mgr->get_current_active_side())
+		//void generateRelevantUnitsLists(CombatAI& ai, CombatState& state);
+
+		// part of 22370
+		//int unitPreconditions(CombatUnit& unit);
+
+		// 22370 - pick ai action
+		//void pickAction(CombatAI& ai, CombatState& state);
 
 22370 - start; check if shooter/shooter-siege or flyer
 	77740 - something with blue highlight

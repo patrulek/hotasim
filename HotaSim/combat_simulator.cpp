@@ -99,7 +99,7 @@ void CombatSimulator::start() {
 
 			while (!tree.isCurrentRoot()) {
 				while (!manager->isCombatFinished()) {
-					std::cout << "Actions: " << action_cnt << " | Turns: " << manager->getCurrentState().turn << std::endl;
+					//std::cout << "Actions: " << action_cnt << " | Turns: " << manager->getCurrentState().turn << std::endl;
 
 					if (manager->isUnitMove()) {
 						if (manager->isPlayerMove()) {
@@ -121,9 +121,9 @@ void CombatSimulator::start() {
 					action_cnt = 0;
 				}
 
-				std::cout << "Combat finished, go parent state\n";
+				//std::cout << "Combat finished, go parent state\n";
 				tree.goParent();
-				std::cout << "Total states checked: " << tree.size() << std::endl;
+				std::cout << "Total states checked: " << tree.getSize() << std::endl;
 
 				// check if need to go up further
 				while (tree.current->action + 1 >= tree.current->action_size)
