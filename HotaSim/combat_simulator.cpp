@@ -6,6 +6,7 @@
 #include "../HotaMechanics/combat_ai.h"
 #include "../HotaMechanics/combat_state.h"
 #include "../HotaMechanics/combat_action.h"
+#include "combat_sequencetree.h"
 
 #include <list>
 #include <iostream>
@@ -89,22 +90,65 @@ void CombatSimulator::start() {
 		for (auto permutation : permutations) {
 			prepareCombat(permutation, /*i*/ 2);
 			
-			//std::list<CombatState> states;
-			//std::list<CombatAction> actions;
+			CombatSequenceTree tree(manager->getInitialState());
+
+			// start battle (PRE_BATTLE action)
+			manager->nextState();
+			tree.addState(manager->getCurrentState(), 0, 1, 0x0000800080008000);
 			int action_cnt = 0;
 
-			while (!manager->isCombatFinished()) {
-				std::cout << "Actions: " << action_cnt++ << " | Turns: " << manager->getCurrentState().turn << std::endl;
+			while (!tree.isCurrentRoot()) {
+				while (!manager->isCombatFinished()) {
+					std::cout << "Actions: " << action_cnt << " | Turns: " << manager->getCurrentState().turn << std::endl;
 
-				if (manager->isUnitMove()) {
-					auto actions = manager->isPlayerMove() ? manager->generateActionsForPlayer() : manager->generateActionsForAI();
-					int choice = getRandomInt(0, actions.size() - 1);
-					manager->nextStateByAction(actions[choice]);
-					continue;
+					if (manager->isUnitMove()) {
+						if (manager->isPlayerMove()) {
+							auto actions = manager->generateActionsForPlayer();
+							tree.addState(manager->getCurrentState(), action_cnt, actions.size(), evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
+							manager->nextStateByAction(actions[action_cnt]);
+						}
+						else {
+							auto actions = manager->generateActionsForAI();
+							// TODO: for now, take only first ai action (in most cases there will be one action anyway)
+							tree.addState(manager->getCurrentState(), 0, 1, evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
+							manager->nextStateByAction(actions[0]);
+						}
+						continue;
+					}
+
+					manager->nextState();
+					tree.addState(manager->getCurrentState(), 0, 1, evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
+					action_cnt = 0;
 				}
+
+				std::cout << "Combat finished, go parent state\n";
+				tree.goParent();
+				std::cout << "Total states checked: " << tree.size() << std::endl;
+
+				// check if need to go up further
+				while (tree.current->action + 1 >= tree.current->action_size)
+					tree.goParent();
 				
-				manager->nextState();
+				action_cnt = tree.current->action + 1;
+				tree.goParent();
+				manager->setCurrentState(tree.current->state);
 			}
+
+			auto best_leaf = tree.findBestLeaf();
+			std::vector<int> action_order;
+			while (best_leaf) {
+				action_order.push_back(best_leaf->action);
+				best_leaf = best_leaf->parent.get();
+			}
+
+			std::reverse(std::begin(action_order), std::end(action_order));
+			for (auto action : action_order) {
+				std::cout << "Next action idx: " << action << std::endl;
+			}
+
+			std::cout << "Total actions: " << action_order.size() << std::endl;
+			std::cout << "Total turns: " << tree.findBestLeaf()->state.turn << std::endl;
+			std::cout << "Best result: " << (int)tree.findBestLeaf()->state.result << std::endl;
 		}
 	}
 }

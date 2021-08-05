@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="combat_permutation.cpp" />
+    <ClCompile Include="combat_sequencetree.cpp" />
     <ClCompile Include="combat_simulator.cpp" />
     <ClCompile Include="HotaSim.cpp" />
   </ItemGroup>
@@ -151,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="combat_permutation.h" />
+    <ClInclude Include="combat_sequencetree.h" />
     <ClInclude Include="combat_simulator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

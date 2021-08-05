@@ -22,7 +22,7 @@ void CombatManager::makeUnitWait() {
 			std::advance(it2, 1);
 			int cur = *it, prev = *(it2);
 			auto& hero = prev / 21 == 0 ? current_state->attacker : current_state->defender;
-			auto& unit = hero.getUnits()[prev % 21];
+			auto unit = hero.getUnits()[prev % 21];
 
 			if (!unit->state.waiting)
 				break;
@@ -121,7 +121,7 @@ void CombatManager::createInitState() {
 	current_state = std::make_unique<CombatState>(attacker_, defender_, field_);
 }
 
-void CombatManager::setCurrentState(CombatState& _state) {
+void CombatManager::setCurrentState(const CombatState& _state) {
 	current_state = std::make_unique<CombatState>(_state);
 }
 

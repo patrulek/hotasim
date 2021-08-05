@@ -46,6 +46,7 @@ public:
 		: hero(&_hero) {
 		unit_template = _unit.unit_template;
 		state = _unit.state;
+		hex = _unit.hex;
 		currentStats = _unit.currentStats;
 		stackNumber = _unit.stackNumber;
 		health_lost = _unit.health_lost;

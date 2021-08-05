@@ -46,7 +46,7 @@ public:
 
 	std::vector<CombatUnit*> getUnitsInRange(CombatSide side, std::vector<int>& hexes) const;
 
-	void setCurrentState(CombatState& _current_state);
+	void setCurrentState(const CombatState& _current_state);
 
 
 	bool isUnitMove() {
