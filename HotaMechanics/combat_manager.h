@@ -42,7 +42,7 @@ public:
 	const CombatState& getInitialState() const { return *init_state; }
 	const CombatAction& getLastAction() const { return *last_action; }
 	const CombatAI& getCombatAI() const;
-	const CombatField& getCombatField() const;
+	const CombatField& getInitialCombatField() const;
 
 	std::vector<CombatUnit*> getUnitsInRange(CombatSide side, std::vector<int>& hexes) const;
 
@@ -96,7 +96,7 @@ private:
 	CombatAction createPreBattleAction() const;
 	CombatAction createPreTurnAction() const;
 	CombatAction createWaitAction() const;
-	CombatAction createWalkAction(int hex_id) const;
+	CombatAction createWalkAction(int hex_id, int _walk_distance = -1) const;
 	CombatAction createDefendAction() const;
 	CombatAction createSpellCastAction(int spell_id, int unit_id, int hex_id) const;
 	CombatAction createAttackAction(int unit_id, int hex_id) const;
@@ -120,7 +120,7 @@ private:
 	void moveUnit(CombatUnit& _unit, int _target_hex);
 	void makeUnitAttack(int _unit_id, int _target_hex);
 	void makeUnitFly(int _target_hex);
-	void makeUnitWalk(int _target_hex);
+	void makeUnitWalk(int _target_hex, int _walk_distance = -1);
 	void makeUnitDefend();
 	void makeUnitWait();
 

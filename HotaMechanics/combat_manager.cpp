@@ -5,6 +5,7 @@
 #include "combat_unit.h"
 
 #include <iostream>
+#include <algorithm>
 
 void CombatManager::makeUnitDefend() {
 	auto& active_stack = getActiveStack();
@@ -15,20 +16,37 @@ void CombatManager::makeUnitWait() {
 	auto& active_stack = getActiveStack();
 	active_stack.wait();
 	current_state->order.push_back(current_state->order.front());
+
+	if (current_state->order.size() > 2) {
+		for (auto it = std::rbegin(current_state->order), it2 = it; ; ++it) {
+			std::advance(it2, 1);
+			int cur = *it, prev = *(it2);
+			auto& hero = prev / 21 == 0 ? current_state->attacker : current_state->defender;
+			auto& unit = hero.getUnits()[prev % 21];
+
+			if (!unit->state.waiting)
+				break;
+
+			if (!unit->currentStats.spd > active_stack.currentStats.spd) {
+				std::swap(*it, *it2);
+			}
+		}
+	}
 }
 
 void CombatManager::makeUnitFly(int _target_hex) {
 	throw std::exception("Not implemented yet");
 }
 
-void CombatManager::makeUnitWalk(int _target_hex) {
+void CombatManager::makeUnitWalk(int _target_hex, int _walk_distance) {
 	auto& active_stack = getActiveStack();
 	auto path = ai->pathfinder->findPath(active_stack.getHex(), _target_hex, current_state->field);
 
 	if (path.empty())
 		throw std::exception("Should never happen (we already found that path earlier)");
 
-	int range = std::min(path.size(), (size_t)active_stack.currentStats.spd);
+	int walk_distance = _walk_distance == -1 ? active_stack.currentStats.spd : _walk_distance;
+	int range = std::min(path.size(), (size_t)walk_distance);
 	for (int i = 0; i < range; ++i) {
 		std::cout << "Moved unit from (" << active_stack.getHex() << ") to (" << path[i] << ")\n";
 		moveUnit(active_stack, path[i]);
@@ -60,7 +78,7 @@ void CombatManager::makeUnitAttack(int _unit_id, int _target_hex) {
 		if (!defender->state.retaliated) {
 			std::cout << "(" << defender->to_string() << ") counter attack (" << active_stack.to_string() << ")\n";
 			active_stack.applyDamage(counter_dmg);
-			std::cout << "(" << defender->to_string() << ") counter attack dealt " << dmg << " to (" << active_stack.to_string() << ")\n";
+			std::cout << "(" << defender->to_string() << ") counter attack dealt " << counter_dmg << " to (" << active_stack.to_string() << ")\n";
 			const_cast<CombatUnit*>(defender)->state.retaliated = true;
 		}
 	}
@@ -134,7 +152,7 @@ std::vector<CombatUnit*> CombatManager::getUnitsInRange(CombatSide side, std::ve
 	return units_in_range;
 }
 
-const CombatField& CombatManager::getCombatField() const {
+const CombatField& CombatManager::getInitialCombatField() const {
 	return *field;
 }
 
@@ -244,7 +262,7 @@ void CombatManager::processPreBattleAction(const CombatAction& _action) {
 		// apply precombat artifacts spells
 	current_state->turn = 0;
 	orderUnitsInTurn();
-	std::cout << "Processed action: PRE_BATTLE\n";
+	std::cout << "Processed action: PRE_BATTLE\n\n-------------------\n\n";
 }
 
 void CombatManager::processPreTurnAction(const CombatAction& _action) {
@@ -258,14 +276,14 @@ void CombatManager::processPreTurnAction(const CombatAction& _action) {
 		// decrease spell active on units
 	++current_state->turn;
 	orderUnitsInTurn();
-	std::cout << "Processed action: PRE_TURN (" << current_state->turn << ")\n";
+	std::cout << "Processed action: PRE_TURN (" << current_state->turn << ")\n\n-----------------\n\n";
 }
 
 void CombatManager::processWaitAction(const CombatAction& _action) {
 	makeUnitWait();
 
 	auto& active_stack = getActiveStack();
-	std::cout << "Processed action: WAIT (" << active_stack.to_string().c_str() << ")\n";
+	std::cout << "Processed action: WAIT (" << active_stack.to_string().c_str() << ")\n\n";
 }
 
 void CombatManager::processWalkAction(const CombatAction& _action) {
@@ -273,15 +291,15 @@ void CombatManager::processWalkAction(const CombatAction& _action) {
 	if (active_stack.canFly())
 		makeUnitFly(_action.target);
 	else
-		makeUnitWalk(_action.target);
-	std::cout << "Processed action: WALK (" << active_stack.to_string().c_str() << ") to pos: " << _action.target << "\n";
+		makeUnitWalk(_action.target, _action.param1);
+	std::cout << "Processed action: WALK (" << active_stack.to_string().c_str() << ") to pos: " << _action.target << "\n\n";
 }
 
 void CombatManager::processDefendAction(const CombatAction& _action) {
 	makeUnitDefend();
 
 	auto& active_stack = getActiveStack();
-	std::cout << "Processed action: DEFENSE (" << active_stack.to_string().c_str() << ")\n";
+	std::cout << "Processed action: DEFENSE (" << active_stack.to_string().c_str() << ")\n\n";
 }
 
 void CombatManager::processSpellCastAction(const CombatAction& _action) {
@@ -293,7 +311,7 @@ void CombatManager::processAttackAction(const CombatAction& _action) {
 
 	auto& active_stack = getActiveStack();
 	std::cout << "Processed action: ATTACK (" << active_stack.to_string().c_str() << ") on unit: " 
-				 << _action.param1 << " at pos: " << _action.target << "\n";
+				 << _action.param1 << " at pos: " << _action.target << "\n\n";
 }
 
 void CombatManager::restoreLastUnit() {
@@ -361,8 +379,8 @@ CombatAction CombatManager::createWaitAction() const {
 	return CombatAction{ CombatActionType::WAIT, -1, -1, true };
 }
 
-CombatAction CombatManager::createWalkAction(int hex_id) const {
-	return CombatAction{ CombatActionType::WALK, -1, hex_id, true };
+CombatAction CombatManager::createWalkAction(int hex_id, int _walk_distance) const {
+	return CombatAction{ CombatActionType::WALK, _walk_distance, hex_id, true };
 }
 
 CombatAction CombatManager::createDefendAction() const {
@@ -392,7 +410,7 @@ std::vector<CombatAction> CombatManager::generateActionsForPlayer() {
 		actions.push_back(createWaitAction());
 
 	// get reachable hexes;
-	auto field = current_state->field;
+	auto& field = current_state->field;
 	auto range_hexes = ai->pathfinder->getHexesInRange(activeStack.getHex(), activeStack.currentStats.spd);
 	auto walkable_hexes = ai->pathfinder->getWalkableHexesFromList(range_hexes, field);
 	auto reachable_hexes = ai->pathfinder->getReachableHexesFromWalkableHexes(activeStack.getHex(), activeStack.currentStats.spd, walkable_hexes, false, false, field);
@@ -434,19 +452,42 @@ std::vector<CombatAction> CombatManager::generateActionsForPlayer() {
 
 
 std::vector<CombatAction> CombatManager::generateActionsForAI() {
-	// check if spellcast possible
-	// check if attack possible
-	// check if wait / defend / surrender possible and has a sense
-	// check if move possible
+	auto active_stack = getActiveStack();
 
-	// TODO: defense for now
-	auto activeStack = getActiveStack();
-
-	if (!activeStack.canMakeAction())
+	if (!active_stack.canMakeAction())
 		return std::vector<CombatAction>{};
 
 	std::vector<CombatAction> actions{};
+	ai->calculateFightValueAdvantageOnHexes(active_stack, current_state->attacker, current_state->field);
+	auto units_to_attack = ai->chooseUnitToAttack(active_stack, current_state->attacker);
 
+	for (auto unit_id : units_to_attack) {
+		auto unit = current_state->attacker.getUnits()[unit_id];
+		int hex = ai->chooseHexToMoveForAttack(active_stack, *unit);
+
+		int distance_to_hex = ai->pathfinder->findPath(active_stack.getHex(), hex, current_state->field).size();
+		int turns = distance_to_hex == 0 ? 1 : std::ceil((float)distance_to_hex / active_stack.currentStats.spd);
+
+		if (turns == 1)
+			actions.push_back(createAttackAction(unit_id, hex));
+		else {
+			int walk_distance = ai->chooseWalkDistanceFromPath(active_stack, hex, current_state->field);
+
+			if (walk_distance == 0) {
+				if (active_stack.canWait())
+					actions.push_back(createWaitAction());
+				else
+					actions.push_back(createWalkAction(hex));
+			}
+			else {
+				actions.push_back(createWalkAction(hex, walk_distance));
+			}
+		}
+	}
+
+
+
+	/*
 	if (activeStack.canWait())
 		actions.push_back(createWaitAction());
 
@@ -490,6 +531,6 @@ std::vector<CombatAction> CombatManager::generateActionsForAI() {
 
 	if (activeStack.canHeroCast())
 		throw std::exception("Not implemented yet");
-
+	*/
 	return actions;
 }

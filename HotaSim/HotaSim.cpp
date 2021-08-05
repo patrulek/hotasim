@@ -29,6 +29,7 @@ int main()
    hotaSim.initialize();
    hotaSim.start();
 
+   getchar();
    // ---------------------
 
    /*

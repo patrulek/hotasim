@@ -8,6 +8,7 @@
 #include "../HotaMechanics/combat_action.h"
 
 #include <list>
+#include <iostream>
 
 CombatSimulator::CombatSimulator(const Hero& _attacker, const Hero& _defender, 
 											const CombatFieldType _field_type, const CombatType _combat_type)
@@ -29,7 +30,7 @@ void CombatSimulator::updateBestState(const CombatState& _state, const std::list
 }
 
 void CombatSimulator::setCombatManager(const CombatManager& _mgr) { 
-	manager = std::make_unique<CombatManager>(_mgr.getAttacker(), _mgr.getDefender(), _mgr.getCombatField(), _mgr.getCombatType());
+	manager = std::make_unique<CombatManager>(_mgr.getAttacker(), _mgr.getDefender(), _mgr.getInitialCombatField(), _mgr.getCombatType());
 }
 
 int64_t CombatSimulator::evaluateCombatStateScore(const CombatState& _initial_state, const CombatState& _state) const {
@@ -83,12 +84,10 @@ void CombatSimulator::setDefenderPermutation() {
 		defender_permutation.permutations.push_back(UnitPermutation{ i, i, defender->army[i].stack_number });
 }
 
-#include <iostream>
-
 void CombatSimulator::start() {
 	for (int i = 0; i < 1 /* combat field templates */; ++i) {
 		for (auto permutation : permutations) {
-			prepareCombat(permutation, i);
+			prepareCombat(permutation, /*i*/ 2);
 			
 			//std::list<CombatState> states;
 			//std::list<CombatAction> actions;

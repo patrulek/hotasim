@@ -108,7 +108,7 @@ std::vector<int> CombatPathfinder::getWalkableHexesFromList(std::vector<int>& _h
 	std::vector<int> walkable(_hexes);
 
 	for (auto hex : _hexes) {
-		if (hex == -1 || !_field.getById(hex).isWalkable())
+		if (!_field.isHexWalkable(hex))
 			walkable.erase(std::remove(std::begin(walkable), std::end(walkable), hex), std::end(walkable));
 	}
 

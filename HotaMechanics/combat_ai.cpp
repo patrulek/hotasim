@@ -135,8 +135,11 @@ std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, con
 	int distance = 999;
 
 	for (auto unit : enemy_hero.getUnits()) {
-		int unit_distance = pathfinder->distanceBetweenHexes(activeStack.getHex(), unit->getHex());
-		int unit_turns = std::ceil((float)unit_distance / activeStack.currentStats.spd); // 1 = can attack; todo: check if should be distance - 1
+		if (!unit->isAlive())
+			continue;
+
+		int unit_distance = pathfinder->distanceBetweenHexes(activeStack.getHex(), unit->getHex()) - 1;
+		int unit_turns = unit_distance == 0 ? 1 : std::ceil((float)unit_distance / activeStack.currentStats.spd); // 1 = can attack; todo: check if should be distance - 1
 		int unit_fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(activeStack, *unit);
 		
 		// if no unit picked, pick first
@@ -261,11 +264,11 @@ int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const Comb
 	int distance = -1;
 
 	for (auto adj_hex : adjacent_hexes) {
-		if (!combat_manager.getCombatField().getById(adj_hex).isWalkable())
+		if (adj_hex != activeStack.getHex() && !combat_manager.getCurrentState().field.isHexWalkable(adj_hex))
 			continue;
 
-		int adj_distance = pathfinder->distanceBetweenHexes(adj_hex, activeStack.getHex());
-		int adj_turns = std::ceil(adj_distance / activeStack.currentStats.spd);
+		int adj_distance = pathfinder->findPath(activeStack.getHex(), adj_hex, combat_manager.getCurrentState().field).size();
+		int adj_turns = adj_distance == 0 ? 1 : std::ceil((float)adj_distance / activeStack.currentStats.spd);
 		int adj_hex_fight_value_gain = hexes_fight_value_gain[adj_hex];
 
 		// if didnt choose any yet, check first possible
@@ -273,6 +276,7 @@ int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const Comb
 			hex = adj_hex;
 			turns = adj_turns;
 			hex_fight_value_gain = adj_hex_fight_value_gain;
+			distance = adj_distance;
 			continue;
 		}
 
@@ -283,11 +287,12 @@ int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const Comb
 		// if current hex is worse in fight_value_gain terms, go next
 		if (adj_hex_fight_value_gain < hex_fight_value_gain)
 			continue;
-		// if is better than choose this field
+		// if is better then choose this field
 		else if (adj_hex_fight_value_gain > hex_fight_value_gain) {
 			hex = adj_hex;
 			turns = adj_turns;
 			hex_fight_value_gain = adj_hex_fight_value_gain;
+			distance = adj_distance;
 			continue;
 		} 
 
@@ -296,6 +301,7 @@ int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const Comb
 			if (adj_distance > distance) {
 				hex = adj_hex;
 				turns = adj_turns;
+				distance = adj_distance;
 			}
 
 			continue;
@@ -304,11 +310,28 @@ int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const Comb
 		// if not, just choose field that is closer
 		if (adj_distance < distance) {
 			hex = adj_hex;
-			turns = adj_turns;
+			distance = adj_distance;
 		}
 	}
 
 	return hex;
+}
+
+
+int CombatAI::chooseWalkDistanceFromPath(const CombatUnit& _active_stack, const int _target_hex, const CombatField& _field) const {
+	int walk_distance = 0;
+	int fight_value_gain = -calculateStackUnitFightValue(_active_stack);
+	auto path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
+	int range = std::min(path.size(), (size_t)_active_stack.currentStats.spd);
+
+	for (int i = 0; i < range; ++i) {
+		if (hexes_fight_value_gain[path[i]] >= fight_value_gain) {
+			fight_value_gain = hexes_fight_value_gain[path[i]];
+			walk_distance = i + 1;
+		}
+	}
+
+	return walk_distance;
 }
 
 // E4580

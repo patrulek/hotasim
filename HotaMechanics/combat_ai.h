@@ -42,6 +42,7 @@ public:
 
 	std::vector<int> chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const;
 	int chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const;
+	int chooseWalkDistanceFromPath(const CombatUnit& active_stack, int _target_hex, const CombatField& _field) const;
 
 	int calculateMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;
 	int calculateCounterAttackMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) const;

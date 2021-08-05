@@ -98,6 +98,6 @@ public:
 	}
 
 	CombatHex getById(int hex_id) const { return hexes[hex_id / CombatFieldSize::COLS][hex_id % CombatFieldSize::COLS]; }
-
+	bool isHexWalkable(const int _hex_id) const { return _hex_id != -1 && getById(_hex_id).isWalkable(); }
 
 };
