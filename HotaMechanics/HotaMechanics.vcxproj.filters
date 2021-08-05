@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HotaMechanics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="combat_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

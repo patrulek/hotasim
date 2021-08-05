@@ -42,7 +42,7 @@ namespace HotaMechanics {
 		void generateUnitsFromArmy();
 
 
-		const Hero& hero_template;
+		Hero hero_template;
 
 		HeroStats stats;
 		ArmyPermutation army_permutation;

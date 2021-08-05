@@ -1,11 +1,13 @@
 #pragma once
 
+#include "../HotaMechanics/structures.h"
 #include "../HotaMechanics/combat_state.h"
-#include "../HotaMechanics/combat_action.h"
 
 #include <cstdint>
 #include <list>
 #include <memory>
+
+using namespace HotaMechanics;
 
 struct CombatSequenceNode {
 	const CombatState state;

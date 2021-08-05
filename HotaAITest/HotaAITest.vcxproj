@@ -45,11 +45,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HotaAI\HotaAI.vcxproj">
-      <Project>{76f93dc2-6b28-4d9e-ab00-3bb40dbd8dc8}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemDefinitionGroup />

@@ -152,7 +152,6 @@
     <ClCompile Include="combat_field.cpp" />
     <ClCompile Include="combat_manager.cpp" />
     <ClCompile Include="combat_unit.cpp" />
-    <ClCompile Include="HotaMechanics.cpp" />
     <ClCompile Include="unit_templates.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>

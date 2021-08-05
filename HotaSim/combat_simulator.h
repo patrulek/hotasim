@@ -4,21 +4,24 @@
 #include <cstdint>
 
 #include "../HotaMechanics/structures.h"
+#include "../HotaMechanics/constants.h"
 #include "combat_permutation.h"
 
 #include <list>
 
-// for initialization
-struct Hero;
-enum class CombatFieldType;
-enum class CombatType;
+
+
+using namespace HotaMechanics;
+using namespace HotaMechanics::Constants;
 
 // for combat simulation
-class CombatManager;
-class CombatHero;
-class CombatField;
-class CombatState;
-class CombatAction;
+namespace HotaMechanics {
+	class CombatManager;
+	class CombatHero;
+	class CombatField;
+	struct CombatState;
+	struct CombatAction;
+}
 
 class CombatSimulator
 {

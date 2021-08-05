@@ -5,11 +5,15 @@
 #include "../HotaMechanics/combat_manager.h"
 #include "../HotaMechanics/combat_ai.h"
 #include "../HotaMechanics/combat_state.h"
-#include "../HotaMechanics/combat_action.h"
+#include "../HotaMechanics/combat_calculator.h"
 #include "combat_sequencetree.h"
 
 #include <list>
 #include <iostream>
+
+using namespace HotaMechanics;
+using namespace HotaMechanics::Calculator;
+
 
 CombatSimulator::CombatSimulator(const Hero& _attacker, const Hero& _defender, 
 											const CombatFieldType _field_type, const CombatType _combat_type)
@@ -45,15 +49,15 @@ int64_t CombatSimulator::evaluateCombatStateScore(const CombatState& _initial_st
 }
 
 int64_t CombatSimulator::evaluateCombatStateAttackScore(const CombatState& _initial_state, const CombatState& _state) const {
-	float initial_fight_value = manager->getCombatAI().calculateBaseHeroFightValue(_initial_state.defender);
-	float current_fight_value = manager->getCombatAI().calculateBaseHeroFightValue(_state.defender);
+	float initial_fight_value = calculateBaseHeroFightValue(_initial_state.defender);
+	float current_fight_value = calculateBaseHeroFightValue(_state.defender);
 
 	return (1 << 15) * (1.0f - current_fight_value / initial_fight_value);
 }
 
 int64_t CombatSimulator::evaluateCombatStateDefenseScore(const CombatState& _initial_state, const CombatState& _state) const {
-	float initial_fight_value = manager->getCombatAI().calculateBaseHeroFightValue(_initial_state.attacker);
-	float current_fight_value = manager->getCombatAI().calculateBaseHeroFightValue(_state.attacker);
+	float initial_fight_value = calculateBaseHeroFightValue(_initial_state.attacker);
+	float current_fight_value = calculateBaseHeroFightValue(_state.attacker);
 
 	return (1 << 15) * (current_fight_value / initial_fight_value);
 }
@@ -74,14 +78,14 @@ int64_t CombatSimulator::evaluateCombatStateManaScore(const CombatState& _initia
 void CombatSimulator::findBestAttackerPermutations() {
 	ArmyPermutation permutation;
 
-	for (int i = 0; i < attacker->army.size(); ++i)
+	for (int8_t i = 0; i < attacker->army.size(); ++i)
 		permutation.permutations.push_back(UnitPermutation{ i, i, attacker->army[i].stack_number });
 
 	permutations.push_back(permutation);
 }
 
 void CombatSimulator::setDefenderPermutation() {
-	for (int i = 0; i < defender->army.size(); ++i)
+	for (int8_t i = 0; i < defender->army.size(); ++i)
 		defender_permutation.permutations.push_back(UnitPermutation{ i, i, defender->army[i].stack_number });
 }
 

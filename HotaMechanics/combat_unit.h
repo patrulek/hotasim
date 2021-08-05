@@ -103,7 +103,7 @@ namespace HotaMechanics {
 		float getFightValue() const { return unit_template.stats.fight_value; }
 		// -------------------------------
 	private:
-		const Unit& unit_template;
+		Unit unit_template;
 		const CombatHero* hero;
 
 		UnitStats stats;

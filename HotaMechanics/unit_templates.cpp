@@ -5,15 +5,15 @@
 namespace HotaMechanics {
 
    BaseStats baseStats(int _atk, int _def, int _pow, int _kgd) {
-      return BaseStats{ _atk << 24 | _def << 16 | _pow << 8 | _kgd };
+      return BaseStats{ _kgd << 24 | _pow << 16 | _def << 8 | _atk };
    }
 
    CombatStats combatStats(int _min, int _max, int _spd, int _shots) {
-      return CombatStats{ _min << 24 | _max << 16 | _spd << 8 | _shots };
+      return CombatStats{ _shots << 24 | _spd << 16 | _max << 8 | _min };
    }
 
    PrimaryStats primaryStats(int _hp, int _mana) {
-      return PrimaryStats{ _hp << 16 | _mana };
+      return PrimaryStats{ _mana << 16 | _hp };
    }
 
    /* Simplest units: only walking, no abilities, only melee, etc */

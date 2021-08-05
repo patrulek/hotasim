@@ -7,30 +7,31 @@
 #include "../HotaMechanics/combat_manager.h"
 #include "../HotaMechanics/unit_templates.h"
 
-
+#include "utils.h"
 #include "combat_simulator.h"
 
 using namespace HotaMechanics;
 using namespace HotaMechanics::Constants;
+using namespace HotaSim::Utils;
 
 int main()
 {
    // prepare/load battle template
-   Hero attacker;
+   HeroCreator attacker;
    attacker.setAttack(0); attacker.setDefense(0);
-   attacker.addUnit(unit_templates["Imp"], 100);
-   attacker.addUnit(unit_templates["Imp"], 100);
+   attacker.addUnit(unit_templates()["Imp"], 100);
+   attacker.addUnit(unit_templates()["Imp"], 100);
 
-   Hero defender;
+   HeroCreator defender;
    defender.setAttack(0), defender.setDefense(0);
-   defender.addUnit(unit_templates["Peasant"], 500);
+   defender.addUnit(unit_templates()["Peasant"], 500);
 
    CombatFieldType field_type = CombatFieldType::GRASS;
    CombatType combat_type = CombatType::NEUTRAL;
    // ---------------------
 
    // create combat simulator
-   CombatSimulator hotaSim(attacker, defender, field_type, combat_type);
+   CombatSimulator hotaSim(attacker.hero, defender.hero, field_type, combat_type);
    hotaSim.initialize();
    hotaSim.start();
 
