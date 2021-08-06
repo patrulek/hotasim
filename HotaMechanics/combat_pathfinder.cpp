@@ -31,11 +31,20 @@ namespace HotaMechanics {
 	}
 
 	const bool CombatPathfinder::areAdjacent(const int _source_hex, const int _target_hex) const {
+		if (_source_hex == -1 || _target_hex == -1)
+			throw std::exception("Invalid hex id");
+
+		if (_source_hex == _target_hex)
+			return false;
+
 		auto adjacent_hexes = getAdjacentHexes(_source_hex);
 		return std::find(std::begin(adjacent_hexes), std::end(adjacent_hexes), _target_hex) != std::end(adjacent_hexes);
 	}
 
 	const std::array<int, 6> CombatPathfinder::getAdjacentHexes(const int _source_hex) const {
+		if (_source_hex == -1)
+			throw std::exception("Invalid hex id");
+
 		std::array<int, 6> hexes{ -1, -1, -1, -1, -1, -1 };
 		int offset = -1 * (_source_hex / FIELD_COLS % 2 != 0);
 
@@ -74,6 +83,9 @@ namespace HotaMechanics {
 	}
 
 	const std::vector<int> CombatPathfinder::getHexesInRange(const int _source_hex, const int _range) const {
+		if (_source_hex == -1 || _range <= 0)
+			throw std::exception("Invalid source hex or range");
+
 		std::unordered_set<int> hexes{ _source_hex };
 		std::vector<int> toCheck{ _source_hex };
 		std::unordered_set<int> checked{ -1 };
@@ -133,6 +145,11 @@ namespace HotaMechanics {
 
 	const std::vector<int> CombatPathfinder::getReachableHexesInRange(const int _source_hex, const int _range, const CombatField& _field,
 																							const bool _can_fly, const bool _double_wide) const {
+		if (_source_hex == -1 || _range <= 0)
+			throw std::exception("Invalid source hex or range");
+		if (_can_fly || _double_wide)
+			throw std::exception("Not implemented yet");
+
 		auto hexes = getWalkableHexesInRange(_source_hex, _range, _field);
 		return getReachableHexesFromWalkableHexes(_source_hex, _range, hexes, _field, _can_fly, _double_wide);
 	}
@@ -163,11 +180,11 @@ namespace HotaMechanics {
 	}
 
 	const int CombatPathfinder::distanceBetweenHexes(const int _source_hex, const int _target_hex) const {
+		if (_source_hex == -1 || _target_hex == -1)
+			throw std::exception("Invalid source or target hex id");
+
 		if (_target_hex == _source_hex)
 			return 0;
-
-		if (_target_hex == -1)
-			return -1;
 
 		if (areAdjacent(_source_hex, _target_hex)) {
 			return 1;
@@ -199,7 +216,10 @@ namespace HotaMechanics {
 		return row_dist + col_dist - (row_dist >= std::max(odd_rows, even_rows) ? std::max(odd_rows, even_rows) : row_dist);
 	}
 
-	const std::vector<int> CombatPathfinder::findPath(const int _source_hex, const int _target_hex, const CombatField& _field) const {
+	const std::vector<int> CombatPathfinder::findPath(const int _source_hex, const int _target_hex, const CombatField& _field, const bool _double_wide) const {
+		if (_double_wide || _source_hex == -1 || _target_hex == -1)
+			throw std::exception("Invalid source or target hex");		
+		
 		if (!_field.isHexWalkable(_target_hex) || _source_hex == _target_hex)
 			return std::vector<int>();
 

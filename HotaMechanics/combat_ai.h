@@ -26,15 +26,27 @@ namespace HotaMechanics {
 		CombatAI& operator=(const CombatAI& _obj) = delete;
 		CombatAI& operator=(CombatAI&& _obj) = delete;
 
-		// AI decision making ------------
+		// AI utils ----------------------
 		void calculateFightValueAdvantageOnHexes(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const CombatField& _field);
+		// -------------------------------
+
+		// AI decision making ------------
 		const std::vector<int> chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero) const;
 		const int chooseHexToMoveForAttack(const CombatUnit& _active_stack, const CombatUnit& _target_unit) const;
 		const int chooseWalkDistanceFromPath(const CombatUnit& _active_stack, int _target_hex, const CombatField& _field) const;
 		// -------------------------------
 
+		// AI state ----------------------
+		const bool needRecalculateHexesFightValueGain() const { return need_recalculate_hexes; }
+		void clearNeedRecalculateHexesFightValueGainFlag() { need_recalculate_hexes = true; }
+		// -------------------------------
+
 		// simple getters ----------------
 		const CombatPathfinder& getPathfinder() const { return *pathfinder; }
+		// -------------------------------
+	protected:
+		// for mocking purposes ----------
+		void setPathfinder(const CombatPathfinder& _pathfinder) { pathfinder.reset(const_cast<CombatPathfinder*>(&_pathfinder)); }
 		// -------------------------------
 	private:
 		const CombatManager& combat_manager;
@@ -43,6 +55,7 @@ namespace HotaMechanics {
 		Constants::AIDifficulty difficulty{ Constants::AIDifficulty::NORMAL };
 		bool similar_army_strength{ true }; // > 2x fight_value for one side
 
+		bool need_recalculate_hexes{ true };
 		std::array<int, Constants::FIELD_SIZE> hexes_fight_value_gain;
 	};
 }; // HotaMechanics

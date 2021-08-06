@@ -40,9 +40,11 @@ namespace HotaMechanics {
 
 		// change state ----------------------
 		void fillHex(const int16_t _target_hex, const Constants::CombatHexOccupation _occupied_by) {
+			if (_target_hex == -1) return;
 			hexes[_target_hex].occupyHex(_occupied_by);
 		}
 		void clearHex(const int16_t _target_hex) {
+			if (_target_hex == -1) return;
 			fillHex(_target_hex, Constants::CombatHexOccupation::EMPTY);
 		}
 		void setTemplate(const std::vector<int>& _template);

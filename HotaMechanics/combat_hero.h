@@ -16,8 +16,8 @@ namespace HotaMechanics {
 		CombatHero(const CombatHero& _obj);
 		CombatHero(CombatHero&& _obj) noexcept;
 
-		CombatHero& operator=(const CombatHero& _obj) = default;
-		CombatHero& operator=(CombatHero&& _obj) = default;
+		CombatHero& operator=(const CombatHero& _obj);
+		CombatHero& operator=(CombatHero&& _obj);
 
 
 		// complex getters ---------------
@@ -40,7 +40,6 @@ namespace HotaMechanics {
 		void addUnitFromArmy(UnitPermutation _unit_perm);
 		ArmyPermutation generateBaseArmyPermutation() const;
 		void generateUnitsFromArmy();
-
 
 		Hero hero_template;
 

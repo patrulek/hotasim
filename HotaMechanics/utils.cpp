@@ -2,11 +2,23 @@
 
 #include <random>
 
-#include "constants.h"
 #include "combat_unit.h"
 
 namespace HotaMechanics::Utils {
 	using namespace Constants;
+
+
+	BaseStats baseStats(int _atk, int _def, int _pow, int _kgd) {
+		return BaseStats{ _kgd << 24 | _pow << 16 | _def << 8 | _atk };
+	}
+
+	CombatStats combatStats(int _min, int _max, int _spd, int _shots) {
+		return CombatStats{ _shots << 24 | _spd << 16 | _max << 8 | _min };
+	}
+
+	PrimaryStats primaryStats(int _hp, int _mana) {
+		return PrimaryStats{ _mana << 16 | _hp };
+	}
 
 	std::string to_string(const CombatUnit& _unit) {
 		return _unit.getTemplate().name + " : " + std::to_string(_unit.getStackNumber()) + " : " + std::to_string(_unit.getHex()) + " : "

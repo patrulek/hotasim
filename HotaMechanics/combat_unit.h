@@ -101,6 +101,7 @@ namespace HotaMechanics {
 		const Unit& getTemplate() const { return unit_template; }
 		int16_t getStackNumber() const { return stack_number; }
 		float getFightValue() const { return unit_template.stats.fight_value; }
+		const CombatHero* getHero() const { return hero; }
 		// -------------------------------
 	private:
 		Unit unit_template;

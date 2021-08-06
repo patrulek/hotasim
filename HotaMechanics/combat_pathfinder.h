@@ -31,7 +31,7 @@ namespace HotaMechanics {
 																		const bool _can_fly, const bool _double_wide) const;
 
 		const int distanceBetweenHexes(const int _source_hex, const int _target_hex) const;
-		const std::vector<int> findPath(const int _source_hex, const int _target_hex, const CombatField& _field) const;
+		const std::vector<int> findPath(const int _source_hex, const int _target_hex, const CombatField& _field, const bool _double_wide = false) const;
 	private:
 		const std::vector<int> getWalkableHexesFromList(const std::vector<int>& _hexes, const CombatField& _field) const;
 		const std::vector<int> getReachableHexesFromWalkableHexes(const int from, const int range, const std::vector<int>& hexes,

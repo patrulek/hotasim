@@ -23,13 +23,16 @@ namespace HotaMechanics {
 		}
 
 		const int calculateCounterAttackMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) {
+			if (!defender.canRetaliate())
+				return 0;
+
 			CombatUnit attacker_copy(attacker);
 			CombatUnit defender_copy(defender);
 
 			int first_attack_dmg = calculateMeleeUnitAverageDamage(attacker_copy, defender_copy);
 			defender_copy.applyDamage(first_attack_dmg);
 
-			if (!defender_copy.isAlive() || !defender_copy.canRetaliate())
+			if (!defender_copy.isAlive())
 				return 0;
 
 			int counter_attack_dmg = calculateMeleeUnitAverageDamage(defender_copy, attacker_copy);

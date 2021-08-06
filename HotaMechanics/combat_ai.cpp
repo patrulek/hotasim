@@ -18,6 +18,7 @@ namespace HotaMechanics {
 
 	void CombatAI::calculateFightValueAdvantageOnHexes(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const CombatField& _field) {
 		hexes_fight_value_gain = Calculator::calculateFightValueAdvantageOnHexes(_active_stack, _enemy_hero, _field, *pathfinder);
+		need_recalculate_hexes = false;
 	}
 
 	// because of randomization which cant be mirrored in this project, this function can possibly return more
@@ -199,7 +200,7 @@ namespace HotaMechanics {
 
 	const int CombatAI::chooseWalkDistanceFromPath(const CombatUnit& _active_stack, const int _target_hex, const CombatField& _field) const {
 		int walk_distance = 0;
-		int fight_value_gain = -calculateStackUnitFightValue(_active_stack);
+		int fight_value_gain = hexes_fight_value_gain[_active_stack.getHex()];
 		auto path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
 		int range = std::min(path.size(), (size_t)_active_stack.getCombatStats().spd);
 

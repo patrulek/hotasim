@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <iterator>
 
-
 namespace HotaMechanics {
 	using namespace Constants;
 
@@ -30,6 +29,23 @@ namespace HotaMechanics {
 		army_permutation = _obj.army_permutation;
 	}
 
+	// TODO: fix it
+	CombatHero& CombatHero::operator=(const CombatHero& _obj) {
+		if (this == &_obj)
+			return *this;
+
+		hero_template = _obj.hero_template;
+		stats = _obj.stats;
+
+		units.clear();
+		for (auto unit : _obj.units)
+			units.emplace_back(CombatUnit(unit, *this));
+
+		side = _obj.side;
+		army_permutation = _obj.army_permutation;
+		return *this;
+	}
+
 	CombatHero::CombatHero(CombatHero&& _obj) noexcept
 		: hero_template(_obj.hero_template) {
 		stats = std::move(_obj.stats);
@@ -40,6 +56,24 @@ namespace HotaMechanics {
 
 		side = std::move(_obj.side);
 		army_permutation = std::move(_obj.army_permutation);
+	}
+
+	// TODO: fix it
+	CombatHero& CombatHero::operator=(CombatHero&& _obj) {
+		if (this == &_obj)
+			return *this;
+
+		hero_template = std::move(_obj.hero_template);
+		stats = std::move(_obj.stats);
+
+		units.clear();
+		for (auto unit : _obj.units)
+			units.emplace_back(CombatUnit(unit, *this));
+		_obj.units.clear();
+
+		side = std::move(_obj.side);
+		army_permutation = std::move(_obj.army_permutation);
+		return *this;
 	}
 
 	void CombatHero::initialize() {
@@ -82,7 +116,7 @@ namespace HotaMechanics {
 	}
 
 	const int CombatHero::getUnitId(const CombatUnit& _unit) const {
-		auto it = std::find_if(std::begin(units), std::end(units), [&_unit](const auto& _obj) { return &_obj == &_unit; });
+		auto it = std::find_if(std::begin(units), std::end(units), [&_unit](const CombatUnit& _obj) { return &_obj == &_unit; });
 		bool found = (it != std::end(units));
 		return (it - std::begin(units)) * found - !found;
 	}
