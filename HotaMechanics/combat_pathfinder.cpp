@@ -218,77 +218,79 @@ namespace HotaMechanics {
 
 	const std::vector<int> CombatPathfinder::findPath(const int _source_hex, const int _target_hex, const CombatField& _field, const bool _double_wide) const {
 		if (_double_wide || _source_hex == -1 || _target_hex == -1)
-			throw std::exception("Invalid source or target hex");		
-		
+			throw std::exception("Invalid source or target hex");
+
 		if (!_field.isHexWalkable(_target_hex) || _source_hex == _target_hex)
 			return std::vector<int>();
 
 		std::vector<int> path{};
 
-		std::vector<int> to_check{ _source_hex };
-		std::vector<int> next_to_check{};
-		std::unordered_set<int> checked;
-		std::unordered_map<int, int> paths;
-		std::unordered_map<int, int> distances;
+		std::array<int16_t, FIELD_SIZE> to_check;
+		to_check.fill(0);
+		int to_check_cnt = 0;
+		to_check[to_check_cnt++] = _source_hex;
+
+		std::array<int16_t, FIELD_SIZE> next_to_check;
+		next_to_check.fill(0);
+		int next_to_check_cnt = 0;
+
+		std::array<bool, FIELD_SIZE> checked;
+		checked.fill(0);
+
+		std::array<int16_t, FIELD_SIZE> paths;
+		paths.fill(-1);
+
+		std::array<int16_t, FIELD_SIZE> distances;
+		distances.fill(999);
+
 		bool found = false;
-		paths[_source_hex] = -1;
 		int dist = 1;
 
-		while (!to_check.empty()) {
-			int hex_id = to_check.back();
-			to_check.pop_back();
-			checked.insert(hex_id);
+		while (to_check_cnt > 0) {
+			const int hex_id = to_check[--to_check_cnt];
 
 			if (hex_id == _target_hex) {
 				found = true;
 				break;
 			}
 
-			auto adjacent_hexes = getAdjacentHexesClockwise(hex_id);
+			checked[hex_id] = true;
+			const auto adjacent_hexes = getAdjacentHexesClockwise(hex_id);
 			auto walkable = std::vector<int>(std::begin(adjacent_hexes), std::end(adjacent_hexes));
 			walkable = getWalkableHexesFromList(walkable, _field);
 
-			for (auto hex : walkable) {
-				if (paths.find(hex) != std::end(paths)) {
-					int distance = hex_id != -1 ? distances[hex_id] + 1 : 999;// ? distanceBetweenHexes(hex_id, _source_hex) : -1;
-					int distance2 = paths[hex] != -1 ? distances[hex] : 999; //distanceBetweenHexes(paths[hex], _source_hex) : -1;
+			for (const auto hex : walkable) {
+				const bool has_path_to_hex = paths[hex] != -1;
+				const int distance_to_hex = (has_path_to_hex * distances[hex_id]) + (!has_path_to_hex * 999);
+				const bool is_closer = !has_path_to_hex || (dist < distance_to_hex);
 
-					if (distance < distance2)
-						paths[hex] = hex_id;
-				}
+				paths[hex] = (hex_id * is_closer) + (paths[hex] * !is_closer);
+				distances[hex] = (dist * is_closer) + (distances[hex] * !is_closer);
+
+				next_to_check[next_to_check_cnt] = hex;
+				next_to_check_cnt += !checked[hex];
+				checked[hex] = true;
 			}
 
-			for (auto check : checked)
-				walkable.erase(std::remove(std::begin(walkable), std::end(walkable), check), std::end(walkable));
-
-			checked.insert(std::begin(walkable), std::end(walkable));
-
-			for (auto check : walkable) {
-				paths[check] = hex_id;
-				distances[check] = dist;
-			}
-
-			next_to_check.insert(std::end(next_to_check), std::begin(walkable), std::end(walkable));
-
-			if (to_check.empty()) {
+			if (to_check_cnt == 0 && next_to_check_cnt > 0) {
 				to_check = next_to_check;
-				std::reverse(std::begin(to_check), std::end(to_check));
-				next_to_check.clear();
+				to_check_cnt = next_to_check_cnt;
+				next_to_check_cnt = 0;
 				++dist;
+
+				std::reverse(std::begin(to_check), std::begin(to_check) + to_check_cnt);
 			}
 		}
 
 		if (found) {
 			int start = _target_hex;
-
 			path.push_back(start);
 
-			while (start != _source_hex) {
+			while (paths[start] != _source_hex) {
 				start = paths[start];
 				path.push_back(start);
 			}
 
-			path.pop_back();
 			std::reverse(std::begin(path), std::end(path));
 		}
 
