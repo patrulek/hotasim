@@ -37,6 +37,12 @@ namespace HotaMechanics {
 		const std::vector<CombatAction> generateActionsForAI();
 		// ------------------------------
 
+		// unit utils -------------------
+		CombatUnit& getActiveStack() const;
+		CombatUnit& getStackByGlobalId(const int _guid) const;
+		CombatUnit& getStackByLocalId(const int _uid, const Constants::CombatSide _side) const;
+		// ------------------------------
+
 		// simple getters ---------------
 		const CombatHero& getAttacker() const { return *attacker; }
 		const CombatHero& getDefender() const { return *defender; }
@@ -58,6 +64,13 @@ namespace HotaMechanics {
 		const CombatAction createAttackAction(int16_t _unit_id, int16_t _hex_id) const;
 		// ------------------------------
 
+		// event creator ----------------
+		const CombatEvent createUnitStatsChangedEvent(const int16_t _unit_id, const int16_t _stats_id) const;
+		const CombatEvent createUnitHealthLostEvent(const int16_t _unit_id) const;
+		const CombatEvent createUnitPosChangedEvent(const int16_t _unit_id, const int16_t _source_hex, const int16_t _target_hex) const;
+		const CombatEvent createFieldChangeEvent(const std::vector<int16_t>& _hexes, const bool _destroy = true) const;
+		// ------------------------------
+
 		// action processor -------------
 		void processPreBattleAction(const CombatAction& _action);
 		void processPreTurnAction(const CombatAction& _action);
@@ -77,7 +90,6 @@ namespace HotaMechanics {
 		// -----------------------------
 
 		// unit utils ------------------
-		CombatUnit& getActiveStack() const;
 		void moveUnit(CombatUnit& _unit, int _target_hex);
 		void makeUnitAttack(int _unit_id, int _target_hex);
 		void makeUnitFly(int _target_hex);
@@ -96,6 +108,10 @@ namespace HotaMechanics {
 		void setCombatResult();
 		const bool isInitialTacticsState() const;
 		// -----------------------------
+
+		// during battle
+		std::vector<CombatEvent> action_events;
+		std::vector<const CombatUnit*> hero_units;
 
 		// post-initialization
 		bool initialized{ false };

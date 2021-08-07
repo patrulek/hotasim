@@ -78,6 +78,7 @@ namespace HotaMechanics {
 
 	void CombatHero::initialize() {
 		units.reserve(21);
+		unit_ptrs.reserve(21);
 		stats = hero_template.stats;
 
 		if (army_permutation.permutations.empty())
@@ -115,10 +116,22 @@ namespace HotaMechanics {
 		return units_;
 	}
 
+	const std::vector<const CombatUnit*> CombatHero::getUnitsPtrs() {
+		unit_ptrs.clear();
+		std::transform(std::begin(units), std::end(units), std::back_inserter(unit_ptrs), [](const auto& _obj) { return &_obj; });
+
+		return unit_ptrs;
+	}
+
 	const int CombatHero::getUnitId(const CombatUnit& _unit) const {
 		auto it = std::find_if(std::begin(units), std::end(units), [&_unit](const CombatUnit& _obj) { return &_obj == &_unit; });
 		bool found = (it != std::end(units));
 		return (it - std::begin(units)) * found - !found;
+	}
+
+	const int CombatHero::getGlobalUnitId(const CombatUnit& _unit) const {
+		auto id = getUnitId(_unit);
+		return id + (21 * (side == CombatSide::DEFENDER));
 	}
 
 	const bool CombatHero::isAlive() const {

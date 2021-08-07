@@ -27,11 +27,17 @@ namespace HotaMechanics {
 		if (current_state->order.empty())
 			throw std::exception("Cant get active stack from empty queue");
 
-		int unit_id = current_state->order.front();
-		auto& hero = unit_id / 21 == 0 ? current_state->attacker : current_state->defender;
+		return getStackByGlobalId(current_state->order.front());
+	}
 
-		auto unit = const_cast<CombatUnit*>(hero.getUnits()[unit_id % 21]);
-		return *unit;
+	CombatUnit& CombatManager::getStackByGlobalId(const int _guid) const {
+		auto& hero = _guid / 21 == 0 ? current_state->attacker : current_state->defender;
+		return *(const_cast<CombatUnit*>(hero.getUnitsPtrs()[_guid % 21]));
+	}
+
+	CombatUnit& CombatManager::getStackByLocalId(const int _uid, const Constants::CombatSide _side) const {
+		auto& hero = _side == CombatSide::ATTACKER ? current_state->attacker : current_state->defender;
+		return *(const_cast<CombatUnit*>(hero.getUnitsPtrs()[_uid]));
 	}
 
 	void CombatManager::orderUnitsInTurn()

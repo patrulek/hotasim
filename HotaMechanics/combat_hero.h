@@ -22,7 +22,9 @@ namespace HotaMechanics {
 
 		// complex getters ---------------
 		const std::vector<const CombatUnit*> getUnits() const;
-		const int getUnitId(const CombatUnit& unit) const;
+		const std::vector<const CombatUnit*> getUnitsPtrs();
+		const int getUnitId(const CombatUnit& _unit) const;
+		const int getGlobalUnitId(const CombatUnit& _unit) const;
 		// -------------------------------
 
 		// check hero state --------------
@@ -48,5 +50,6 @@ namespace HotaMechanics {
 		Constants::CombatSide side;
 
 		std::vector<CombatUnit> units;
+		std::vector<const CombatUnit*> unit_ptrs;
 	};
 };

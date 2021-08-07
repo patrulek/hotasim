@@ -18,6 +18,9 @@ namespace HotaMechanics {
 		defender = std::make_unique<CombatHero>(_defender);
 		field = std::make_unique<CombatField>(_field);
 		ai = std::make_unique<CombatAI>(*this);
+
+		action_events.reserve(32);
+		hero_units.reserve(32);
 	}
 
 	CombatManager::~CombatManager() {}
@@ -64,6 +67,7 @@ namespace HotaMechanics {
 
 		if (isNewCombat()) {
 			nextStateByAction(createPreBattleAction());
+			ai->initializeBattle();
 			return;
 		}
 
@@ -80,10 +84,14 @@ namespace HotaMechanics {
 		if (!initialized)
 			throw std::exception("Combat manager still didnt initialized");
 
+		action_events.clear();
+
 		if (isUnitAction(action))
 			processUnitAction(action);
 		else
 			processCombatAction(action);
+
+		ai->addEventsToProcess(action_events);
 
 		setCombatResult();
 

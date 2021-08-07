@@ -75,4 +75,11 @@ namespace HotaMechanics::Constants {
 		NEUTRAL, ENCOUNTER
 	};
 
+
+	enum class CombatEventType : int8_t {
+		UNIT_POS_CHANGED, FIELD_CHANGE, UNIT_HEALTH_LOST, UNIT_STATS_CHANGED, BATTLE_START
+	};
+
+
+
 } // HotaMechanics::Constants

@@ -100,4 +100,12 @@ namespace HotaMechanics {
 		int16_t target; // hex_id (for walk/melee attack/spellcast)
 		int16_t param2; // true/false (whether action ends unit turn; hero spellcast dont)
 	};
+
+	struct CombatEvent {
+		Constants::CombatEventType type;
+		int16_t param1;
+		int16_t param2;
+		int16_t param3;
+		std::vector<int16_t> hexes;
+	};
 }; // HotaMechanics

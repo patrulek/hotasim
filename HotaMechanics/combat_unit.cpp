@@ -118,8 +118,17 @@ namespace HotaMechanics {
 		return hero->getUnitId(*this);
 	}
 
+	const int CombatUnit::getGlobalUnitId() const {
+		return hero->getGlobalUnitId(*this);
+	}
+
 	const CombatSide CombatUnit::getCombatSide() const {
 		return hero->getCombatSide();
+	}
+
+	const CombatSide CombatUnit::getEnemyCombatSide() const {
+		auto side = hero->getCombatSide();
+		return side == CombatSide::ATTACKER ? CombatSide::DEFENDER : CombatSide::ATTACKER;
 	}
 
 } // HotaMechanics

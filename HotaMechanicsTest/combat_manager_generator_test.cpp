@@ -17,14 +17,12 @@ namespace CombatManagerTest {
 	// CombatManager::generateActionsForPlayer()
 	TEST(CombatManager_Generator, shouldReturnNoAttackNorSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHaveSpellbookAndNoHostileUnitsInRange) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
+
+		// start battle
 		combat_manager->nextState();
-		auto& current_state = combat_manager->getCurrentState();
-		
+
+		// start turn 1
 		auto actions = combat_manager->generateActionsForPlayer();
-		auto unit = const_cast<CombatUnit*>(current_state.attacker.getUnits()[0]);
-		auto unit2 = const_cast<CombatUnit*>(current_state.defender.getUnits()[0]);
-		unit->moveTo(getHexId(8, 1));
-		current_state.field.fillHex(getHexId(8, 1), CombatHexOccupation::UNIT);
 		EXPECT_EQ(21, actions.size()); // 19 walking actions, 1 wait action, 1 defend action
 
 		int walking_actions = 0;
@@ -34,50 +32,65 @@ namespace CombatManagerTest {
 		}
 		EXPECT_EQ(19, walking_actions);
 
-		/// --- ///
+		CombatAction player_action{ CombatActionType::DEFENSE, -1, -1, true };
+		combat_manager->nextStateByAction(player_action);
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(8, 15), true };
+		combat_manager->nextStateByAction(ai_action);
+		combat_manager->nextState();
 
-		current_state.field.fillHex(getHexId(8, 2), CombatHexOccupation::SOLID_OBSTACLE); // this obstacle prevents from going to 2 hexes, so there should be 20 actions now
 
-		actions = combat_manager->generateActionsForPlayer();
-		EXPECT_EQ(19, actions.size()); // 17 walking actions, 1 wait action, 1 defend action
+		// start turn 2
+		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		combat_manager->nextStateByAction(player_action);
+		ai_action = CombatAction{ CombatActionType::DEFENSE, -1, -1, true };
+		combat_manager->nextStateByAction(ai_action);
 
-		walking_actions = 0;
-		for (auto action : actions) {
-			EXPECT_FALSE(isAttackOrSpellcastAction(action));
-			walking_actions += (action.action == CombatActionType::WALK);
-		}
-		EXPECT_EQ(17, walking_actions);
-
-		/// --- ///
-
-		unit->wait(); // were changing unit state, so now wait action should be gone
-		actions = combat_manager->generateActionsForPlayer();
-		EXPECT_EQ(18, actions.size()); // 17 walking actions, 1 defend action
+		actions = combat_manager->generateActionsForPlayer(); 
+		EXPECT_EQ(20, actions.size()); // 19 walking actions, 1 defend action
 
 		walking_actions = 0;
 		for (auto action : actions) {
 			EXPECT_FALSE(isAttackOrSpellcastAction(action));
 			walking_actions += (action.action == CombatActionType::WALK);
 		}
-		EXPECT_EQ(17, walking_actions);
+		EXPECT_EQ(19, walking_actions);
+
+		/// --- ///
+		// TODO: need FIELD_CHANGE event
+		//current_state.field.fillHex(getHexId(8, 2), CombatHexOccupation::SOLID_OBSTACLE); // this obstacle prevents from going to 2 hexes, so there should be 20 actions now
+
+		//actions = combat_manager->generateActionsForPlayer();
+		//EXPECT_EQ(19, actions.size()); // 17 walking actions, 1 wait action, 1 defend action
+
+		//walking_actions = 0;
+		//for (auto action : actions) {
+		//	EXPECT_FALSE(isAttackOrSpellcastAction(action));
+		//	walking_actions += (action.action == CombatActionType::WALK);
+		//}
+		//EXPECT_EQ(17, walking_actions);
+
+		///// --- ///
+
+		
 	}
 
 	// CombatManager::generateActionsForPlayer()
 	TEST(CombatManager_Generator, shouldReturnNoSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHaveSpellbookAndHostileUnitsInRange) {
-		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 1), CombatSide::DEFENDER));
+		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
+
+		// start battle
 		combat_manager->nextState();
-		auto& current_state = combat_manager->getCurrentState();
 
-		auto unit = const_cast<CombatUnit*>(current_state.attacker.getUnits()[0]);
-		auto unit2 = const_cast<CombatUnit*>(current_state.defender.getUnits()[0]);
-		current_state.field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::EMPTY));
-		unit->moveTo(getHexId(8, 1));
-		unit2->moveTo(getHexId(8, 2));
-		current_state.field.fillHex(getHexId(8, 1), CombatHexOccupation::UNIT);
-		current_state.field.fillHex(getHexId(8, 2), CombatHexOccupation::UNIT); // this unit prevents from going to 2 hexes
+		// start turn 1
+		CombatAction player_action{ CombatActionType::DEFENSE, -1, -1, true };
+		combat_manager->nextStateByAction(player_action);
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(5, 2), true };
+		combat_manager->nextStateByAction(ai_action);
+		combat_manager->nextState();
 
+		// start turn 2
 		auto actions = combat_manager->generateActionsForPlayer();
-		EXPECT_EQ(26, actions.size()); // 18 walking actions, 6 attack actions, 1 wait action, 1 defend action
+		EXPECT_EQ(25, actions.size()); // 17 walking actions ([5,2] blokuje), 6 attack actions, 1 wait action, 1 defend action
 
 		int walking_actions = 0;
 		int attack_actions = 0;
@@ -85,41 +98,70 @@ namespace CombatManagerTest {
 			walking_actions += (action.action == CombatActionType::WALK);
 			attack_actions += (action.action == CombatActionType::ATTACK);
 		}
-		EXPECT_EQ(18, walking_actions);
+		EXPECT_EQ(17, walking_actions);
 		EXPECT_EQ(6, attack_actions);
 	}
 
 	// CombatManager::generateActionsForAI()
-	TEST(CombatManager_Generator, shouldReturnAttackActionWhenHostileUnitsInRange) {
+	TEST(CombatManager_Generator, shouldReturnAttackActionWhenOneHostileUnitInRange) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
+		
+		// start battle
 		combat_manager->nextState();
-		CombatAction player_action{ CombatActionType::WAIT, -1, -1, -1 };
-		combat_manager->nextStateByAction(player_action);
-		auto& current_state = combat_manager->getCurrentState();
 
-		auto unit = const_cast<CombatUnit*>(current_state.attacker.getUnits()[0]);
-		auto unit2 = const_cast<CombatUnit*>(current_state.defender.getUnits()[0]);
-		current_state.field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::EMPTY));
-		unit->moveTo(getHexId(8, 1));
-		unit2->moveTo(getHexId(8, 2));
-		current_state.field.fillHex(getHexId(8, 1), CombatHexOccupation::UNIT);
-		current_state.field.fillHex(getHexId(8, 2), CombatHexOccupation::UNIT);
+		// start turn 1
+		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(8, 1), true };
+		combat_manager->nextStateByAction(player_action);
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(8, 2), true };
+		combat_manager->nextStateByAction(ai_action);
+		combat_manager->nextState();
+
+		// start turn 2
+		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		combat_manager->nextStateByAction(player_action);
 
 		// when one player unit in range, always choose that one to attack
 		auto actions = combat_manager->generateActionsForAI();
 		EXPECT_EQ(1, actions.size());
 		EXPECT_EQ(CombatActionType::ATTACK, actions[0].action);
+	}
 
+	// CombatManager::generateActionsForAI()
+	TEST(CombatManager_Generator, shouldReturnAttackActionWhenManyHostilesUnitsInRange) {
+		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100, "Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
 
-		current_state.attacker = createHero(createArmy("Peasant", 100, "Peasant", 100)); 
-		const_cast<CombatUnit*>(current_state.attacker.getUnits()[0])->moveTo(getHexId(8, 1));
-		const_cast<CombatUnit*>(current_state.attacker.getUnits()[1])->moveTo(getHexId(7, 2));
-		current_state.field.fillHex(getHexId(7, 2), CombatHexOccupation::UNIT);
+		// start battle
+		combat_manager->nextState();
+
+		// start turn 1
+		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(7, 2), true };
+		combat_manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::DEFENSE, -1, -1, true };
+		combat_manager->nextStateByAction(player_action);
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(8, 2), true };
+		combat_manager->nextStateByAction(ai_action);
+		combat_manager->nextState();
+
+		// start turn 2
+		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		combat_manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		combat_manager->nextStateByAction(player_action);
 
 		// when two player's units in range (at same distance), ane both are same(or very similar) strength, then AI attacks random stack, so generate 2 attack actions
-		actions = combat_manager->generateActionsForAI();
+		auto actions = combat_manager->generateActionsForAI();
 		EXPECT_EQ(2, actions.size());
 		EXPECT_NE(actions[0].param1, actions[1].param1); // actions with different unit_id (targets)
+
+		auto& current_state = combat_manager->getCurrentState();
+		const_cast<CombatUnit*>(current_state.attacker.getUnits()[0])->applyDamage(50);
+
+		// when two player's units in range, and one of then is definitely weaker, pick the one, that fight value gain is better
+		// (100 peasants attacking 100 peasants, will get avg 1500 fight value; 100 peasants attacking 50 peasants, will get avg 750 fight value)
+		// in this case AI should choose to attack 100 peasants so unit_id == 1
+		actions = combat_manager->generateActionsForAI();
+		EXPECT_EQ(1, actions.size());
+		EXPECT_EQ(1, actions[0].param1); // unit_id == 1 (pick unit with greater fv gain)
 
 
 		//const_cast<CombatUnit*>(current_state.attacker.getUnits()[1])->moveTo(getHexId(7, 1));
@@ -131,35 +173,27 @@ namespace CombatManagerTest {
 		//actions = combat_manager->generateActionsForAI();
 		//EXPECT_EQ(1, actions.size());
 		//EXPECT_EQ(0, actions[0].param1); // unit_id == 0 (pick first unit)
-
-
-		const_cast<CombatUnit*>(current_state.attacker.getUnits()[0])->applyDamage(50);
-
-		// when two player's units in range, and one of then is definitely weaker, pick the one, that fight value gain is better
-		// (100 peasants attacking 100 peasants, will get avg 1500 fight value; 100 peasants attacking 50 peasants, will get avg 750 fight value)
-		// in this case AI should choose to attack 100 peasants so unit_id == 1
-		actions = combat_manager->generateActionsForAI();
-		EXPECT_EQ(1, actions.size());
-		EXPECT_EQ(1, actions[0].param1); // unit_id == 1 (pick unit with greater fv gain)
 	}
 
 	// CombatManager::generateActionsForAI()
 	TEST(CombatManager_Generator, shouldReturnWalkActionWhenNoHostileUnitsInRangeAndWeakerUnitsFurtherThanTwoTurnsAway) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 100)), createHero(createArmy("Peasant", 500), CombatSide::DEFENDER));
+
+		// start battle
 		combat_manager->nextState();
-		CombatAction player_action{ CombatActionType::WAIT, -1, -1, -1 };
+
+		// start turn 1
+		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(8, 1), true };
 		combat_manager->nextStateByAction(player_action);
-		auto& current_state = combat_manager->getCurrentState();
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(8, 15), true };
+		combat_manager->nextStateByAction(ai_action);
+		combat_manager->nextState();
 
-		auto unit = const_cast<CombatUnit*>(current_state.attacker.getUnits()[0]);
-		auto unit2 = const_cast<CombatUnit*>(current_state.defender.getUnits()[0]);
-		current_state.field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::EMPTY));
-		unit->moveTo(getHexId(8, 1));
-		unit2->moveTo(getHexId(8, 15));
-		current_state.field.fillHex(getHexId(8, 1), CombatHexOccupation::UNIT);
-		current_state.field.fillHex(getHexId(8, 15), CombatHexOccupation::UNIT); 
+		// start turn 2
+		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		combat_manager->nextStateByAction(player_action);
 
-		// when one player unit in range, always choose that one to attack
+		// when no player unit in range, choos to walk
 		auto actions = combat_manager->generateActionsForAI();
 		EXPECT_EQ(1, actions.size());
 		EXPECT_EQ(CombatActionType::WALK, actions[0].action);
@@ -172,20 +206,22 @@ namespace CombatManagerTest {
 	// CombatManager::generateActionsForAI()
 	TEST(CombatManager_Generator, shouldReturnWalkActionWhenNoHostileUnitsInRangeAndEqualCloserThanTwoTurnsAwayToStrongerUnits) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 200)), createHero(createArmy("Peasant", 500), CombatSide::DEFENDER));
+
+		// start battle
 		combat_manager->nextState();
-		CombatAction player_action{ CombatActionType::WAIT, -1, -1, -1 };
+
+		// start turn 1
+		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(8, 1), true };
 		combat_manager->nextStateByAction(player_action);
-		auto& current_state = combat_manager->getCurrentState();
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(8, 9), true };
+		combat_manager->nextStateByAction(ai_action);
+		combat_manager->nextState();
 
-		auto unit = const_cast<CombatUnit*>(current_state.attacker.getUnits()[0]);
-		auto unit2 = const_cast<CombatUnit*>(current_state.defender.getUnits()[0]);
-		current_state.field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::EMPTY));
-		unit->moveTo(getHexId(8, 1));
-		unit2->moveTo(getHexId(8, 9));
-		current_state.field.fillHex(getHexId(8, 1), CombatHexOccupation::UNIT);
-		current_state.field.fillHex(getHexId(8, 9), CombatHexOccupation::UNIT); 
+		// start turn 2
+		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		combat_manager->nextStateByAction(player_action);
 
-		// when one player unit in range, always choose that one to attack
+		// when no player unit in range, choose to walk but no at full range (when would get damaged)
 		auto actions = combat_manager->generateActionsForAI();
 		EXPECT_EQ(1, actions.size());
 		EXPECT_EQ(CombatActionType::WALK, actions[0].action);
@@ -197,18 +233,20 @@ namespace CombatManagerTest {
 	// CombatManager::generateActionsForAI()
 	TEST(CombatManager_Generator, shouldReturnWaitActionWhenNoHostileUnitsInRangeAndEqualCloserThanTwoTurnsAwayToStrongerUnitsAndMovingWouldGetUsInDangerZone) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 200)), createHero(createArmy("Peasant", 500), CombatSide::DEFENDER));
-		combat_manager->nextState();
-		CombatAction player_action{ CombatActionType::WAIT, -1, -1, -1 };
-		combat_manager->nextStateByAction(player_action);
-		auto& current_state = combat_manager->getCurrentState();
 
-		auto unit = const_cast<CombatUnit*>(current_state.attacker.getUnits()[0]);
-		auto unit2 = const_cast<CombatUnit*>(current_state.defender.getUnits()[0]);
-		current_state.field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::EMPTY));
-		unit->moveTo(getHexId(8, 1));
-		unit2->moveTo(getHexId(8, 8));
-		current_state.field.fillHex(getHexId(8, 1), CombatHexOccupation::UNIT);
-		current_state.field.fillHex(getHexId(8, 8), CombatHexOccupation::UNIT); 
+		// start battle
+		combat_manager->nextState();
+
+		// start turn 1
+		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(8, 1), true };
+		combat_manager->nextStateByAction(player_action);
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(8, 8), true };
+		combat_manager->nextStateByAction(ai_action);
+		combat_manager->nextState();
+
+		// start turn 2
+		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		combat_manager->nextStateByAction(player_action);
 
 		// when one player unit in range, always choose that one to attack
 		auto actions = combat_manager->generateActionsForAI();

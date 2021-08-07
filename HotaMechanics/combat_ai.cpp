@@ -9,18 +9,225 @@
 
 namespace HotaMechanics {
 	using namespace Calculator;
+	using namespace Constants;
 
 	CombatAI::CombatAI(const CombatManager& _combat_manager)
 		: combat_manager(_combat_manager) {
 
 		pathfinder = std::make_unique<CombatPathfinder>();
+		events_to_process.reserve(128);
+	}
+
+	std::vector<int16_t> CombatAI::getReachableHexesForUnit(const CombatUnit& _unit) const {
+		std::vector<int16_t> reachable; reachable.reserve(64);
+		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
+
+		for (int hex = 0, uid = _unit.getUnitId(); hex < FIELD_SIZE; ++hex) {
+			if (reachables[hex] & (1 << uid))
+				reachable.push_back(hex);
+		}
+
+		return reachable;
+	}
+
+	std::vector<int16_t> CombatAI::getReachableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const {
+		std::vector<int16_t> reachable; reachable.reserve(64);
+		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
+		int uid = _unit.getUnitId();
+
+		for (auto hex : _hexes) {
+			if (reachables[hex] & (1 << uid))
+				reachable.push_back(hex);
+		}
+
+		return reachable;
+	}
+
+	std::vector<const CombatUnit*> CombatAI::getEnemyUnitsInRange(const CombatUnit& _unit) const {
+		std::vector<const CombatUnit*> units; units.reserve(16);
+		auto& hero = _unit.getCombatSide() == CombatSide::ATTACKER ? combat_manager.getCurrentState().defender : combat_manager.getCurrentState().attacker;
+		auto& ranges = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_ranges : ai_unit_ranges;
+		int uid = _unit.getUnitId();
+
+		for (auto enemy_unit : hero.getUnits()) {
+			if (ranges[enemy_unit->getHex()] & (1 << uid))
+				units.push_back(enemy_unit);
+		}
+
+		return units;
+	}
+
+	void CombatAI::initializeBattle() {
+		initializePlayerUnitRanges();
+		initializePlayerUnitReachables();
+		initializeAIUnitRanges();
+		initializeAIUnitReachables();
+	}
+
+	void CombatAI::initializePlayerUnitRanges() {
+		for (auto unit : combat_manager.getCurrentState().attacker.getUnits()) {
+			setPlayerUnitRanges(*unit);
+		}
+	}
+
+	void CombatAI::initializePlayerUnitReachables() {
+		for (auto unit : combat_manager.getCurrentState().attacker.getUnits()) {
+			setPlayerUnitReachables(*unit);
+		}
+	}
+
+	void CombatAI::initializeAIUnitRanges() {
+		for (auto unit : combat_manager.getCurrentState().defender.getUnits()) {
+			setAIUnitRanges(*unit);
+		}
+	}
+
+	void CombatAI::initializeAIUnitReachables() {
+		for (auto unit : combat_manager.getCurrentState().defender.getUnits()) {
+			setAIUnitReachables(*unit);
+		}
+	}
+
+	void CombatAI::processEvents() {
+		for (auto& ev : events_to_process) {
+			if (ev.type == CombatEventType::UNIT_POS_CHANGED)
+				processUnitPosChangedEvent(ev);
+			else if (ev.type == CombatEventType::UNIT_HEALTH_LOST)
+				processUnitHealthLostEvent(ev);
+		}
+
+		events_to_process.clear();
+	}
+
+	void CombatAI::processUnitPosChangedEvent(const CombatEvent& _ev) {
+		auto unit = combat_manager.getStackByGlobalId(_ev.param1);
+
+		if (unit.getCombatSide() == CombatSide::ATTACKER) {
+			clearPlayerUnitRanges(unit);
+			clearPlayerUnitReachables(unit);
+			setPlayerUnitRanges(unit);
+			setPlayerUnitReachables(unit);
+		}
+		else {
+			clearAIUnitRanges(unit);
+			clearAIUnitReachables(unit);
+			setAIUnitRanges(unit);
+			setAIUnitReachables(unit);
+		}
+
+		for (auto attacker_unit : combat_manager.getCurrentState().attacker.getUnits()) {
+			if (attacker_unit == &unit)
+				continue;
+
+			int uid = attacker_unit->getUnitId();
+
+			if (player_unit_ranges[_ev.param3] & (1 << uid)) {
+				clearPlayerUnitReachables(*attacker_unit);
+				setPlayerUnitReachables(*attacker_unit);
+			}
+		}
+
+		for (auto defender_unit : combat_manager.getCurrentState().defender.getUnits()) {
+			if (defender_unit == &unit)
+				continue;
+
+			int uid = defender_unit->getUnitId();
+
+			if (ai_unit_ranges[_ev.param3] & (1 << uid)) {
+				clearAIUnitReachables(*defender_unit);
+				setAIUnitReachables(*defender_unit);
+			}
+		}
+	}
+
+	void CombatAI::setPlayerUnitRanges(const CombatUnit& _unit) {
+		auto hexes = pathfinder->getHexesInRange(_unit.getHex(), _unit.getCombatStats().spd);
+		for (auto hex : hexes)
+			player_unit_ranges[hex] |= (1 << _unit.getUnitId());
+	}
+
+	void CombatAI::setPlayerUnitReachables(const CombatUnit& _unit) {
+		auto hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false);
+		for (auto hex : hexes)
+			player_unit_reachables[hex] |= (1 << _unit.getUnitId());
+	}
+	
+	void CombatAI::setAIUnitRanges(const CombatUnit& _unit) {
+		auto hexes = pathfinder->getHexesInRange(_unit.getHex(), _unit.getCombatStats().spd);
+		for (auto hex : hexes)
+			ai_unit_ranges[hex] |= (1 << _unit.getUnitId());
+	}
+
+	void CombatAI::setAIUnitReachables(const CombatUnit& _unit) {
+		auto hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false);
+		for (auto hex : hexes)
+			ai_unit_reachables[hex] |= (1 << _unit.getUnitId());
+	}
+
+	void CombatAI::processUnitHealthLostEvent(const CombatEvent& _ev) {
+		auto unit = combat_manager.getStackByGlobalId(_ev.param1);
+
+		if (unit.isAlive())
+			return;
+		
+		if (unit.getCombatSide() == CombatSide::ATTACKER) {
+			clearPlayerUnitRanges(unit);
+			clearPlayerUnitReachables(unit);
+		}
+		else {
+			clearAIUnitRanges(unit);
+			clearAIUnitReachables(unit);
+		}
+	}
+
+	void CombatAI::clearPlayerUnitRanges(const CombatUnit& _unit) {
+		for (int i = 0, uid = _unit.getUnitId(); i < FIELD_SIZE; ++i) {
+			player_unit_ranges[i] &= (~(1 << uid));
+		}
+	}
+
+	void CombatAI::clearPlayerUnitReachables(const CombatUnit& _unit) {
+		for (int i = 0, uid = _unit.getUnitId(); i < FIELD_SIZE; ++i) {
+			player_unit_reachables[i] &= (~(1 << uid));
+		}
+	}
+
+	void CombatAI::clearAIUnitRanges(const CombatUnit& _unit) {
+		for (int i = 0, uid = _unit.getUnitId(); i < FIELD_SIZE; ++i) {
+			ai_unit_ranges[i] &= (~(1 << uid));
+		}
+	}
+
+	void CombatAI::clearAIUnitReachables(const CombatUnit& _unit) {
+		for (int i = 0, uid = _unit.getUnitId(); i < FIELD_SIZE; ++i) {
+			ai_unit_reachables[i] &= (~(1 << uid));
+		}
 	}
 
 	void CombatAI::calculateFightValueAdvantageOnHexes(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const CombatField& _field) {
-		if (need_recalculate_hexes) {
-			hexes_fight_value_gain = Calculator::calculateFightValueAdvantageOnHexes(_active_stack, _enemy_hero, _field, *pathfinder);
-			need_recalculate_hexes = false;
+		int max_fight_value_gain = calculateStackUnitFightValue(_active_stack);
+		hexes_fight_value_gain.fill(0);
+
+		for (auto unit : const_cast<CombatHero&>(_enemy_hero).getUnitsPtrs()) {
+			int fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, _active_stack);
+
+			if (fight_value_gain <= 0)
+				continue;
+
+			for (int hex = 0, uid = unit->getUnitId(); hex < FIELD_SIZE; ++hex) {
+				if (player_unit_reachables[hex] & (1 << uid)) {
+					hexes_fight_value_gain[hex] = std::min(max_fight_value_gain, hexes_fight_value_gain[hex] + fight_value_gain);
+
+					auto adjacent_hexes = pathfinder->getAdjacentHexes(hex);
+					for (auto adj_hex : adjacent_hexes) {
+						if (adj_hex != -1)
+							hexes_fight_value_gain[adj_hex] = std::min(max_fight_value_gain, hexes_fight_value_gain[adj_hex] + fight_value_gain);
+					}
+				}
+			}
 		}
+
+		std::for_each(std::begin(hexes_fight_value_gain), std::end(hexes_fight_value_gain), [](auto& obj) { obj = -obj; });
 	}
 
 	// because of randomization which cant be mirrored in this project, this function can possibly return more

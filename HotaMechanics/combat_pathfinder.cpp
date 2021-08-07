@@ -181,7 +181,7 @@ namespace HotaMechanics {
 		if (_double_wide)
 			return std::vector<int16_t>(); // todo
 
-		std::vector<int16_t> reachable; reachable.resize(_hexes.size());
+		std::array<int16_t, 128> reachable;
 		int16_t idx = 0;
 
 		for (auto hex : _hexes) {
@@ -190,8 +190,7 @@ namespace HotaMechanics {
 			idx += (!path.empty() && path.size() <= _range);
 		}
 
-		reachable.resize(idx);
-		return reachable;
+		return std::vector<int16_t>(std::begin(reachable), std::begin(reachable) + idx);
 	}
 
 	const int16_t CombatPathfinder::distanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex) const {

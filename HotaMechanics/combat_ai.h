@@ -37,26 +37,56 @@ namespace HotaMechanics {
 		// -------------------------------
 
 		// AI state ----------------------
-		const bool needRecalculateHexesFightValueGain() const { return need_recalculate_hexes; }
-		void clearNeedRecalculateHexesFightValueGainFlag() { need_recalculate_hexes = true; }
+		void initializeBattle();
+		void addEventsToProcess(const std::vector<CombatEvent>& _events) { events_to_process.insert(std::end(events_to_process), std::begin(_events), std::end(_events)); }
+		void processEvents();
+
+		std::vector<int16_t> getReachableHexesForUnit(const CombatUnit& _unit) const;
+		std::vector<int16_t> getReachableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const;
+		std::vector<const CombatUnit*> getEnemyUnitsInRange(const CombatUnit& _unit) const;
 		// -------------------------------
 
 		// simple getters ----------------
 		const CombatPathfinder& getPathfinder() const { return *pathfinder; }
 		// -------------------------------
-	protected:
-		// for mocking purposes ----------
-		void setPathfinder(const CombatPathfinder& _pathfinder) { pathfinder.reset(const_cast<CombatPathfinder*>(&_pathfinder)); }
-		// -------------------------------
 	private:
+		// event processor ---------------
+		void processUnitPosChangedEvent(const CombatEvent& _ev);
+		void processUnitHealthLostEvent(const CombatEvent& _ev);
+		// -------------------------------
+
+		// AI state ----------------------
+		void initializePlayerUnitRanges();
+		void initializePlayerUnitReachables();
+		void initializeAIUnitRanges();
+		void initializeAIUnitReachables();
+
+		void clearPlayerUnitRanges(const CombatUnit& _unit);
+		void clearPlayerUnitReachables(const CombatUnit& _unit);
+		void clearAIUnitRanges(const CombatUnit& _unit);
+		void clearAIUnitReachables(const CombatUnit& _unit);
+
+		void setPlayerUnitRanges(const CombatUnit& _unit);
+		void setPlayerUnitReachables(const CombatUnit& _unit);
+		void setAIUnitRanges(const CombatUnit& _unit);
+		void setAIUnitReachables(const CombatUnit& _unit);
+		// -------------------------------
+
 		const CombatManager& combat_manager;
 		std::unique_ptr<CombatPathfinder> pathfinder;
 
 		Constants::AIDifficulty difficulty{ Constants::AIDifficulty::NORMAL };
 		bool similar_army_strength{ true }; // > 2x fight_value for one side
 
-		bool need_recalculate_hexes{ true };
 		std::array<int, Constants::FIELD_SIZE> hexes_fight_value_gain;
+
+		std::vector<CombatEvent> events_to_process;
+
+		std::array<int, Constants::FIELD_SIZE> player_unit_ranges;
+		std::array<int, Constants::FIELD_SIZE> player_unit_reachables;
+
+		std::array<int, Constants::FIELD_SIZE> ai_unit_ranges;
+		std::array<int, Constants::FIELD_SIZE> ai_unit_reachables;
 	};
 }; // HotaMechanics
 

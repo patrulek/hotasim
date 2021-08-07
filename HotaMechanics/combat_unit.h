@@ -89,7 +89,9 @@ namespace HotaMechanics {
 
 		//	hero getters ------------------
 		const int getUnitId() const;
+		const int getGlobalUnitId() const;
 		const Constants::CombatSide getCombatSide() const;
+		const Constants::CombatSide getEnemyCombatSide() const;
 		// -------------------------------
 
 		// simple getters ----------------

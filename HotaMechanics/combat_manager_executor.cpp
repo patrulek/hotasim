@@ -43,6 +43,7 @@ namespace HotaMechanics {
 	void CombatManager::makeUnitWalk(int _target_hex, int _walk_distance) {
 		auto& active_stack = getActiveStack();
 		auto path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
+		auto new_event = createUnitPosChangedEvent(active_stack.getGlobalUnitId(), active_stack.getHex(), active_stack.getHex());
 
 		if (path.empty())
 			throw std::exception("Should never happen (we already found that path earlier)");
@@ -52,8 +53,10 @@ namespace HotaMechanics {
 		for (int i = 0; i < range; ++i) {
 			//std::cout << "Moved unit from (" << active_stack.getHex() << ") to (" << path[i] << ")\n";
 			moveUnit(active_stack, path[i]);
+			new_event.param3 = path[i];
 		}
 
+		action_events.push_back(new_event);
 		active_stack.setDone(); // TODO: shouldnt be done yet if we're attacking, unless quicksand or smth
 	}
 
@@ -67,25 +70,27 @@ namespace HotaMechanics {
 		if (!active_stack.isAlive())
 			return;
 
-		auto defender = active_stack.getCombatSide() == CombatSide::ATTACKER ? current_state->defender.getUnits()[_unit_id] : current_state->attacker.getUnits()[_unit_id];
-		int dmg = calculateMeleeUnitAverageDamage(active_stack, *defender);
-		int counter_dmg = calculateCounterAttackMeleeUnitAverageDamage(active_stack, *defender);
+		auto& defender = getStackByLocalId(_unit_id, active_stack.getEnemyCombatSide());
+		int dmg = calculateMeleeUnitAverageDamage(active_stack, defender);
+		int counter_dmg = calculateCounterAttackMeleeUnitAverageDamage(active_stack, defender);
 
 
 		//std::cout << "(" << active_stack.to_string() << ") attack (" << defender->to_string() << ")\n";
-		const_cast<CombatUnit*>(defender)->applyDamage(dmg);
+		defender.applyDamage(dmg);
+		action_events.push_back(createUnitHealthLostEvent(defender.getGlobalUnitId()));
 		//std::cout << "(" << active_stack.to_string() << ") dealt " << dmg << " to (" << defender->to_string() << ")\n";
 
-		if (defender->isAlive()) {
-			if (defender->canRetaliate()) {
+		if (defender.isAlive()) {
+			if (defender.canRetaliate()) {
 				//std::cout << "(" << defender->to_string() << ") counter attack (" << active_stack.to_string() << ")\n";
 				active_stack.applyDamage(counter_dmg);
+				action_events.push_back(createUnitHealthLostEvent(active_stack.getGlobalUnitId()));
 				//std::cout << "(" << defender->to_string() << ") counter attack dealt " << counter_dmg << " to (" << active_stack.to_string() << ")\n";
-				const_cast<CombatUnit*>(defender)->setRetaliated();
+				defender.setRetaliated();
 			}
 		}
 		else {
-			removeFromOrderList(_unit_id + (defender->getCombatSide() == CombatSide::ATTACKER ? 0 : 21));
+			removeFromOrderList(defender.getGlobalUnitId());
 		}
 
 		if (active_stack.isAlive())

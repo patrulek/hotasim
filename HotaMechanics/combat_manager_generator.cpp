@@ -9,12 +9,13 @@ namespace HotaMechanics {
 	using namespace Constants;
 
 	const std::vector<CombatAction> CombatManager::generateActionsForPlayer() {
-		auto activeStack = getActiveStack();
+		auto& activeStack = getActiveStack();
 
 		if (!activeStack.canMakeAction())
 			return std::vector<CombatAction>{};
 
 		std::vector<CombatAction> actions{};
+		ai->processEvents();
 
 		if (activeStack.canDefend())
 			actions.push_back(createDefendAction());
@@ -23,21 +24,28 @@ namespace HotaMechanics {
 			actions.push_back(createWaitAction());
 
 		// get reachable hexes;
-		auto& field = current_state->field;
-		auto reachable_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd, field, false, false);
+		auto reachable_hexes = ai->getReachableHexesForUnit(activeStack);
+
+		//auto& field = current_state->field;
+		//auto reachable_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd, field, false, false);
 		
-		for (auto hex : reachable_hexes)
+		for (auto hex : reachable_hexes) {
+			// TODO: to nie powinno byæ potrzebne
+			if (!current_state->field.isHexWalkable(hex))
+				continue;
+
 			actions.push_back(createWalkAction(hex));
+		}
 
 		// get attackable enemy units; 
 		// if can shoot then only get all enemy units
-		auto range_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd + 1);
-		auto units_in_range = getUnitsInRange(CombatSide::DEFENDER, range_hexes);
+		//auto range_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd + 1);
+		auto units_in_range = ai->getEnemyUnitsInRange(activeStack);//getUnitsInRange(CombatSide::DEFENDER, range_hexes);
 
 		for (auto unit : units_in_range) {
 			auto adjacent_hexes = ai->getPathfinder().getAdjacentHexes(unit->getHex());
-			auto reachable_adjacent = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableAdjacentHexes(unit->getHex(), activeStack.getHex(), activeStack.getCombatStats().spd,
-																											field, false, false);
+			auto adjacent_hexes_vec = std::vector<int16_t>(std::begin(adjacent_hexes), std::end(adjacent_hexes));
+			auto reachable_adjacent = ai->getReachableHexesForUnitFromList(activeStack, adjacent_hexes_vec);
 
 			// if were staying in one of adjacent hexes to target, add that hex
 			bool staying_around = std::find(std::begin(adjacent_hexes), std::end(adjacent_hexes), activeStack.getHex()) != std::end(adjacent_hexes);
@@ -61,13 +69,15 @@ namespace HotaMechanics {
 
 
 	const std::vector<CombatAction> CombatManager::generateActionsForAI() {
-		auto active_stack = getActiveStack();
+		auto& active_stack = getActiveStack();
 
 		if (!active_stack.canMakeAction())
 			return std::vector<CombatAction>{};
 
-		std::vector<CombatAction> actions{};
+		ai->processEvents();
 		ai->calculateFightValueAdvantageOnHexes(active_stack, current_state->attacker, current_state->field);
+
+		std::vector<CombatAction> actions{};
 		auto units_to_attack = ai->chooseUnitToAttack(active_stack, current_state->attacker);
 
 		for (auto unit_id : units_to_attack) {
