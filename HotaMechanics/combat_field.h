@@ -28,6 +28,10 @@ namespace HotaMechanics {
 		const int getId() const { return id; }
 		const Constants::CombatHexOccupation getOccupation() const { return occupied_by; }
 		// ------------------------------
+
+		// util -------------------------
+		std::string toString() const;
+		// ------------------------------
 	private:
 		int16_t id{ -1 };
 		Constants::CombatHexOccupation occupied_by{ Constants::CombatHexOccupation::EMPTY };

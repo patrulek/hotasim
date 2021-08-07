@@ -105,6 +105,10 @@ namespace HotaMechanics {
 		float getFightValue() const { return unit_template.stats.fight_value; }
 		const CombatHero* getHero() const { return hero; }
 		// -------------------------------
+
+		// util --------------------------
+		std::string toString() const;
+		// -------------------------------
 	private:
 		Unit unit_template;
 		const CombatHero* hero;

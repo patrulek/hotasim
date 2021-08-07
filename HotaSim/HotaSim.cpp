@@ -13,13 +13,14 @@
 using namespace HotaMechanics;
 using namespace HotaMechanics::Constants;
 using namespace HotaSim::Utils;
+using namespace HotaSim;
 
 int main()
 {
    // prepare/load battle template
    HeroCreator attacker;
    attacker.setAttack(0); attacker.setDefense(0);
-   attacker.addUnit(unit_templates()["Imp"], 500);
+   attacker.addUnit(unit_templates()["Imp"], 200);
    //attacker.addUnit(unit_templates()["Imp"], 100);
 
    HeroCreator defender;
@@ -35,6 +36,7 @@ int main()
    hotaSim.initialize();
    hotaSim.start();
 
+   std::cout << "\n\nPress any key...\n";
    getchar();
    // ---------------------
 

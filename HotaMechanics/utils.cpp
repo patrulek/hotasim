@@ -20,11 +20,6 @@ namespace HotaMechanics::Utils {
 		return PrimaryStats{ _mana << 16 | _hp };
 	}
 
-	std::string to_string(const CombatUnit& _unit) {
-		return _unit.getTemplate().name + " : " + std::to_string(_unit.getStackNumber()) + " : " + std::to_string(_unit.getHex()) + " : "
-			+ (_unit.getCombatSide() == CombatSide::ATTACKER ? "player_unit" : "ai_unit");
-	}
-
 	int getRandomInt(int _min, int _max) {
 		static std::random_device rd;  //Will be used to obtain a seed for the random number engine
 		static std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()

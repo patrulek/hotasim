@@ -66,24 +66,28 @@ namespace HotaMechanics {
 
 	void CombatAI::initializePlayerUnitRanges() {
 		for (auto unit : combat_manager.getCurrentState().attacker.getUnits()) {
+			clearPlayerUnitRanges(*unit);
 			setPlayerUnitRanges(*unit);
 		}
 	}
 
 	void CombatAI::initializePlayerUnitReachables() {
 		for (auto unit : combat_manager.getCurrentState().attacker.getUnits()) {
+			clearPlayerUnitReachables(*unit);
 			setPlayerUnitReachables(*unit);
 		}
 	}
 
 	void CombatAI::initializeAIUnitRanges() {
 		for (auto unit : combat_manager.getCurrentState().defender.getUnits()) {
+			clearAIUnitRanges(*unit);
 			setAIUnitRanges(*unit);
 		}
 	}
 
 	void CombatAI::initializeAIUnitReachables() {
 		for (auto unit : combat_manager.getCurrentState().defender.getUnits()) {
+			clearAIUnitReachables(*unit);
 			setAIUnitReachables(*unit);
 		}
 	}
@@ -100,7 +104,7 @@ namespace HotaMechanics {
 	}
 
 	void CombatAI::processUnitPosChangedEvent(const CombatEvent& _ev) {
-		auto unit = combat_manager.getStackByGlobalId(_ev.param1);
+		auto& unit = combat_manager.getStackByGlobalId(_ev.param1);
 
 		if (unit.getCombatSide() == CombatSide::ATTACKER) {
 			clearPlayerUnitRanges(unit);
@@ -165,7 +169,7 @@ namespace HotaMechanics {
 	}
 
 	void CombatAI::processUnitHealthLostEvent(const CombatEvent& _ev) {
-		auto unit = combat_manager.getStackByGlobalId(_ev.param1);
+		auto& unit = combat_manager.getStackByGlobalId(_ev.param1);
 
 		if (unit.isAlive())
 			return;

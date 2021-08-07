@@ -5,6 +5,10 @@
 namespace HotaMechanics {
 	using namespace Constants;
 
+	std::string CombatHex::toString() const {
+		return "Hex(" + std::to_string(id / FIELD_COLS) + ", " + std::to_string(id % FIELD_COLS) + ")";
+	}
+
 	const bool CombatHex::isWalkable() const {
 		bool first_col = id % FIELD_COLS == 0;
 		bool last_col = id % FIELD_COLS == FIELD_COLS - 1;

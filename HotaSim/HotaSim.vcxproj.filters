@@ -21,10 +21,13 @@
     <ClCompile Include="combat_simulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="combat_permutation.cpp">
+    <ClCompile Include="combat_sequencetree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="combat_sequencetree.cpp">
+    <ClCompile Include="combat_estimator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="combat_rewinder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,13 +35,16 @@
     <ClInclude Include="combat_simulator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="combat_permutation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="combat_sequencetree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="combat_estimator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="combat_rewinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

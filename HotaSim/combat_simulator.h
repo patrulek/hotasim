@@ -5,10 +5,8 @@
 
 #include "../HotaMechanics/structures.h"
 #include "../HotaMechanics/constants.h"
-#include "combat_permutation.h"
 
 #include <list>
-
 
 
 using namespace HotaMechanics;
@@ -23,57 +21,69 @@ namespace HotaMechanics {
 	struct CombatAction;
 }
 
-class CombatSimulator
-{
-public:
-	explicit CombatSimulator(const Hero& _attacker, const Hero& _defender, const CombatFieldType _field_type, const CombatType _combat_type);
-	CombatSimulator(const CombatSimulator& _obj) = delete;
-	CombatSimulator(CombatSimulator&& _obj) = delete;
-	CombatSimulator() = delete;
+namespace HotaSim {
+	class CombatSequenceTree;
 
-	CombatSimulator& operator=(const CombatSimulator& _obj) = delete;
-	CombatSimulator& operator=(CombatSimulator&& _obj) = delete;
+	class CombatSimulator
+	{
+	public:
+		explicit CombatSimulator(const Hero& _attacker, const Hero& _defender, const CombatFieldType _field_type, const CombatType _combat_type);
+		CombatSimulator(const CombatSimulator& _obj) = delete;
+		CombatSimulator(CombatSimulator&& _obj) = delete;
+		CombatSimulator() = delete;
 
-	~CombatSimulator();
+		CombatSimulator& operator=(const CombatSimulator& _obj) = delete;
+		CombatSimulator& operator=(CombatSimulator&& _obj) = delete;
 
-	void initialize();
-	void start();
+		~CombatSimulator();
 
-	int64_t evaluateCombatStateScore(const CombatState& _initial_state, const CombatState& _state) const;
+		void initialize();
+		void start();
 
-	void setCombatManager(const CombatManager& _mgr);
-	
-	void updateBestState(const CombatState& _state, const std::list<CombatState>& _states, const std::list<CombatAction>& _actions);
-private:
-	void findBestAttackerPermutations();
-	void setDefenderPermutation();
+		uint64_t evaluateCombatStateScore(const CombatState& _initial_state, const CombatState& _state) const;
 
-	void prepareCombat(const ArmyPermutation& _permutation, const int _field_template);
-	std::shared_ptr<CombatField> prepareCombatField(const int _field_template);
-	std::shared_ptr<CombatHero> prepareCombatHero(const Hero& _hero_template, const ArmyPermutation& _permutation, const CombatSide _side);
+		void setCombatManager(const CombatManager& _mgr);
 
-	// combat state score
-	int64_t evaluateCombatStateAttackScore(const CombatState& _initial_state, const CombatState& _state) const;
-	int64_t evaluateCombatStateDefenseScore(const CombatState& _initial_state, const CombatState& _state) const;
-	int64_t evaluateCombatStateTurnsScore(const CombatState& _initial_state, const CombatState& _state) const;
-	int64_t evaluateCombatStateManaScore(const CombatState& _initial_state, const CombatState& _state) const;
+		void updateBestState(const CombatState& _state, const std::list<CombatState>& _states, const std::list<CombatAction>& _actions);
+	private:
+		void findBestAttackerPermutations();
+		void setDefenderPermutation();
 
-	// during combat
-	std::list<CombatState> states_timeline;
-	std::list<CombatAction> actions_timeline;
-	std::unique_ptr<CombatState> best_state;
+		const bool simulatorConstraintsViolated(const CombatSequenceTree& _tree);
+		const bool combatConstraintsViolated();
+		void resetRulesCounters();
 
-	// before combat start
-	std::unique_ptr<CombatManager> manager;
+		void prepareCombat(const ArmyPermutation& _permutation, const CombatFieldTemplate _field_template = CombatFieldTemplate::IMPS_2x100);
+		std::shared_ptr<CombatField> prepareCombatField(const CombatFieldTemplate _field_template);
+		std::shared_ptr<CombatHero> prepareCombatHero(const Hero& _hero_template, const ArmyPermutation& _permutation, const CombatSide _side);
 
-	// before simulation start
-	std::vector<ArmyPermutation> permutations;
-	ArmyPermutation defender_permutation;
+		// combat state score
+		uint64_t evaluateCombatStateAttackScore(const CombatState& _initial_state, const CombatState& _state) const;
+		uint64_t evaluateCombatStateDefenseScore(const CombatState& _initial_state, const CombatState& _state) const;
+		uint64_t evaluateCombatStateTurnsScore(const CombatState& _initial_state, const CombatState& _state) const;
+		uint64_t evaluateCombatStateManaScore(const CombatState& _initial_state, const CombatState& _state) const;
 
-	// for initialization
-	std::unique_ptr<Hero> attacker;
-	std::unique_ptr<Hero> defender;
-	const CombatFieldType field_type;
-	const CombatType combat_type;
-};
+		// during combat
+		std::list<CombatState> states_timeline;
+		std::list<CombatAction> actions_timeline;
+		std::unique_ptr<CombatState> best_state;
 
+		// before combat start
+		std::unique_ptr<CombatManager> manager;
+		int combat_finished_cnt;
+		int estimated_turns;
+		int turns_rule_violation_cnt;
+		int estimated_total_states;
+
+		// before simulation start
+		std::vector<ArmyPermutation> permutations;
+		ArmyPermutation defender_permutation;
+
+		// for initialization
+		std::unique_ptr<Hero> attacker;
+		std::unique_ptr<Hero> defender;
+		const CombatFieldType field_type;
+		const CombatType combat_type;
+	};
+
+}; // HotaSim

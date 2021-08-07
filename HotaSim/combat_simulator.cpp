@@ -1,5 +1,7 @@
 #include "combat_simulator.h"
 
+#include "../HotaMechanics/utils.h"
+
 #include "../HotaMechanics/combat_hero.h"
 #include "../HotaMechanics/combat_field.h"
 #include "../HotaMechanics/combat_manager.h"
@@ -7,183 +9,222 @@
 #include "../HotaMechanics/combat_state.h"
 #include "../HotaMechanics/combat_calculator.h"
 #include "combat_sequencetree.h"
+#include "combat_estimator.h"
+#include "combat_rewinder.h"
 
 #include <list>
 #include <iostream>
 
 using namespace HotaMechanics;
 using namespace HotaMechanics::Calculator;
+using namespace HotaMechanics::Utils;
 
+namespace HotaSim {
+	CombatSimulator::CombatSimulator(const Hero& _attacker, const Hero& _defender,
+		const CombatFieldType _field_type, const CombatType _combat_type)
+		: field_type(_field_type), combat_type(_combat_type) {
 
-CombatSimulator::CombatSimulator(const Hero& _attacker, const Hero& _defender, 
-											const CombatFieldType _field_type, const CombatType _combat_type)
-	: field_type(_field_type), combat_type(_combat_type) {
-	
-	attacker = std::make_unique<Hero>(_attacker);
-	defender = std::make_unique<Hero>(_defender);
-}
+		attacker = std::make_unique<Hero>(_attacker);
+		defender = std::make_unique<Hero>(_defender);
+	}
 
-CombatSimulator::~CombatSimulator() {}
+	CombatSimulator::~CombatSimulator() {}
 
-void CombatSimulator::updateBestState(const CombatState& _state, const std::list<CombatState>& _states, const std::list<CombatAction>& _actions) {
-	if (evaluateCombatStateScore(manager->getInitialState(), _state) <= evaluateCombatStateScore(manager->getInitialState(), *best_state))
-		return;
+	void CombatSimulator::updateBestState(const CombatState& _state, const std::list<CombatState>& _states, const std::list<CombatAction>& _actions) {
+		if (evaluateCombatStateScore(manager->getInitialState(), _state) <= evaluateCombatStateScore(manager->getInitialState(), *best_state))
+			return;
 
-	best_state = std::make_unique<CombatState>(_state);
-	states_timeline = _states;
-	actions_timeline = _actions;
-}
+		best_state = std::make_unique<CombatState>(_state);
+		states_timeline = _states;
+		actions_timeline = _actions;
+	}
 
-void CombatSimulator::setCombatManager(const CombatManager& _mgr) { 
-	manager = std::make_unique<CombatManager>(_mgr.getAttacker(), _mgr.getDefender(), _mgr.getInitialCombatField(), _mgr.getCombatType());
-}
+	void CombatSimulator::setCombatManager(const CombatManager& _mgr) {
+		manager = std::make_unique<CombatManager>(_mgr.getAttacker(), _mgr.getDefender(), _mgr.getInitialCombatField(), _mgr.getCombatType());
+	}
 
-int64_t CombatSimulator::evaluateCombatStateScore(const CombatState& _initial_state, const CombatState& _state) const {
-	int64_t attack_score = evaluateCombatStateAttackScore(_initial_state, _state); // the more enemy units we killed the better
-	int64_t defense_score = evaluateCombatStateDefenseScore(_initial_state, _state); // the less units we lost the better
-	int64_t turns_score = evaluateCombatStateTurnsScore(_initial_state, _state); // the less turns we fought the better
-	int64_t mana_score = evaluateCombatStateManaScore(_initial_state, _state); // the less mana weve lost the better
+	uint64_t CombatSimulator::evaluateCombatStateScore(const CombatState& _initial_state, const CombatState& _state) const {
+		uint64_t attack_score = evaluateCombatStateAttackScore(_initial_state, _state); // the more enemy units we killed the better
+		uint64_t defense_score = evaluateCombatStateDefenseScore(_initial_state, _state); // the less units we lost the better
+		uint64_t turns_score = evaluateCombatStateTurnsScore(_initial_state, _state); // the less turns we fought the better
+		uint64_t mana_score = evaluateCombatStateManaScore(_initial_state, _state); // the less mana weve lost the better
 
-	int64_t score = (attack_score << 48) | (defense_score << 32) | (turns_score << 16) | mana_score;
-	return score;
-}
+		uint64_t score = (attack_score << 48) | (defense_score << 32) | (turns_score << 16) | mana_score;
+		return score;
+	}
 
-int64_t CombatSimulator::evaluateCombatStateAttackScore(const CombatState& _initial_state, const CombatState& _state) const {
-	float initial_fight_value = calculateBaseHeroFightValue(_initial_state.defender);
-	float current_fight_value = calculateBaseHeroFightValue(_state.defender);
+	uint64_t CombatSimulator::evaluateCombatStateAttackScore(const CombatState& _initial_state, const CombatState& _state) const {
+		float initial_fight_value = calculateBaseHeroFightValue(_initial_state.defender);
+		float current_fight_value = calculateBaseHeroFightValue(_state.defender);
 
-	return (1 << 15) * (1.0f - current_fight_value / initial_fight_value);
-}
+		return (1 << 15) * (1.0f - current_fight_value / initial_fight_value);
+	}
 
-int64_t CombatSimulator::evaluateCombatStateDefenseScore(const CombatState& _initial_state, const CombatState& _state) const {
-	float initial_fight_value = calculateBaseHeroFightValue(_initial_state.attacker);
-	float current_fight_value = calculateBaseHeroFightValue(_state.attacker);
+	uint64_t CombatSimulator::evaluateCombatStateDefenseScore(const CombatState& _initial_state, const CombatState& _state) const {
+		float initial_fight_value = calculateBaseHeroFightValue(_initial_state.attacker);
+		float current_fight_value = calculateBaseHeroFightValue(_state.attacker);
 
-	return (1 << 15) * (current_fight_value / initial_fight_value);
-}
+		return (1 << 15) * (current_fight_value / initial_fight_value);
+	}
 
-int64_t CombatSimulator::evaluateCombatStateTurnsScore(const CombatState& _initial_state, const CombatState& _state) const {
-	return (1 << 15) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f);
-}
+	uint64_t CombatSimulator::evaluateCombatStateTurnsScore(const CombatState& _initial_state, const CombatState& _state) const {
+		return (1 << 15) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f);
+	}
 
-int64_t CombatSimulator::evaluateCombatStateManaScore(const CombatState& _initial_state, const CombatState& _state) const {
-	bool has_mana = _initial_state.attacker.getMana();
+	uint64_t CombatSimulator::evaluateCombatStateManaScore(const CombatState& _initial_state, const CombatState& _state) const {
+		bool has_mana = _initial_state.attacker.getMana();
 
-	if (has_mana)
-		return (1 << 15) * (1.0f - (_state.attacker.getMana() - _initial_state.attacker.getMana()) / _initial_state.attacker.getMana());
-	return (1 << 15);
-}
+		if (has_mana)
+			return (1 << 15) * (1.0f - (_state.attacker.getMana() - _initial_state.attacker.getMana()) / _initial_state.attacker.getMana());
+		return (1 << 15);
+	}
 
-// TODO: make more permutations; for now dont change unit order
-void CombatSimulator::findBestAttackerPermutations() {
-	ArmyPermutation permutation;
+	// TODO: make more permutations; for now dont change unit order
+	void CombatSimulator::findBestAttackerPermutations() {
+		ArmyPermutation permutation;
 
-	for (int8_t i = 0; i < attacker->army.size(); ++i)
-		permutation.permutations.push_back(UnitPermutation{ i, i, attacker->army[i].stack_number });
+		for (int8_t i = 0; i < attacker->army.size(); ++i)
+			permutation.permutations.push_back(UnitPermutation{ i, i, attacker->army[i].stack_number });
 
-	permutations.push_back(permutation);
-}
+		permutations.push_back(permutation);
+	}
 
-void CombatSimulator::setDefenderPermutation() {
-	for (int8_t i = 0; i < defender->army.size(); ++i)
-		defender_permutation.permutations.push_back(UnitPermutation{ i, i, defender->army[i].stack_number });
-}
+	void CombatSimulator::setDefenderPermutation() {
+		for (int8_t i = 0; i < defender->army.size(); ++i)
+			defender_permutation.permutations.push_back(UnitPermutation{ i, i, defender->army[i].stack_number });
+	}
 
-void CombatSimulator::start() {
-	for (int i = 0; i < 1 /* combat field templates */; ++i) {
-		for (auto permutation : permutations) {
-			prepareCombat(permutation, /*i*/ 2);
-			
-			CombatSequenceTree tree(manager->getInitialState());
-			int last_size = 0;
+	const bool CombatSimulator::simulatorConstraintsViolated(const CombatSequenceTree& _tree) {
+		// some states wasnt checked yet
+		bool some_states_left_rule_violated = _tree.isCurrentRoot();
 
-			// start battle (PRE_BATTLE action)
-			manager->nextState();
-			tree.addState(manager->getCurrentState(), 0, 1, 0x0000800080008000);
-			int action_cnt = 0;
+		// reached total states limit for simulation
+		bool state_limit_reached_rule_violated = _tree.getSize() > estimated_total_states;
 
-			while (!tree.isCurrentRoot()) {
-				while (!manager->isCombatFinished()) {
-					//std::cout << "Actions: " << action_cnt << " | Turns: " << manager->getCurrentState().turn << std::endl;
+		return some_states_left_rule_violated || state_limit_reached_rule_violated;
+	}
 
-					if (manager->isUnitMove()) {
-						if (manager->isPlayerMove()) {
-							auto actions = manager->generateActionsForPlayer();
-							tree.addState(manager->getCurrentState(), action_cnt, actions.size(), evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
-							manager->nextStateByAction(actions[action_cnt]);
+	const bool CombatSimulator::combatConstraintsViolated() {
+		// turns rule
+		bool turns_rule_violated = manager->getCurrentState().turn >= estimated_turns;
+		turns_rule_violation_cnt += turns_rule_violated;
+
+		// combat finished rule
+		bool combat_finished_rule_violated = manager->isCombatFinished();
+		combat_finished_cnt += combat_finished_rule_violated;
+
+		return turns_rule_violated || combat_finished_rule_violated;
+	}
+
+	void CombatSimulator::resetRulesCounters() {
+		combat_finished_cnt = turns_rule_violation_cnt = 0;
+	}
+
+	void CombatSimulator::start() {
+		for (int i = 0; i < 1 /* combat field templates */; ++i) {
+			for (auto permutation : permutations) {
+				prepareCombat(permutation, /*i*/ CombatFieldTemplate::IMPS_2x100);
+
+				CombatSequenceTree tree(manager->getInitialState());
+				int last_size = 0;
+
+				estimated_turns = Estimator::estimateTurnsNumber(manager->getInitialState());
+				estimated_total_states = Estimator::estimateTotalStatesNumber(manager->getInitialState());
+				resetRulesCounters();
+
+				// start battle (PRE_BATTLE action)
+				manager->nextState();
+				tree.addState(manager->getCurrentState(), 0, 1, 0x0000800080008000);
+				int action_cnt = 0;
+
+				while (!simulatorConstraintsViolated(tree)) {
+					while (!combatConstraintsViolated()) {
+						if (manager->isUnitMove()) {
+							if (manager->isPlayerMove()) {
+								auto actions = manager->generateActionsForPlayer();								
+								manager->nextStateByAction(actions[action_cnt]);
+								tree.addState(manager->getCurrentState(), action_cnt, actions.size(), evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
+							}
+							else {
+								auto actions = manager->generateActionsForAI();
+								// TODO: for now, take only first ai action (in most cases there will be one action anyway)
+								manager->nextStateByAction(actions[0]);
+								tree.addState(manager->getCurrentState(), 0, 1, evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
+							}
+							continue;
 						}
-						else {
-							auto actions = manager->generateActionsForAI();
-							// TODO: for now, take only first ai action (in most cases there will be one action anyway)
-							tree.addState(manager->getCurrentState(), 0, 1, evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
-							manager->nextStateByAction(actions[0]);
-						}
-						continue;
+
+						manager->nextState();
+						tree.addState(manager->getCurrentState(), 0, 1, evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
+						action_cnt = 0;
 					}
 
-					manager->nextState();
-					tree.addState(manager->getCurrentState(), 0, 1, evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
-					action_cnt = 0;
-				}
-
-				//std::cout << "Combat finished, go parent state\n";
-				tree.goParent();
-				if (tree.getSize() / 5000 > last_size) {
-					std::cout << "Total states checked: " << tree.getSize() << std::endl;
-					++last_size;
-				}
-
-				// check if need to go up further
-				while (tree.current->action + 1 >= tree.current->action_size)
 					tree.goParent();
-				
-				action_cnt = tree.current->action + 1;
-				tree.goParent();
-				manager->setCurrentState(tree.current->state);
-			}
+					if (tree.getSize() / 5000 > last_size) {
+						++last_size;
+						std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
+						std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
+						std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
+						std::cout << "Best score so far: " << std::hex << tree.root->best_branch_score << std::endl << std::endl;
+					}
 
-			auto best_leaf = tree.findBestLeaf();
-			std::vector<int> action_order;
-			while (best_leaf) {
-				action_order.push_back(best_leaf->action);
-				best_leaf = best_leaf->parent.get();
-			}
+					// check if need to go up further
+					while (tree.current->parent && tree.current->action + 1 >= tree.current->action_size)
+						tree.goParent();
 
-			std::reverse(std::begin(action_order), std::end(action_order));
-			for (auto action : action_order) {
-				std::cout << "Next action idx: " << action << std::endl;
-			}
+					if (tree.current->parent) {
+						action_cnt = tree.current->action + 1;
+						tree.goParent();
+						manager->setCurrentState(tree.current->state);
+					}
+				}
 
-			std::cout << "Total actions: " << action_order.size() << std::endl;
-			std::cout << "Total turns: " << tree.findBestLeaf()->state.turn << std::endl;
-			std::cout << "Best result: " << (int)tree.findBestLeaf()->state.result << std::endl;
+				auto best_leaf = tree.findBestLeaf();
+				int best_leaf_turns = best_leaf->state.turn;
+				std::vector<int> action_order;
+				while (best_leaf) {
+					action_order.push_back(best_leaf->action);
+					best_leaf = best_leaf->parent;
+				}
+
+				action_order.pop_back();
+				std::reverse(std::begin(action_order), std::end(action_order));
+
+				std::cout << "Total actions: " << std::dec << action_order.size() << std::endl;
+				std::cout << "Total turns: " << best_leaf_turns + 1 << std::endl;
+				std::cout << "Total states checked: " << tree.getSize() << std::endl;
+				std::cout << "Best result: " << std::hex << tree.root->best_branch_score << std::endl;
+
+				auto rewinder = CombatRewinder(*manager);
+				rewinder.rewind(action_order);
+			}
 		}
 	}
-}
 
-void CombatSimulator::prepareCombat(const ArmyPermutation& permutation, const int _field_template) {
-	auto combat_attacker = prepareCombatHero(*attacker, permutation, CombatSide::ATTACKER);
-	auto combat_defender = prepareCombatHero(*defender, defender_permutation, CombatSide::DEFENDER);
-	auto combat_field = prepareCombatField(_field_template);
+	void CombatSimulator::prepareCombat(const ArmyPermutation& permutation, const CombatFieldTemplate _field_template) {
+		auto combat_attacker = prepareCombatHero(*attacker, permutation, CombatSide::ATTACKER);
+		auto combat_defender = prepareCombatHero(*defender, defender_permutation, CombatSide::DEFENDER);
+		auto combat_field = prepareCombatField(_field_template);
 
-	manager = std::make_unique<CombatManager>(*combat_attacker, *combat_defender, *combat_field, combat_type);
-	manager->initialize();
-}
+		manager = std::make_unique<CombatManager>(*combat_attacker, *combat_defender, *combat_field, combat_type);
+		manager->initialize();
+	}
 
-std::shared_ptr<CombatField> CombatSimulator::prepareCombatField(const int _field_template) {
-	auto combat_field = std::make_shared<CombatField>(field_type);
-	auto combat_field_template = getCombatFieldTemplate(_field_template);
-	combat_field->setTemplate(combat_field_template);
-	return combat_field;
-}
+	std::shared_ptr<CombatField> CombatSimulator::prepareCombatField(const CombatFieldTemplate _field_template) {
+		auto combat_field = std::make_shared<CombatField>(field_type);
+		auto combat_field_template = getCombatFieldTemplate(_field_template);
+		combat_field->setTemplate(combat_field_template);
+		return combat_field;
+	}
 
-std::shared_ptr<CombatHero> CombatSimulator::prepareCombatHero(const Hero& hero_template, const ArmyPermutation& permutation, const CombatSide _side) {
-	std::shared_ptr<CombatHero> hero = std::make_shared<CombatHero>(hero_template, permutation, _side);
+	std::shared_ptr<CombatHero> CombatSimulator::prepareCombatHero(const Hero& hero_template, const ArmyPermutation& permutation, const CombatSide _side) {
+		std::shared_ptr<CombatHero> hero = std::make_shared<CombatHero>(hero_template, permutation, _side);
 
-	return hero;
-}
+		return hero;
+	}
 
-void CombatSimulator::initialize() {
-	findBestAttackerPermutations();
-	setDefenderPermutation();
-}
+	void CombatSimulator::initialize() {
+		findBestAttackerPermutations();
+		setDefenderPermutation();
+	}
+}; // HotaSim

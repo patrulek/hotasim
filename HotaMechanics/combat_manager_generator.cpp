@@ -37,6 +37,8 @@ namespace HotaMechanics {
 			actions.push_back(createWalkAction(hex));
 		}
 
+		int16_t asHex = activeStack.getHex();
+		int16_t acSize = actions.size();
 		// get attackable enemy units; 
 		// if can shoot then only get all enemy units
 		//auto range_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd + 1);

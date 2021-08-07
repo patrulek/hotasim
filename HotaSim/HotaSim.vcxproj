@@ -143,7 +143,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="combat_permutation.cpp" />
+    <ClCompile Include="combat_estimator.cpp" />
+    <ClCompile Include="combat_rewinder.cpp" />
     <ClCompile Include="combat_sequencetree.cpp" />
     <ClCompile Include="combat_simulator.cpp" />
     <ClCompile Include="HotaSim.cpp" />
@@ -154,7 +155,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="combat_permutation.h" />
+    <ClInclude Include="combat_estimator.h" />
+    <ClInclude Include="combat_rewinder.h" />
     <ClInclude Include="combat_sequencetree.h" />
     <ClInclude Include="combat_simulator.h" />
     <ClInclude Include="utils.h" />

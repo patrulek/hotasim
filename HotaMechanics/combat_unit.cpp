@@ -29,6 +29,11 @@ namespace HotaMechanics {
 		active_spells = std::move(_unit.active_spells);
 	}
 
+	std::string CombatUnit::toString() const {
+		return unit_template.name + " : StackNumber(" + std::to_string(stack_number) + ") : Hex(" + std::to_string(hex / FIELD_COLS) + ", " 
+			+ std::to_string(hex % FIELD_COLS) + ") : " + (getCombatSide() == CombatSide::ATTACKER ? "player_unit" : "ai_unit");
+	}
+
 	void CombatUnit::moveTo(const int _target_hex) {
 		hex = _target_hex;
 	}

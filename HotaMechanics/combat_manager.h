@@ -24,6 +24,7 @@ namespace HotaMechanics {
 
 		// state machine ----------------
 		void initialize();
+		void reinitialize();
 		void nextState();
 		void nextStateByAction(const CombatAction& _action);
 		void setCurrentState(const CombatState& _current_state);

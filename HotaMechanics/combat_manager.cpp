@@ -25,6 +25,11 @@ namespace HotaMechanics {
 
 	CombatManager::~CombatManager() {}
 
+	void CombatManager::reinitialize() {
+		initialized = false;
+		initialize();
+	}
+
 	void CombatManager::initialize() {
 		if (initialized)
 			return;
@@ -59,6 +64,7 @@ namespace HotaMechanics {
 
 	void CombatManager::setCurrentState(const CombatState& _state) {
 		current_state = std::make_unique<CombatState>(_state);
+		ai->initializeBattle();
 	}
 
 	void CombatManager::nextState() {
