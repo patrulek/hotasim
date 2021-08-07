@@ -95,6 +95,7 @@ void CombatSimulator::start() {
 			prepareCombat(permutation, /*i*/ 2);
 			
 			CombatSequenceTree tree(manager->getInitialState());
+			int last_size = 0;
 
 			// start battle (PRE_BATTLE action)
 			manager->nextState();
@@ -127,7 +128,10 @@ void CombatSimulator::start() {
 
 				//std::cout << "Combat finished, go parent state\n";
 				tree.goParent();
-				std::cout << "Total states checked: " << tree.getSize() << std::endl;
+				if (tree.getSize() / 5000 > last_size) {
+					std::cout << "Total states checked: " << tree.getSize() << std::endl;
+					++last_size;
+				}
 
 				// check if need to go up further
 				while (tree.current->action + 1 >= tree.current->action_size)

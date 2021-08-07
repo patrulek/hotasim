@@ -98,41 +98,41 @@ namespace HotaMechanics {
 		if (_source_hex == -1 || _range <= 0)
 			throw std::exception("Invalid source hex or range");
 
-		std::unordered_set<int16_t> hexes{ _source_hex };
-		std::vector<int16_t> toCheck{ _source_hex };
-		std::unordered_set<int16_t> checked{ -1 };
+		std::array<int16_t, FIELD_SIZE + 1> to_check; to_check.fill(0);
+		int to_check_cnt = 0;
+		to_check[to_check_cnt++] = _source_hex;
 
-		while (!toCheck.empty()) {
-			int hex_id = toCheck.back();
-			checked.insert(hex_id);
-			toCheck.pop_back();
+		std::array<int16_t, FIELD_SIZE + 1> next_to_check; next_to_check.fill(0);
+		int next_to_check_cnt = 0;
 
-			if (hex_id == -1)
-				continue;
+		std::array<bool, FIELD_SIZE + 1> checked; checked.fill(0);
 
-			if (distanceBetweenHexes(hex_id, _source_hex) > _range)
-				continue;
+		int dist = 0;
+		std::vector<int16_t> hexes; hexes.reserve(128);
 
+		while (to_check_cnt > 0 && dist <= _range) {
+			const int hex_id = to_check[--to_check_cnt];
+			checked[hex_id] = true;
+			hexes.push_back(hex_id);
+			
 			auto adjacent_hexes = getAdjacentHexes(hex_id);
 
-			hexes.insert(std::begin(adjacent_hexes), std::end(adjacent_hexes));
-			toCheck.insert(std::end(toCheck), std::begin(adjacent_hexes), std::end(adjacent_hexes));
+			for (auto hex : adjacent_hexes) {
+				const bool is_viable_hex = hex > -1 && hex < FIELD_SIZE;
+				hex = (is_viable_hex * hex) + (!is_viable_hex * FIELD_SIZE);
 
-			for (auto check : checked)
-				toCheck.erase(std::remove(std::begin(toCheck), std::end(toCheck), check), std::end(toCheck));
-		}
+				next_to_check[next_to_check_cnt] = hex;
+				next_to_check_cnt += (is_viable_hex * !checked[hex]);
+				checked[hex] = true;
+			}
 
-		hexes.erase(-1);
-		std::unordered_set<int16_t> to_remove;
-		for (auto hex : hexes)
-		{
-			if (distanceBetweenHexes(_source_hex, hex) > _range) {
-				to_remove.insert(hex);
+			if (to_check_cnt == 0 && next_to_check_cnt > 0) {
+				to_check = next_to_check;
+				to_check_cnt = next_to_check_cnt;
+				next_to_check_cnt = 0;
+				++dist;
 			}
 		}
-
-		for (auto rem : to_remove)
-			hexes.erase(rem);
 
 		auto result = std::vector<int16_t>(std::begin(hexes), std::end(hexes));
 		std::sort(std::begin(result), std::end(result));
@@ -145,13 +145,15 @@ namespace HotaMechanics {
 	}
 
 	const std::vector<int16_t> CombatPathfinder::getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field) const {
-		std::vector<int16_t> walkable(_hexes);
+		std::vector<int16_t> walkable; walkable.resize(_hexes.size());
+		int16_t idx = 0;
 
 		for (auto hex : _hexes) {
-			if (!_field.isHexWalkable(hex))
-				walkable.erase(std::remove(std::begin(walkable), std::end(walkable), hex), std::end(walkable));
+			walkable[idx] = hex;
+			idx += _field.isHexWalkable(hex);
 		}
 
+		walkable.resize(idx);
 		return walkable;
 	}
 
@@ -179,15 +181,16 @@ namespace HotaMechanics {
 		if (_double_wide)
 			return std::vector<int16_t>(); // todo
 
-		std::vector<int16_t> reachable;
+		std::vector<int16_t> reachable; reachable.resize(_hexes.size());
+		int16_t idx = 0;
 
 		for (auto hex : _hexes) {
 			auto path = findPath(_source_hex, hex, _field);
-
-			if (!path.empty() && path.size() <= _range)
-				reachable.push_back(hex);
+			reachable[idx] = hex;
+			idx += (!path.empty() && path.size() <= _range);
 		}
 
+		reachable.resize(idx);
 		return reachable;
 	}
 

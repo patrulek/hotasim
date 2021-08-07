@@ -17,8 +17,10 @@ namespace HotaMechanics {
 	}
 
 	void CombatAI::calculateFightValueAdvantageOnHexes(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const CombatField& _field) {
-		hexes_fight_value_gain = Calculator::calculateFightValueAdvantageOnHexes(_active_stack, _enemy_hero, _field, *pathfinder);
-		need_recalculate_hexes = false;
+		if (need_recalculate_hexes) {
+			hexes_fight_value_gain = Calculator::calculateFightValueAdvantageOnHexes(_active_stack, _enemy_hero, _field, *pathfinder);
+			need_recalculate_hexes = false;
+		}
 	}
 
 	// because of randomization which cant be mirrored in this project, this function can possibly return more

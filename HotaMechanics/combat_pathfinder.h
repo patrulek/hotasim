@@ -4,14 +4,17 @@
 
 #include <array>
 #include <vector>
+#include <unordered_map>
 
 namespace HotaMechanics {
 	class CombatField;
 
 	class CombatPathfinder
 	{
+
 	public:
 		CombatPathfinder();
+
 
 		const int getUnitStartHex(const Constants::CombatSide _side, const int _unit_order, const int _units_stacks, 
 										  const bool _double_wide, const Constants::CombatType _combat_type) const;
@@ -37,7 +40,6 @@ namespace HotaMechanics {
 		const std::vector<int16_t> getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field) const;
 		const std::vector<int16_t> getReachableHexesFromWalkableHexes(const int16_t from, const int range, const std::vector<int16_t>& hexes,
 																					 const CombatField& _field, const bool can_fly, const bool double_wide);
-
 
 
 		std::vector<int16_t> path;

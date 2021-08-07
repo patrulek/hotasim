@@ -51,7 +51,7 @@ namespace HotaMechanics {
 		// ----------------------------------
 
 		// check state ----------------------
-		const bool isHexWalkable(const int16_t _hex_id) const { return _hex_id != -1 && getById(_hex_id).isWalkable(); }
+		const bool isHexWalkable(const int16_t _hex_id) const { return _hex_id > -1 && _hex_id < Constants::FIELD_SIZE && hexes[_hex_id].isWalkable(); }
 		// ----------------------------------
 
 		// simple getters -------------------

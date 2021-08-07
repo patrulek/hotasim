@@ -45,6 +45,8 @@ namespace HotaMechanics {
 			// decrease spell active on units
 		++current_state->turn;
 		orderUnitsInTurn();
+		ai->clearNeedRecalculateHexesFightValueGainFlag();
+
 		//std::cout << "Processed action: PRE_TURN (" << current_state->turn << ")\n\n-----------------\n\n";
 	}
 
@@ -61,6 +63,8 @@ namespace HotaMechanics {
 			makeUnitFly(_action.target);
 		else
 			makeUnitWalk(_action.target, _action.param1);
+
+		ai->clearNeedRecalculateHexesFightValueGainFlag();
 		//std::cout << "Processed action: WALK (" << active_stack.to_string().c_str() << ") to pos: " << _action.target << "\n\n";
 	}
 
@@ -68,6 +72,7 @@ namespace HotaMechanics {
 		makeUnitDefend();
 
 		auto& active_stack = getActiveStack();
+		ai->clearNeedRecalculateHexesFightValueGainFlag();
 		//std::cout << "Processed action: DEFENSE (" << active_stack.to_string().c_str() << ")\n\n";
 	}
 
@@ -81,5 +86,7 @@ namespace HotaMechanics {
 		auto& active_stack = getActiveStack();
 		//std::cout << "Processed action: ATTACK (" << active_stack.to_string().c_str() << ") on unit: " 
 		//			 << _action.param1 << " at pos: " << _action.target << "\n\n";
+
+		ai->clearNeedRecalculateHexesFightValueGainFlag();
 	}
 }; // HotaMechanics
