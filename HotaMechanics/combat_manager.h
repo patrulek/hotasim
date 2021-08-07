@@ -84,7 +84,7 @@ namespace HotaMechanics {
 		void makeUnitWalk(int _target_hex, int _walk_distance = -1);
 		void makeUnitDefend();
 		void makeUnitWait();
-		const std::vector<CombatUnit*> getUnitsInRange(const Constants::CombatSide _side, const std::vector<int>& _hexes) const;
+		const std::vector<CombatUnit*> getUnitsInRange(const Constants::CombatSide _side, const std::vector<int16_t>& _hexes) const;
 		// -----------------------------
 
 		// state utils -----------------

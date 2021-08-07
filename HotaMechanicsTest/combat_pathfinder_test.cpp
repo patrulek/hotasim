@@ -38,31 +38,31 @@ namespace CombatPathfinderTest {
 		EXPECT_ANY_THROW(pathfinder.getAdjacentHexes(-1)); // invalid source
 
 		auto hex = getHexId(0, 0);
-		auto expected = std::array<int, 6>{-1, -1, -1, 1, 17, 18};
+		auto expected = std::array<int16_t, 6>{-1, -1, -1, 1, 17, 18};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(0, 16);
-		expected = std::array<int, 6>{-1, -1, 15, -1, 33, -1};
+		expected = std::array<int16_t, 6>{-1, -1, 15, -1, 33, -1};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(10, 0);
-		expected = std::array<int, 6>{153, 154, -1, 171, -1, -1};
+		expected = std::array<int16_t, 6>{153, 154, -1, 171, -1, -1};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(10, 16);
-		expected = std::array<int, 6>{169, -1, 185, -1, -1, -1};
+		expected = std::array<int16_t, 6>{169, -1, 185, -1, -1, -1};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(9, 0);
-		expected = std::array<int, 6>{-1, 136, -1, 154, -1, 170};
+		expected = std::array<int16_t, 6>{-1, 136, -1, 154, -1, 170};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(9, 16);
-		expected = std::array<int, 6>{151, 152, 168, -1, 185, 186};
+		expected = std::array<int16_t, 6>{151, 152, 168, -1, 185, 186};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(4, 8);
-		expected = std::array<int, 6>{59, 60, 75, 77, 93, 94};
+		expected = std::array<int16_t, 6>{59, 60, 75, 77, 93, 94};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 	}
 
@@ -71,15 +71,15 @@ namespace CombatPathfinderTest {
 		CombatPathfinder pathfinder;
 
 		auto hex = getHexId(10, 16);
-		auto expected = std::array<int, 6>{169, -1, 185, -1, -1, -1};
+		auto expected = std::array<int16_t, 6>{169, -1, 185, -1, -1, -1};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		EXPECT_ANY_THROW(pathfinder.getAdjacentHexesClockwise(-1)); // invalid source hex
-		expected = std::array<int, 6>{-1, -1, -1, -1, 185, 169};
+		expected = std::array<int16_t, 6>{-1, -1, -1, -1, 185, 169};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexesClockwise(hex));
 
 		EXPECT_ANY_THROW(pathfinder.getAdjacentHexesCounterClockwise(-1)); // invalid source hex
-		expected = std::array<int, 6>{169, 185, -1, -1, -1, -1};
+		expected = std::array<int16_t, 6>{169, 185, -1, -1, -1, -1};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexesCounterClockwise(hex));
 	}
 
@@ -93,7 +93,7 @@ namespace CombatPathfinderTest {
 
 		int hex = getHexId(2, 1);
 		int unit_speed = 6;
-		std::vector<int> expected{ 0, 1, 2, 3, 4, 5, 6, 17, 18, 19, 20, 21, 22, 23, 24, 34, 35, 36, 37, 38, 39, 40, 41, 51, 52, 53, 54, 55, 56, 57, 58,
+		std::vector<int16_t> expected{ 0, 1, 2, 3, 4, 5, 6, 17, 18, 19, 20, 21, 22, 23, 24, 34, 35, 36, 37, 38, 39, 40, 41, 51, 52, 53, 54, 55, 56, 57, 58,
 											68, 69, 70, 71, 72, 73, 74, 85, 86, 87, 88, 89, 90, 91, 102, 103, 104, 105, 106, 107, 119, 120, 121, 122, 123, 124,
 											136, 137, 138, 139, 140 };
 		auto value = pathfinder.getHexesInRange(hex, unit_speed);
@@ -101,7 +101,7 @@ namespace CombatPathfinderTest {
 
 		hex = getHexId(5, 15);
 		unit_speed = 3;
-		expected = std::vector<int>{ 47, 48, 49, 50, 64, 65, 66, 67, 80, 81, 82, 83, 84, 97, 98, 99, 100, 101, 114, 115, 116, 117, 118,
+		expected = std::vector<int16_t>{ 47, 48, 49, 50, 64, 65, 66, 67, 80, 81, 82, 83, 84, 97, 98, 99, 100, 101, 114, 115, 116, 117, 118,
 												132, 133, 134, 135, 149, 150, 151, 152 };
 		value = pathfinder.getHexesInRange(hex, unit_speed);
 		EXPECT_EQ(expected, value);
@@ -109,7 +109,7 @@ namespace CombatPathfinderTest {
 
 		hex = getHexId(8, 1);
 		unit_speed = 3;
-		expected = std::vector<int>{ 85, 86, 87, 88, 102, 103, 104, 105, 119, 120, 121, 122, 123, 136, 137, 138, 139, 140,
+		expected = std::vector<int16_t>{ 85, 86, 87, 88, 102, 103, 104, 105, 119, 120, 121, 122, 123, 136, 137, 138, 139, 140,
 												153, 154, 155, 156, 157, 170, 171, 172, 173 };
 		value = pathfinder.getHexesInRange(hex, unit_speed);
 		EXPECT_EQ(expected, value);
@@ -126,7 +126,7 @@ namespace CombatPathfinderTest {
 
 		int hex = getHexId(2, 1);
 		int unit_speed = 6;
-		std::vector<int> expected{ 1, 2, 3, 4, 5, 6, 18, 19, 20, 21, 22, 23, 24, 35, 36, 37, 38, 39, 40, 41, 52, 53, 54, 55, 56, 57, 58,
+		std::vector<int16_t> expected{ 1, 2, 3, 4, 5, 6, 18, 19, 20, 21, 22, 23, 24, 35, 36, 37, 38, 39, 40, 41, 52, 53, 54, 55, 56, 57, 58,
 											69, 70, 71, 72, 73, 74, 86, 87, 88, 89, 90, 91, 103, 104, 105, 106, 107, 120, 121, 122, 123, 124,
 											137, 138, 139, 140 };
 		auto value = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
@@ -137,7 +137,7 @@ namespace CombatPathfinderTest {
 		field.fillHex(getHexId(3, 3), CombatHexOccupation::SOLID_OBSTACLE);
 		field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
 
-		expected = std::vector<int>{ 1, 2, 3, 4, 5, 6, 18, 20, 21, 22, 23, 24, 35, 36, 38, 39, 40, 41, 52, 53, 55, 56, 57, 58,
+		expected = std::vector<int16_t>{ 1, 2, 3, 4, 5, 6, 18, 20, 21, 22, 23, 24, 35, 36, 38, 39, 40, 41, 52, 53, 55, 56, 57, 58,
 											69, 70, 71, 72, 73, 74, 86, 87, 88, 89, 90, 91, 103, 104, 105, 106, 107, 120, 121, 122, 123, 124,
 											137, 138, 139, 140 };
 		value = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
@@ -147,7 +147,7 @@ namespace CombatPathfinderTest {
 		field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::EMPTY));
 		hex = getHexId(5, 15);
 		unit_speed = 3;
-		expected = std::vector<int>{ 47, 48, 49, 64, 65, 66, 80, 81, 82, 83, 97, 98, 99, 100, 114, 115, 116, 117,
+		expected = std::vector<int16_t>{ 47, 48, 49, 64, 65, 66, 80, 81, 82, 83, 97, 98, 99, 100, 114, 115, 116, 117,
 												132, 133, 134, 149, 150, 151 };
 		value = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
 		EXPECT_EQ(expected, value); // no obstacles in range
@@ -181,8 +181,8 @@ namespace CombatPathfinderTest {
 		walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
 		reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
 
-		std::vector<int> expected(walkable);
-		std::vector<int> excluded{ getHexId(0, 1) }; // this one field is not reachable anymore, and path to other walkable field is not distorted
+		std::vector<int16_t> expected(walkable);
+		std::vector<int16_t> excluded{ getHexId(0, 1) }; // this one field is not reachable anymore, and path to other walkable field is not distorted
 		for (auto ex : excluded)
 			expected.erase(std::remove(std::begin(expected), std::end(expected), ex), std::end(expected));
 		EXPECT_EQ(expected, reachable);
@@ -197,8 +197,8 @@ namespace CombatPathfinderTest {
 		walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
 		reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
 
-		expected = std::vector<int>(walkable);
-		excluded = std::vector<int>{ getHexId(2, 7), getHexId(3, 7) }; // these fields are beyond unit range (distorted path by obstacles)
+		expected = std::vector<int16_t>(walkable);
+		excluded = std::vector<int16_t>{ getHexId(2, 7), getHexId(3, 7) }; // these fields are beyond unit range (distorted path by obstacles)
 		for (auto ex : excluded)
 			expected.erase(std::remove(std::begin(expected), std::end(expected), ex), std::end(expected));
 		EXPECT_EQ(expected, reachable);
@@ -280,48 +280,48 @@ namespace CombatPathfinderTest {
 		CombatPathfinder pathfinder;
 		CombatField field(createField());
 
-		int from = getHexId(2, 1);
-		int to = getHexId(8, 1);
+		int16_t from = getHexId(2, 1);
+		int16_t to = getHexId(8, 1);
 		auto path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(6, path.size());
-		auto expected = std::vector<int>{ 53, 70, 88, 104, 121, to };
+		auto expected = std::vector<int16_t>{ 53, 70, 88, 104, 121, to };
 		EXPECT_EQ(expected, path);
 
 		to = getHexId(2, 15);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(14, path.size());
-		expected = std::vector<int>{ 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, to };
+		expected = std::vector<int16_t>{ 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, to };
 		EXPECT_EQ(expected, path);
 
 		to = getHexId(2, 7);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(6, path.size());
-		expected = std::vector<int>{ 36, 37, 38, 39, 40, to };
+		expected = std::vector<int16_t>{ 36, 37, 38, 39, 40, to };
 		EXPECT_EQ(expected, path);
 
 		to = getHexId(5, 15);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(15, path.size());
-		expected = std::vector<int>{ 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 65, 82, to };
+		expected = std::vector<int16_t>{ 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 65, 82, to };
 		EXPECT_EQ(expected, path);
 
 		field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::IMPS_2x100));
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(15, path.size());
-		expected = std::vector<int>{ 36, 37, 38, 39, 40, 41, 42, 43, 61, 78, 79, 80, 81, 82, to };
+		expected = std::vector<int16_t>{ 36, 37, 38, 39, 40, 41, 42, 43, 61, 78, 79, 80, 81, 82, to };
 		EXPECT_EQ(expected, path);
 
 		from = getHexId(2, 8);
 		to = getHexId(10, 8);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(9, path.size());
-		expected = std::vector<int>{ 60, 76, 93, 109, 126, 142, 160, 177, to };
+		expected = std::vector<int16_t>{ 60, 76, 93, 109, 126, 142, 160, 177, to };
 		EXPECT_EQ(expected, path);
 
 		to = getHexId(6, 9);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(4, path.size());
-		expected = std::vector<int>{ 60, 77, 95, to };
+		expected = std::vector<int16_t>{ 60, 77, 95, to };
 		EXPECT_EQ(expected, path);
 
 		from = getHexId(6, 9);
@@ -329,7 +329,7 @@ namespace CombatPathfinderTest {
 		to = getHexId(2, 11);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(7, path.size());
-		expected = std::vector<int>{ 95, 78, 79, 80, 64, 46, to };
+		expected = std::vector<int16_t>{ 95, 78, 79, 80, 64, 46, to };
 		EXPECT_EQ(expected, path);
 	}
 }

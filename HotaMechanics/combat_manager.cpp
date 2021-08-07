@@ -92,7 +92,7 @@ namespace HotaMechanics {
 	}
 
 
-	const std::vector<CombatUnit*> CombatManager::getUnitsInRange(const CombatSide _side, const std::vector<int>& _hexes) const {
+	const std::vector<CombatUnit*> CombatManager::getUnitsInRange(const CombatSide _side, const std::vector<int16_t>& _hexes) const {
 		std::vector<CombatUnit*> units_in_range;
 		auto& hero = _side == CombatSide::ATTACKER ? current_state->attacker : current_state->defender;
 

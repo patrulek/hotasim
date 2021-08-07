@@ -42,7 +42,7 @@ namespace HotaMechanics {
 
 	void CombatManager::makeUnitWalk(int _target_hex, int _walk_distance) {
 		auto& active_stack = getActiveStack();
-		auto path = ai->getPathfinder().findPath(active_stack.getHex(), _target_hex, current_state->field);
+		auto path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
 
 		if (path.empty())
 			throw std::exception("Should never happen (we already found that path earlier)");

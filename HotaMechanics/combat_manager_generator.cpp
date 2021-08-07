@@ -24,19 +24,19 @@ namespace HotaMechanics {
 
 		// get reachable hexes;
 		auto& field = current_state->field;
-		auto reachable_hexes = ai->getPathfinder().getReachableHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd, field, false, false);
+		auto reachable_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd, field, false, false);
 		
 		for (auto hex : reachable_hexes)
 			actions.push_back(createWalkAction(hex));
 
 		// get attackable enemy units; 
 		// if can shoot then only get all enemy units
-		auto range_hexes = ai->getPathfinder().getHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd + 1);
+		auto range_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd + 1);
 		auto units_in_range = getUnitsInRange(CombatSide::DEFENDER, range_hexes);
 
 		for (auto unit : units_in_range) {
 			auto adjacent_hexes = ai->getPathfinder().getAdjacentHexes(unit->getHex());
-			auto reachable_adjacent = ai->getPathfinder().getReachableAdjacentHexes(unit->getHex(), activeStack.getHex(), activeStack.getCombatStats().spd,
+			auto reachable_adjacent = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableAdjacentHexes(unit->getHex(), activeStack.getHex(), activeStack.getCombatStats().spd,
 																											field, false, false);
 
 			// if were staying in one of adjacent hexes to target, add that hex
@@ -74,7 +74,7 @@ namespace HotaMechanics {
 			auto unit = current_state->attacker.getUnits()[unit_id];
 			int hex = ai->chooseHexToMoveForAttack(active_stack, *unit);
 
-			int distance_to_hex = ai->getPathfinder().findPath(active_stack.getHex(), hex, current_state->field).size();
+			int distance_to_hex = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), hex, current_state->field).size();
 			int turns = distance_to_hex == 0 ? 1 : std::ceil((float)distance_to_hex / active_stack.getCombatStats().spd);
 
 			if (turns == 1)

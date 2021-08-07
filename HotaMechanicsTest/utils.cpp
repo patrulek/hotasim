@@ -26,7 +26,7 @@ namespace TestUtils {
 		return r;
 	}
 
-	const int getHexId(const int _row, const int _col) {
+	const int16_t getHexId(const int _row, const int _col) {
 		return _row * FIELD_COLS + _col;
 	}
 

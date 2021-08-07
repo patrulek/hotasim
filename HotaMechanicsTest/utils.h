@@ -29,6 +29,6 @@ namespace TestUtils {
 	CombatAI& createCombatAI();
 	CombatManager* createCombatManager();
 	CombatManager* createCombatManager(const CombatHero& _attacker, const CombatHero& _defender, const bool _initialize = true);
-	const int getHexId(const int _row, const int _col);
+	const int16_t getHexId(const int _row, const int _col);
 
 }; // TestUtils;

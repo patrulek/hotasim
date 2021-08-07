@@ -106,7 +106,7 @@ namespace HotaMechanics {
 				if (fight_value_gain <= 0)
 					continue;
 
-				auto reachable_hexes = _pathfinder.getReachableHexesInRange(unit->getHex(), unit->getCombatStats().spd + 1, _field, false, false);
+				auto reachable_hexes = const_cast<CombatPathfinder&>(_pathfinder).getReachableHexesInRange(unit->getHex(), unit->getCombatStats().spd + 1, _field, false, false);
 				reachable_hexes.push_back(unit->getHex()); // add also unit position
 
 				for (auto hex : reachable_hexes) {

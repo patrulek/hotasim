@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+#include <cstdint>
 
 namespace HotaMechanics::Constants {
 
@@ -9,6 +11,7 @@ namespace HotaMechanics::Constants {
 	static const int FIELD_ROWS = 11;
 	static constexpr int FIELD_SIZE = FIELD_COLS * FIELD_ROWS;
 
+	static std::vector<int16_t> EMPTY_PATH;
 
 	enum class AIDifficulty : int8_t {
 		EASY /*80%, 100%*/, NORMAL /*130%, 160%, 200%*/
