@@ -123,7 +123,7 @@ namespace HotaMechanics {
 			auto adjacent_hexes = getAdjacentHexes(hex_id);
 
 			for (auto hex : adjacent_hexes) {
-				const bool is_viable_hex = hex != INVALID_HEX_ID;
+				const bool is_viable_hex = (hex != INVALID_HEX_ID);
 				hex = (is_viable_hex * hex) + (!is_viable_hex * INVALID_HEX_ID);
 
 				next_to_check[next_to_check_cnt] = hex;
@@ -131,12 +131,13 @@ namespace HotaMechanics {
 				checked[hex] = true;
 			}
 
-			if (to_check_cnt == 0 && next_to_check_cnt > 0) {
-				to_check = next_to_check;
-				to_check_cnt = next_to_check_cnt;
-				next_to_check_cnt = 0;
-				++dist;
-			}
+			const bool check_next = (to_check_cnt == 0 * next_to_check_cnt > 0);
+			to_check_cnt = (!check_next * to_check_cnt) + (check_next * next_to_check_cnt);
+			next_to_check_cnt = (!check_next * next_to_check_cnt);
+			dist = (!check_next * dist) + (check_next * (dist + 1));
+
+			for (int hex = 0; hex < to_check_cnt; ++hex)
+				to_check[hex] = (!check_next * to_check[hex]) + (check_next * next_to_check[hex]);
 		}
 
 		auto result = std::vector<int16_t>(std::begin(hexes), std::end(hexes));

@@ -42,6 +42,7 @@ namespace HotaMechanics {
 		CombatUnit& getActiveStack() const;
 		CombatUnit& getStackByGlobalId(const int _guid) const;
 		CombatUnit& getStackByLocalId(const int _uid, const Constants::CombatSide _side) const;
+		const std::vector<const CombatUnit*> getAllUnitStacks() const;
 		// ------------------------------
 
 		// simple getters ---------------
@@ -85,6 +86,7 @@ namespace HotaMechanics {
 		void processUnitAction(const CombatAction& _action);
 
 		void orderUnitsInTurn();
+		void reorderUnits();
 		void removeFromOrderList(const int _unit_id);
 		void restoreLastUnit();
 		void nextUnit();

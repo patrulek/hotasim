@@ -42,7 +42,7 @@ namespace HotaSim {
 						for (auto adj_hex : adjacent) {
 							if (!state.field.isHexWalkable(adj_hex))
 								continue;
-							if (ai.getPlayerReachables()[adj_hex] & (1 << (guid % 21))) {
+							if (const_cast<CombatAI&>(ai).canUnitAttackHex(unit_order, adj_hex)) {
 								auto unit_it = std::find(std::begin(state.order), std::end(state.order), unit.getGlobalUnitId());
 								auto unit_order_it = std::find(std::begin(state.order), std::end(state.order), guid);
 
@@ -68,12 +68,12 @@ namespace HotaSim {
 					if (!state.field.isHexWalkable(hex))
 						continue;
 
-					for (int i = 0; i < 7; ++i) {
-						if (unit.getUnitId() == i)
+					for (auto uu : _mgr.getCurrentState().defender.getUnitsPtrs()) {
+						if (uu->getUnitId() == unit.getUnitId())
 							continue;
 
-						if (ai.getAIReachables()[hex] & (1 << i) && std::find(std::begin(state.order), std::end(state.order), i + 21) != std::end(state.order)) {
-							auto gunit = _mgr.getStackByLocalId(i, CombatSide::DEFENDER);
+						if (const_cast<CombatAI&>(ai).canUnitAttackHex(*uu, hex) && std::find(std::begin(state.order), std::end(state.order), uu->getGlobalUnitId()) != std::end(state.order)) {
+							auto gunit = _mgr.getStackByLocalId(uu->getUnitId(), CombatSide::DEFENDER);
 							int fv_gain = Calculator::calculateFightValueAdvantageAfterMeleeUnitAttack(active_stack, unit);
 							score -= fv_gain;
 						}
@@ -121,15 +121,23 @@ namespace HotaSim {
 				return 1;
 			}
 			if (_action.action == CombatActionType::WALK) {
-				int safe = _mgr.getCombatAI().getAIReachables()[active_stack.getHex()];
 				int summed_dist = 0;
 				int score = 30000;
 
 				
 
 				for (auto unit : state.defender.getUnitsPtrs()) {
-					if (safe & (1 << unit->getUnitId()))
+					if (const_cast<CombatAI&>(ai).canUnitAttackHex(*unit, _action.target)) {
 						score -= Calculator::calculateStackUnitFightValue(*unit);
+						score -= Calculator::calculateStackUnitFightValue(active_stack);
+					}
+
+					for (auto attacker_unit : state.attacker.getUnitsPtrs()) {
+						if (const_cast<CombatAI&>(ai).canUnitAttackHex(*unit, attacker_unit->getHex())) {
+							score -= Calculator::calculateStackUnitFightValue(*unit);
+							score -= Calculator::calculateStackUnitFightValue(*attacker_unit);
+						}
+					}
 					//auto path = const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).findPath(unit->getHex(), _action.target, state.field, false, unit->getCombatStats().spd);
 					summed_dist += _mgr.getCombatAI().getPathfinder().distanceBetweenHexes(unit->getHex(), _action.target);//path.size();
 				}

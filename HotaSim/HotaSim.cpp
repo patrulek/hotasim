@@ -26,7 +26,8 @@ int main()
 
    HeroCreator defender;
    defender.setAttack(0), defender.setDefense(0);
-   defender.addUnit(unit_templates()["Peasant"], 500);
+   defender.addUnit(unit_templates()["Peasant"], 250);
+   defender.addUnit(unit_templates()["Peasant"], 250);
 
    CombatFieldType field_type = CombatFieldType::GRASS;
    CombatType combat_type = CombatType::NEUTRAL;

@@ -31,9 +31,9 @@ namespace HotaMechanics {
 		// -------------------------------
 
 		// AI decision making ------------
-		const std::vector<int> chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero) const;
-		const int chooseHexToMoveForAttack(const CombatUnit& _active_stack, const CombatUnit& _target_unit) const;
-		const int chooseWalkDistanceFromPath(const CombatUnit& _active_stack, int _target_hex, const CombatField& _field) const;
+		const std::vector<int> chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const std::vector<int16_t>& _hexes_to_attack) const;
+		const int16_t chooseHexToMoveForAttack(const CombatUnit& _active_stack, const CombatUnit& _target_unit) const;
+		const int chooseWalkDistanceFromPath(const CombatUnit& _active_stack, int _target_hex, const CombatField& _field, const int _unit_id) const;
 		// -------------------------------
 
 		// AI state ----------------------
@@ -41,16 +41,22 @@ namespace HotaMechanics {
 		void addEventsToProcess(const std::vector<CombatEvent>& _events) { events_to_process.insert(std::end(events_to_process), std::begin(_events), std::end(_events)); }
 		void processEvents();
 
+		const std::array<int, Constants::FIELD_SIZE + 1>& getAttackablesForUnit(const CombatUnit& _unit) const;
+		const std::array<int, Constants::FIELD_SIZE + 1>& getReachablesForUnit(const CombatUnit& _unit) const;
 		std::vector<int16_t> getAttackableHexesForUnit(const CombatUnit& _unit) const;
 		std::vector<int16_t> getReachableHexesForUnit(const CombatUnit& _unit) const;
 		std::vector<int16_t> getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const;
+		
+		const bool canUnitReachHex(const CombatUnit& _unit, const int16_t _hex) const;
+		const bool canUnitAttackHex(const CombatUnit& _unit, const int16_t _hex) const;
+		const bool isHexInUnitRange(const CombatUnit& _unit, const int16_t _hex) const;
+
 		std::vector<const CombatUnit*> getEnemyUnitsInAttackRange(const CombatUnit& _unit) const;
+		const bool isUnitBlockedFor(const CombatUnit& _unit, const CombatUnit& _active_stack) const;
 		// -------------------------------
 
 		// simple getters ----------------
 		const CombatPathfinder& getPathfinder() const { return *pathfinder; }
-		const std::array<int, Constants::FIELD_SIZE + 1>& getAIAttackables() const { return ai_unit_attackables; }
-		const std::array<int, Constants::FIELD_SIZE + 1>& getPlayerAttackables() const { return player_unit_attackables; }
 		// -------------------------------
 	private:
 		// event processor ---------------
@@ -245,9 +251,10 @@ AI FLOW:
 			21400(0, some_calc_value, activeStack) - check special terrain / antimagic garrison
 			1F700(jednym z argumentów jest hex na który idziemy) - (check tactics phase) - tu gdzieœ ustawiliœmy combat action i wybraliœmy combathex do ruchu; przekazaliœmy numer hexa jako parametr
 				B3160 - 
-				124280 - pobieranie kolejnego hexa z pathfindingu??
+				124280 - pobieranie kolejnego hexa z pathfindingu - tak
 
 
+(h3hota HD.exe + 299538) + 1f6d8 -> poziom trudnoœci 
 
 ##################
 
@@ -309,6 +316,7 @@ ecx = [ebp-44] - ten sam target
 21DAA - [ebp-1C] = ecx - tutaj ustawiamy target hexa na jaki zmierzamy
 
 218B5 - tutaj ustawiamy ró¿nicê fight value na hexach, tylko w przypadku gdy player zada wiêcej fight_value ni¿ kontra ai
+
 
 ##################
 

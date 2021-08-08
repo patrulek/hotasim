@@ -176,6 +176,8 @@ namespace HotaSim {
 						std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << std::endl;
 						std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 						std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
+						std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]
+							<< " [2] = " << tree.turns_occurence[2] << " [3] = " << tree.turns_occurence[3] << " [4] = " << tree.turns_occurence[4] << std::endl;
 						std::cout << "Best score so far: " << std::hex << tree.root->best_branch_score << std::endl << std::endl;
 					}
 
@@ -184,16 +186,21 @@ namespace HotaSim {
 					bool take_forgotten = false;
 
 					if ((float)tree.forgotten_paths.size() / tree.getSize() > 0.01f 
-					&& tree.getSize() % 24 == 0)
+					&& tree.getSize() % 12 == 0)
 						take_forgotten = true;
 
-					if ((float)tree.forgotten_paths.size() / tree.getSize() < 0.015f) {
-						if (tree.getSize() / 15 > jump_random_parent) {
+					if (tree.getSize() < 15000) {
+						++jump_root;
+						tree.goRoot();
+						root_jump = true;
+					}
+					else if ((float)tree.forgotten_paths.size() / tree.getSize() < 0.015f) {
+						if (tree.getSize() / 3 > jump_random_parent) {
 							++jump_random_parent;
 							tree.goRandomParent();
 							random_jump = true;
 						}
-						else if (tree.getSize() / 37 > jump_root) {
+						else if (tree.getSize() / 7 > jump_root) {
 							++jump_root;
 							tree.goRoot();
 							root_jump = true;

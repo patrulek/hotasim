@@ -40,6 +40,36 @@ namespace HotaMechanics {
 		return *(const_cast<CombatUnit*>(hero.getUnitsPtrs()[_uid]));
 	}
 
+	void CombatManager::reorderUnits() {
+		auto& active_stack = getActiveStack();
+
+		if (current_state->order.size() > 2) {
+			int i = 0;
+
+			while(true) {
+				auto it = std::rbegin(current_state->order);
+				std::advance(it, i);
+				auto it2 = std::rbegin(current_state->order);
+				std::advance(it2, i + 1);
+
+				int cur = *it, prev = *(it2);
+				if (prev == current_state->order.front())
+					break;
+
+				auto& hero = prev / 21 == 0 ? current_state->attacker : current_state->defender;
+				auto unit = hero.getUnits()[prev % 21];
+
+				if (unit->canWait())
+					break;
+
+				if (unit->getCombatStats().spd > active_stack.getCombatStats().spd)
+					std::swap(*it, *it2);
+
+				++i;
+			}
+		}
+	}
+
 	void CombatManager::orderUnitsInTurn()
 	{
 		auto units = current_state->attacker.getUnits();

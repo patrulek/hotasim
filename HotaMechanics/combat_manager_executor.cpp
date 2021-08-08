@@ -16,25 +16,7 @@ namespace HotaMechanics {
 		active_stack.wait();
 		current_state->order.push_back(current_state->order.front());
 
-		if (current_state->order.size() > 2) {
-			for (auto it = std::rbegin(current_state->order), it2 = it; ; ++it) {
-				std::advance(it2, 1);
-				int cur = *it, prev = *(it2);
-				if (prev == current_state->order.front())
-					break;
-
-				auto& hero = prev / 21 == 0 ? current_state->attacker : current_state->defender;
-				auto unit = hero.getUnits()[prev % 21];
-
-				if (unit->canWait())
-					break;
-
-				if (unit->getCombatStats().spd < active_stack.getCombatStats().spd
-				|| (unit->getCombatStats().spd == active_stack.getCombatStats().spd && unit->getCombatSide() != active_stack.getCombatSide())) {
-					std::swap(*it, *it2);
-				}
-			}
-		}
+		reorderUnits();
 	}
 
 	void CombatManager::makeUnitFly(int _target_hex) {
@@ -44,15 +26,17 @@ namespace HotaMechanics {
 	void CombatManager::makeUnitWalk(int _target_hex, int _walk_distance) {
 		auto& active_stack = getActiveStack();
 		auto path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
-		auto new_event = createUnitPosChangedEvent(active_stack.getGlobalUnitId(), active_stack.getHex(), active_stack.getHex());
 
-		if (path.empty())
+		if (path.empty()) {
+			path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
+			this->generateActionsForPlayer();
 			throw std::exception("Should never happen (we already found that path earlier)");
+		}
 
+		auto new_event = createUnitPosChangedEvent(active_stack.getGlobalUnitId(), active_stack.getHex(), active_stack.getHex());
 		int walk_distance = _walk_distance == -1 ? active_stack.getCombatStats().spd : _walk_distance;
 		int range = std::min(path.size(), (size_t)walk_distance);
 		for (int i = 0; i < range; ++i) {
-			//std::cout << "Moved unit from (" << active_stack.getHex() << ") to (" << path[i] << ")\n";
 			moveUnit(active_stack, path[i]);
 			new_event.param3 = path[i];
 		}

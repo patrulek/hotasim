@@ -31,28 +31,57 @@ namespace HotaMechanics {
 	}
 
 	std::vector<int16_t> CombatAI::getAttackableHexesForUnit(const CombatUnit& _unit) const {
-		std::vector<int16_t> reachable; reachable.reserve(64);
-		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
+		std::vector<int16_t> attackable; attackable.reserve(64);
+		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
 
 		for (int hex = 0, uid = _unit.getUnitId(); hex < FIELD_SIZE; ++hex) {
-			if (reachables[hex] & (1 << uid))
-				reachable.push_back(hex);
+			if (attackables[hex] & (1 << uid))
+				attackable.push_back(hex);
 		}
 
-		return reachable;
+		return attackable;
+	}
+
+	const bool CombatAI::canUnitReachHex(const CombatUnit& _unit, const int16_t _hex) const {
+		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
+		auto uid = _unit.getUnitId();
+
+		return reachables[_hex] & (1 << uid);
+	}
+
+	const bool CombatAI::isHexInUnitRange(const CombatUnit& _unit, const int16_t _hex) const {
+		auto& ranges = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_ranges : ai_unit_ranges;
+		auto uid = _unit.getUnitId();
+
+		return ranges[_hex] & (1 << uid);
+	}
+
+	const bool CombatAI::canUnitAttackHex(const CombatUnit& _unit, const int16_t _hex) const {
+		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
+		auto uid = _unit.getUnitId();
+
+		return attackables[_hex] & (1 << uid);
+	}
+
+	const std::array<int, Constants::FIELD_SIZE + 1>& CombatAI::getAttackablesForUnit(const CombatUnit& _unit) const {
+		return _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
+	}
+
+	const std::array<int, Constants::FIELD_SIZE + 1>& CombatAI::getReachablesForUnit(const CombatUnit& _unit) const {
+		return _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
 	}
 
 	std::vector<int16_t> CombatAI::getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const {
-		std::vector<int16_t> reachable; reachable.reserve(64);
-		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
+		std::vector<int16_t> attackable; attackable.reserve(64);
+		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
 		int uid = _unit.getUnitId();
 
 		for (auto hex : _hexes) {
-			if (reachables[hex] & (1 << uid))
-				reachable.push_back(hex);
+			if (attackables[hex] & (1 << uid))
+				attackable.push_back(hex);
 		}
 
-		return reachable;
+		return attackable;
 	}
 
 	std::vector<const CombatUnit*> CombatAI::getEnemyUnitsInAttackRange(const CombatUnit& _unit) const {
@@ -62,10 +91,11 @@ namespace HotaMechanics {
 		int uid = _unit.getUnitId();
 
 		for (auto enemy_unit : hero.getUnits()) {
-			if (attackables[enemy_unit->getHex()] & (1 << uid)) {
-				units.push_back(enemy_unit);
+			if (!enemy_unit->isAlive())
 				continue;
-			}
+			
+			if( canUnitAttackHex(_unit, enemy_unit->getHex()))
+				units.push_back(enemy_unit);
 		}
 
 		return units;
@@ -125,27 +155,13 @@ namespace HotaMechanics {
 		setUnitRanges(unit);
 		setUnitAttackables(unit);
 
-		for (auto attacker_unit : combat_manager.getCurrentState().attacker.getUnits()) {
-			if (attacker_unit == &unit)
+		for (auto u : combat_manager.getAllUnitStacks()) {
+			if (u == &unit)
 				continue;
 
-			int uid = attacker_unit->getUnitId();
-
-			if (player_unit_ranges[_ev.param3] & (1 << uid)) {
-				clearUnitAttackables(*attacker_unit);
-				setUnitAttackables(*attacker_unit);
-			}
-		}
-
-		for (auto defender_unit : combat_manager.getCurrentState().defender.getUnits()) {
-			if (defender_unit == &unit)
-				continue;
-
-			int uid = defender_unit->getUnitId();
-
-			if (ai_unit_ranges[_ev.param3] & (1 << uid)) {
-				clearUnitAttackables(*defender_unit);
-				setUnitAttackables(*defender_unit);
+			if (isHexInUnitRange(*u, _ev.param3)) {
+				clearUnitAttackables(*u);
+				setUnitAttackables(*u);
 			}
 		}
 	}
@@ -162,6 +178,8 @@ namespace HotaMechanics {
 		auto adjacent_hexes = pathfinder->getWalkableHexesInRange(_unit.getHex(), 1, combat_manager.getCurrentState().field, true);
 		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
 		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
+
+		attackables[_unit.getHex()] |= (1 << _unit.getUnitId());
 
 		for (auto adj_hex : adjacent_hexes)
 			attackables[adj_hex] |= (1 << _unit.getUnitId());
@@ -185,6 +203,16 @@ namespace HotaMechanics {
 		
 		clearUnitRanges(unit);
 		clearUnitAttackables(unit);
+
+		for (auto u : combat_manager.getAllUnitStacks()) {
+			if (u == &unit)
+				continue;
+
+			if (isHexInUnitRange(*u, unit.getHex())) {
+				clearUnitAttackables(*u);
+				setUnitAttackables(*u);
+			}
+		}
 	}
 
 	void CombatAI::clearUnitRanges(const CombatUnit& _unit) {
@@ -225,11 +253,19 @@ namespace HotaMechanics {
 		std::for_each(std::begin(hexes_fight_value_gain), std::end(hexes_fight_value_gain), [](auto& obj) { obj = -obj; });
 	}
 
+	const bool CombatAI::isUnitBlockedFor(const CombatUnit& _unit, const CombatUnit& _active_stack) const {
+		auto adjacent_hexes = pathfinder->getWalkableHexesInRange(_unit.getHex(), 1, combat_manager.getCurrentState().field);
+		if (adjacent_hexes.empty())
+			return true;
+
+		return pathfinder->findPath(_active_stack.getHex(), _unit.getHex(), combat_manager.getCurrentState().field, false, true).empty();
+	}
+
 	// because of randomization which cant be mirrored in this project, this function can possibly return more
 	// than one unit to attack (only if some specified conditions are met; for most cases there will be only one unit)
-	const std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& activeStack, const CombatHero& enemy_hero) const {
-		if (enemy_hero.getUnits().size() == 1)
-			return std::vector<int>{ enemy_hero.getUnits()[0]->getUnitId() }; // todo: to could not always be [0]
+	const std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const std::vector<int16_t>& _hexes_to_attack) const {
+		if (_enemy_hero.getUnits().size() == 1)
+			return std::vector<int>{ _enemy_hero.getUnits()[0]->getUnitId() }; // todo: to could not always be [0]
 
 		int turns = 999;
 		std::vector<int> unit_ids{};
@@ -237,24 +273,34 @@ namespace HotaMechanics {
 		int min_fight_value_gain = 0;
 		int max_fight_value_gain = 0;
 		int distance = 999;
+		bool attackable = false;
 		auto& field = combat_manager.getCurrentState().field;
+		int cnt = -1;
 
-		for (auto unit : enemy_hero.getUnits()) {
+		for (auto unit : _enemy_hero.getUnits()) {
+			++cnt;
+
 			if (!unit->isAlive())
 				continue;
 
-			int unit_distance = pathfinder->findPath(activeStack.getHex(), unit->getHex(), field, false, true).size();
-			int unit_turns = std::ceil((float)unit_distance / activeStack.getCombatStats().spd); // 1 = can attack; todo: check if should be distance - 1
-			int unit_fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(activeStack, *unit);
+			int unit_distance = pathfinder->findPath(_active_stack.getHex(), _hexes_to_attack[cnt], field, false).size();
+			const bool unit_attackable = !isUnitBlockedFor(*unit, _active_stack);
+			int unit_turns = _hexes_to_attack[cnt] == _active_stack.getHex() ? 1 : std::ceil((float)unit_distance / _active_stack.getCombatStats().spd); // 1 = can attack; todo: check if should be distance - 1
+			int unit_fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(_active_stack, *unit); //351d0
 
-			// if no unit picked, pick first
-			if (unit_ids.empty()) {
+			// if already picked some unit and that one we check now is not attackable 
+			if (!unit_attackable && !unit_ids.empty())
+				continue;
+
+			// if no unit picked or chosen unit not attackable
+			if (unit_ids.empty() || !attackable) {
 				unit_ids.push_back(unit->getUnitId());
 				turns = unit_turns;
 				fight_value_gain = unit_fight_value_gain / unit_turns;
 				min_fight_value_gain = 0.75f * fight_value_gain;
 				max_fight_value_gain = fight_value_gain;
 				distance = unit_distance;
+				attackable = unit_attackable;
 				continue;
 			}
 
@@ -355,7 +401,7 @@ namespace HotaMechanics {
 		return unit_ids;
 	}
 
-	const int CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const {
+	const int16_t CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const {
 		auto adjacent_hexes = pathfinder->getAdjacentHexesClockwise(target_unit.getHex());
 
 		int hex = INVALID_HEX_ID;
@@ -418,7 +464,7 @@ namespace HotaMechanics {
 	}
 
 
-	const int CombatAI::chooseWalkDistanceFromPath(const CombatUnit& _active_stack, const int _target_hex, const CombatField& _field) const {
+	const int CombatAI::chooseWalkDistanceFromPath(const CombatUnit& _active_stack, const int _target_hex, const CombatField& _field, const int _unit_id) const {
 		int walk_distance = 0;
 		int fight_value_gain = hexes_fight_value_gain[_active_stack.getHex()];
 		auto path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
@@ -429,6 +475,17 @@ namespace HotaMechanics {
 				fight_value_gain = hexes_fight_value_gain[path[i]];
 				walk_distance = i + 1;
 			}
+		}
+
+		if (!_active_stack.canWait() && walk_distance < range) {
+			if (walk_distance == 0)
+				walk_distance = 1;
+			auto& unit = combat_manager.getStackByLocalId(_unit_id, CombatSide::ATTACKER);
+			int max_safe_distance = path.size() - unit.getCombatStats().spd;
+			if (walk_distance >= max_safe_distance)
+				walk_distance = _active_stack.getCombatStats().spd;
+			else
+				walk_distance = std::min(max_safe_distance, range);
 		}
 
 		return walk_distance;

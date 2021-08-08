@@ -86,6 +86,14 @@ namespace HotaMechanics {
 	}
 
 
+	const std::vector<const CombatUnit*> CombatManager::getAllUnitStacks() const {
+		auto attacker_units = current_state->attacker.getUnitsPtrs();
+		auto defender_units = current_state->defender.getUnitsPtrs();
+		std::move(std::begin(defender_units), std::end(defender_units), std::back_inserter(attacker_units));
+
+		return attacker_units;
+	}
+
 	void CombatManager::nextStateByAction(const CombatAction& action) {
 		if (!initialized)
 			throw std::exception("Combat manager still didnt initialized");
