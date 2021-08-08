@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <list>
 #include <memory>
+#include <random>
 
 using namespace HotaMechanics;
 
@@ -18,21 +19,17 @@ namespace HotaSim {
 		int action{ 0 };
 		int action_size{ 1 };
 		int depth{ 0 };
+		int seed{ 0 };
 		uint64_t score{ 0 };
 		uint64_t best_branch_score{ 0 };
 		bool cutout{ false };
 
-		CombatSequenceNode(const CombatState& _state, const int64_t _score)
-			: CombatSequenceNode(_state, _score, nullptr) {}
-
-		CombatSequenceNode(const CombatState& _state, const int _action, const int _action_size, const uint64_t _score, CombatSequenceNode* _parent)
-			: state(_state), action(_action), action_size(_action_size), score(_score), best_branch_score(_score), parent(_parent) {
+		CombatSequenceNode(const CombatState& _state, const int _action, const int _action_size, const uint64_t _score, CombatSequenceNode* _parent, const int _seed)
+			: state(_state), action(_action), action_size(_action_size), seed(_seed), score(_score), best_branch_score(_score), parent(_parent) {
 		}
 
-		CombatSequenceNode(const CombatState& _state, const int64_t _score, CombatSequenceNode* _parent)
-			: state(_state), score(_score), best_branch_score(_score), parent(_parent) {}
 
-		void addChild(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score) {
+		void addChild(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed) {
 			score = _state_score;
 
 			CombatSequenceNode* branch = this;
@@ -46,7 +43,7 @@ namespace HotaSim {
 				branch = branch->parent;
 			}
 
-			auto child = std::make_shared<CombatSequenceNode>(_state, _action, _action_size, _state_score, this);
+			auto child = std::make_shared<CombatSequenceNode>(_state, _action, _action_size, _state_score, this, _seed);
 			children.push_back(child);
 		}
 	};
@@ -58,19 +55,27 @@ namespace HotaSim {
 		CombatSequenceNode* current{ nullptr };
 		uint64_t size{ 0 };
 
+		int fp_cnt{ 0 };
+		std::vector<CombatSequenceNode*> forgotten_paths;
+
 		CombatSequenceTree(const CombatState& _initial_state, const uint64_t _initial_state_score = 0x0000800080008000) {
-			root = std::make_shared<CombatSequenceNode>(_initial_state, _initial_state_score);
+			root = std::make_shared<CombatSequenceNode>(_initial_state, 0, 1, _initial_state_score, nullptr, 1);
 			current = root.get();
+			forgotten_paths.reserve(8096);
 		}
 
-		void addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score) {
-			current->addChild(_state, _action, _action_size, _state_score);
+		void addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed) {
+			current->addChild(_state, _action, _action_size, _state_score, _seed);
 			current = current->children.back().get();
 			++size;
 		}
 
 		bool isCurrentRoot() const {
 			return current == root.get();
+		}
+
+		void takeForgotten() {
+			current = forgotten_paths[fp_cnt++];
 		}
 
 		int branchSize(CombatSequenceNode* _branch) {
@@ -98,6 +103,24 @@ namespace HotaSim {
 				throw std::exception("Should never happen (cant go to null parent node)");
 
 			current = current->parent;
+		}
+
+		void goRandomParent() {
+			if (current->depth < 6) {
+				goRoot();
+				return;
+			}
+
+
+			forgotten_paths.push_back(current);
+			while (current->parent && current->parent->parent != root.get() && current->state.turn > 1)
+				goParent();
+		}
+
+		void goRoot() {
+			forgotten_paths.push_back(current);
+			while (current->parent && current->parent->parent != root.get())
+				goParent();
 		}
 
 		CombatSequenceNode* findBestLeaf() {

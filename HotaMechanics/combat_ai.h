@@ -48,6 +48,8 @@ namespace HotaMechanics {
 
 		// simple getters ----------------
 		const CombatPathfinder& getPathfinder() const { return *pathfinder; }
+		const std::array<int, Constants::FIELD_SIZE>& getAIReachables() const { return ai_unit_reachables; }
+		const std::array<int, Constants::FIELD_SIZE>& getPlayerReachables() const { return player_unit_reachables; }
 		// -------------------------------
 	private:
 		// event processor ---------------

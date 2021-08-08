@@ -4,6 +4,8 @@
 #include "../HotaMechanics/structures.h"
 #include "../HotaMechanics/combat_manager.h"
 
+#include "combat_estimator.h"
+
 using namespace HotaMechanics;
 using namespace HotaMechanics::Constants;
 using namespace HotaMechanics::Utils;
@@ -39,25 +41,28 @@ namespace HotaSim {
 		}
 	}
 
-	void CombatRewinder::rewind(const std::vector<int>& _actions) {
+	void CombatRewinder::rewind(const std::vector<int>& _actions, const std::vector<int>& _seeds) {
 		manager.reinitialize();
 		manager.nextState();
 		std::cout << "\n\n====================================================\nBattle has started\n===================================================\n\n";
 		std::cout << "\nTurn " << manager.getCurrentState().turn + 1 << " has started\n-----\n";
 
 		for (int i = 1; i < _actions.size(); ++i) {
-			int action_idx = _actions[i];
+			int action_cnt = _actions[i];
 
 			if (manager.isUnitMove()) {
 				if (manager.isPlayerMove()) {
 					auto actions = manager.generateActionsForPlayer();
+
+					auto action_order = Estimator::shuffleActions(actions, manager, _seeds[i]);
+					auto action_idx = action_order[action_cnt];
 					describeAction(actions[action_idx]);
 					manager.nextStateByAction(actions[action_idx]);
 				}
 				else {
 					auto actions = manager.generateActionsForAI();
-					describeAction(actions[action_idx]);
-					manager.nextStateByAction(actions[action_idx]);
+					describeAction(actions[action_cnt]);
+					manager.nextStateByAction(actions[action_cnt]);
 				}
 				continue;
 			}

@@ -20,8 +20,9 @@ int main()
    // prepare/load battle template
    HeroCreator attacker;
    attacker.setAttack(0); attacker.setDefense(0);
-   attacker.addUnit(unit_templates()["Imp"], 200);
-   //attacker.addUnit(unit_templates()["Imp"], 100);
+   attacker.addUnit(unit_templates()["Imp"], 50);
+   attacker.addUnit(unit_templates()["Imp"], 100);
+   attacker.addUnit(unit_templates()["Imp"], 50);
 
    HeroCreator defender;
    defender.setAttack(0), defender.setDefense(0);

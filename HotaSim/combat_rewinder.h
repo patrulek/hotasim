@@ -15,7 +15,7 @@ namespace HotaSim {
 			: manager(_manager) {}
 
 		void describeAction(const HotaMechanics::CombatAction& _action);
-		void rewind(const std::vector<int>& _actions);
+		void rewind(const std::vector<int>& _actions, const std::vector<int>& _seeds);
 
 	private:
 		HotaMechanics::CombatManager& manager;

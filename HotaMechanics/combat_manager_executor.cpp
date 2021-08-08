@@ -29,7 +29,8 @@ namespace HotaMechanics {
 				if (unit->canWait())
 					break;
 
-				if (!(unit->getCombatStats().spd > active_stack.getCombatStats().spd)) {
+				if (unit->getCombatStats().spd < active_stack.getCombatStats().spd
+				|| (unit->getCombatStats().spd == active_stack.getCombatStats().spd && unit->getCombatSide() != active_stack.getCombatSide())) {
 					std::swap(*it, *it2);
 				}
 			}

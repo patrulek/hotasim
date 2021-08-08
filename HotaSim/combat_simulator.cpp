@@ -14,6 +14,7 @@
 
 #include <list>
 #include <iostream>
+#include <random>
 
 using namespace HotaMechanics;
 using namespace HotaMechanics::Calculator;
@@ -96,7 +97,7 @@ namespace HotaSim {
 
 	const bool CombatSimulator::simulatorConstraintsViolated(const CombatSequenceTree& _tree) {
 		// some states wasnt checked yet
-		bool some_states_left_rule_violated = _tree.isCurrentRoot();
+		bool some_states_left_rule_violated = _tree.isCurrentRoot() && !_tree.forgotten_paths.empty();
 
 		// reached total states limit for simulation
 		bool state_limit_reached_rule_violated = _tree.getSize() > estimated_total_states;
@@ -127,6 +128,8 @@ namespace HotaSim {
 
 				CombatSequenceTree tree(manager->getInitialState());
 				int last_size = 0;
+				int jump_root = 0;
+				int jump_random_parent = 0;
 
 				estimated_turns = Estimator::estimateTurnsNumber(manager->getInitialState());
 				estimated_total_states = Estimator::estimateTotalStatesNumber(manager->getInitialState());
@@ -134,61 +137,104 @@ namespace HotaSim {
 
 				// start battle (PRE_BATTLE action)
 				manager->nextState();
-				tree.addState(manager->getCurrentState(), 0, 1, 0x0000800080008000);
+				tree.addState(manager->getCurrentState(), 0, 1, 0x0000800080008000, 1);
 				int action_cnt = 0;
+				int seed = std::random_device()();
 
 				while (!simulatorConstraintsViolated(tree)) {
 					while (!combatConstraintsViolated()) {
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
-								auto actions = manager->generateActionsForPlayer();								
-								manager->nextStateByAction(actions[action_cnt]);
-								tree.addState(manager->getCurrentState(), action_cnt, actions.size(), evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
+								auto actions = manager->generateActionsForPlayer();
+								auto action_order = Estimator::shuffleActions(actions, *manager, seed);
+								auto action_idx = action_order[action_cnt];
+								manager->nextStateByAction(actions[action_idx]);
+								tree.addState(manager->getCurrentState(), action_cnt, actions.size(), 
+									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), seed);
+								seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
+								//seed = 42;
+								action_cnt = 0;
 							}
 							else {
 								auto actions = manager->generateActionsForAI();
 								// TODO: for now, take only first ai action (in most cases there will be one action anyway)
 								manager->nextStateByAction(actions[0]);
-								tree.addState(manager->getCurrentState(), 0, 1, evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
+								tree.addState(manager->getCurrentState(), 0, 1, 
+									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1);
 							}
 							continue;
 						}
 
 						manager->nextState();
-						tree.addState(manager->getCurrentState(), 0, 1, evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()));
-						action_cnt = 0;
+						tree.addState(manager->getCurrentState(), 0, 1,
+							evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1);
 					}
 
-					tree.goParent();
 					if (tree.getSize() / 5000 > last_size) {
 						++last_size;
 						std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
+						std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << std::endl;
 						std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 						std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
 						std::cout << "Best score so far: " << std::hex << tree.root->best_branch_score << std::endl << std::endl;
 					}
 
-					// check if need to go up further
-					while (tree.current->parent && tree.current->action + 1 >= tree.current->action_size)
-						tree.goParent();
+					bool random_jump = false;
+					bool root_jump = false;
+					bool take_forgotten = false;
 
-					if (tree.current->parent) {
-						action_cnt = tree.current->action + 1;
-						tree.goParent();
-						manager->setCurrentState(tree.current->state);
+					if ((float)tree.forgotten_paths.size() / tree.getSize() > 0.01f 
+					&& tree.getSize() % 24 == 0)
+						take_forgotten = true;
+
+					if ((float)tree.forgotten_paths.size() / tree.getSize() < 0.015f) {
+						if (tree.getSize() / 15 > jump_random_parent) {
+							++jump_random_parent;
+							tree.goRandomParent();
+							random_jump = true;
+						}
+						else if (tree.getSize() / 37 > jump_root) {
+							++jump_root;
+							tree.goRoot();
+							root_jump = true;
+						}
 					}
+
+					// check if need to go up further
+					if (!root_jump) {
+						if(!random_jump)
+							tree.goParent();
+
+						while (tree.current->parent && tree.current->action + 1 >= tree.current->action_size)
+							tree.goParent();
+
+						if (tree.current->parent)
+							tree.goParent();
+					}
+
+					if (tree.current->parent == tree.root.get() && take_forgotten) {
+						tree.takeForgotten();
+					}
+
+					action_cnt = tree.current->action + 1;
+					seed = tree.current->seed;
+					manager->setCurrentState(tree.current->state);
 				}
 
 				auto best_leaf = tree.findBestLeaf();
 				int best_leaf_turns = best_leaf->state.turn;
 				std::vector<int> action_order;
+				std::vector<int> action_seeds;
 				while (best_leaf) {
 					action_order.push_back(best_leaf->action);
+					action_seeds.push_back(best_leaf->seed);
 					best_leaf = best_leaf->parent;
 				}
 
 				action_order.pop_back();
+				action_seeds.pop_back();
 				std::reverse(std::begin(action_order), std::end(action_order));
+				std::reverse(std::begin(action_seeds), std::end(action_seeds));
 
 				std::cout << "Total actions: " << std::dec << action_order.size() << std::endl;
 				std::cout << "Total turns: " << best_leaf_turns + 1 << std::endl;
@@ -196,7 +242,7 @@ namespace HotaSim {
 				std::cout << "Best result: " << std::hex << tree.root->best_branch_score << std::endl;
 
 				auto rewinder = CombatRewinder(*manager);
-				rewinder.rewind(action_order);
+				rewinder.rewind(action_order, action_seeds);
 			}
 		}
 	}

@@ -29,17 +29,17 @@ namespace HotaMechanics {
 
 		const std::vector<int16_t> getHexesInRange(const int16_t _source_hex, const int _range) const;
 		// from hexes in range check which one are not occupied
-		const std::vector<int16_t> getWalkableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field) const;
+		const std::vector<int16_t> getWalkableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field, const bool _ghost_hex = false) const;
 		// checking pathfinding to hexes which arent occupied
 		const std::vector<int16_t> getReachableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field,
-																		const bool _can_fly, const bool _double_wide);
+																		const bool _can_fly, const bool _double_wide, const bool _ghost_hex = false);
 
 		const int16_t distanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex) const;
-		const std::vector<int16_t>& findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide = false);
+		const std::vector<int16_t>& findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide = false, const bool _ghost_hex = false, const int _range = 999);
 	private:
-		const std::vector<int16_t> getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field) const;
-		const std::vector<int16_t> getReachableHexesFromWalkableHexes(const int16_t from, const int range, const std::vector<int16_t>& hexes,
-																					 const CombatField& _field, const bool can_fly, const bool double_wide);
+		const std::vector<int16_t> getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field, const bool _ghost_hex = false) const;
+		const std::vector<int16_t> getReachableHexesFromWalkableHexes(const int16_t _source_hex, const int _range, const std::vector<int16_t>& _hexes,
+																					 const CombatField& _field, const bool _can_fly, const bool _double_wide, const bool _ghost_hex = false);
 
 
 		std::vector<int16_t> path;

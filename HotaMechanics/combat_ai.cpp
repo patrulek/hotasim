@@ -50,8 +50,21 @@ namespace HotaMechanics {
 		int uid = _unit.getUnitId();
 
 		for (auto enemy_unit : hero.getUnits()) {
-			if (ranges[enemy_unit->getHex()] & (1 << uid))
+			if (ranges[enemy_unit->getHex()] & (1 << uid)) {
 				units.push_back(enemy_unit);
+				continue;
+			}
+
+			auto adjacent = pathfinder->getAdjacentHexes(enemy_unit->getHex());
+			for (auto adj_hex : adjacent) {
+				if (!combat_manager.getCurrentState().field.isHexWalkable(adj_hex))
+					continue;
+
+				if ( pathfinder->distanceBetweenHexes(adj_hex, _unit.getHex()) <= _unit.getCombatStats().spd && ranges[adj_hex] & (1 << uid)) {
+					units.push_back(enemy_unit);
+					break;
+				}
+			}
 		}
 
 		return units;
@@ -151,7 +164,7 @@ namespace HotaMechanics {
 	}
 
 	void CombatAI::setPlayerUnitReachables(const CombatUnit& _unit) {
-		auto hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false);
+		auto hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false, true);
 		for (auto hex : hexes)
 			player_unit_reachables[hex] |= (1 << _unit.getUnitId());
 	}
@@ -163,7 +176,7 @@ namespace HotaMechanics {
 	}
 
 	void CombatAI::setAIUnitReachables(const CombatUnit& _unit) {
-		auto hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false);
+		auto hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false, true);
 		for (auto hex : hexes)
 			ai_unit_reachables[hex] |= (1 << _unit.getUnitId());
 	}
@@ -246,13 +259,14 @@ namespace HotaMechanics {
 		int min_fight_value_gain = 0;
 		int max_fight_value_gain = 0;
 		int distance = 999;
+		auto& field = combat_manager.getCurrentState().field;
 
 		for (auto unit : enemy_hero.getUnits()) {
 			if (!unit->isAlive())
 				continue;
 
-			int unit_distance = pathfinder->distanceBetweenHexes(activeStack.getHex(), unit->getHex()) - 1;
-			int unit_turns = unit_distance == 0 ? 1 : std::ceil((float)unit_distance / activeStack.getCombatStats().spd); // 1 = can attack; todo: check if should be distance - 1
+			int unit_distance = pathfinder->findPath(activeStack.getHex(), unit->getHex(), field, false, true).size();
+			int unit_turns = std::ceil((float)unit_distance / activeStack.getCombatStats().spd); // 1 = can attack; todo: check if should be distance - 1
 			int unit_fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(activeStack, *unit);
 
 			// if no unit picked, pick first
@@ -299,8 +313,23 @@ namespace HotaMechanics {
 			if (unit_fight_value_gain < min_fight_value_gain) // if cur_max_fv < ch_min_fv -> pick ch
 				continue;
 
+			
 			// fight_value_gain ranges for both units collide, so we need to add current unit to set
 			// and update set fight_value_gain ranges
+
+			// check if closer
+			if (unit_distance < distance) {
+				unit_ids.clear();
+				unit_ids.push_back(unit->getUnitId());
+				fight_value_gain = unit_fight_value_gain / unit_turns;
+				min_fight_value_gain = 0.75f * fight_value_gain;
+				max_fight_value_gain = fight_value_gain;
+				distance = unit_distance;
+			}
+
+			if (unit_distance > distance)
+				continue;
+
 			unit_ids.push_back(unit->getUnitId());
 			min_fight_value_gain = std::min(min_fight_value_gain, (int)(0.75f * fight_value_gain));
 			max_fight_value_gain = std::max(max_fight_value_gain, fight_value_gain);
