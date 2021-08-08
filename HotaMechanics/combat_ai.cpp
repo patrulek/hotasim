@@ -465,27 +465,25 @@ namespace HotaMechanics {
 
 
 	const int CombatAI::chooseWalkDistanceFromPath(const CombatUnit& _active_stack, const int _target_hex, const CombatField& _field, const int _unit_id) const {
-		int walk_distance = 0;
-		int fight_value_gain = hexes_fight_value_gain[_active_stack.getHex()];
+		int walk_distance = !_active_stack.canWait();
 		auto path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
+		int fight_value_gain = !_active_stack.canWait() ? hexes_fight_value_gain[path[0]] : hexes_fight_value_gain[_active_stack.getHex()];
 		int range = std::min(path.size(), (size_t)_active_stack.getCombatStats().spd);
 
-		for (int i = 0; i < range; ++i) {
+		for (int i = walk_distance; i < range; ++i) {
 			if (hexes_fight_value_gain[path[i]] >= fight_value_gain) {
 				fight_value_gain = hexes_fight_value_gain[path[i]];
 				walk_distance = i + 1;
 			}
-		}
 
-		if (!_active_stack.canWait() && walk_distance < range) {
-			if (walk_distance == 0)
-				walk_distance = 1;
-			auto& unit = combat_manager.getStackByLocalId(_unit_id, CombatSide::ATTACKER);
-			int max_safe_distance = path.size() - unit.getCombatStats().spd;
-			if (walk_distance >= max_safe_distance)
-				walk_distance = _active_stack.getCombatStats().spd;
-			else
-				walk_distance = std::min(max_safe_distance, range);
+			if ( !_active_stack.canWait() && i + 1 >= walk_distance) {
+				if (std::ceil((float)(path.size() - walk_distance) / _active_stack.getCombatStats().spd
+					> std::ceil((float)(path.size() - i - 1) / _active_stack.getCombatStats().spd))) {
+					walk_distance++;
+					i = walk_distance - 1;
+					fight_value_gain = hexes_fight_value_gain[path[walk_distance]];
+				}
+			}
 		}
 
 		return walk_distance;

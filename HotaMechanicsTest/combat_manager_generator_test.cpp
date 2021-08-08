@@ -300,4 +300,60 @@ namespace CombatManagerTest {
 		EXPECT_EQ(3, actions[0].param1); // result hex (6, 10)
 		combat_manager->nextStateByAction(actions[0]);
 	}
+
+	// CombatManager::generateActionsForAI()
+	TEST(CombatManager_Generator, shouldFixFirstWalkAfterWaitActionBug) {
+		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 50, "Imp", 100, "Imp", 50)),
+			createHero(createArmy("Peasant", 250, "Peasant", 250), CombatSide::DEFENDER));
+		combat_manager->getCurrentState().field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::IMPS_2x100));
+		// start battle
+		combat_manager->nextState();
+
+		// start turn 1
+		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(1, 6), true };
+		combat_manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(5, 6), true };
+		combat_manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(7, 6), true };
+		combat_manager->nextStateByAction(player_action);
+
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(5, 14), true };
+		combat_manager->nextStateByAction(ai_action);
+		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(8, 12), true };
+		combat_manager->nextStateByAction(ai_action);
+
+		combat_manager->nextState();
+
+		// start turn 2
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(5, 9), true };
+		combat_manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		combat_manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		combat_manager->nextStateByAction(player_action);
+
+		auto actions = combat_manager->generateActionsForAI();
+		EXPECT_EQ(1, actions.size());
+		EXPECT_EQ(CombatActionType::WAIT, actions[0].action);
+		combat_manager->nextStateByAction(actions[0]);
+
+		actions = combat_manager->generateActionsForAI();
+		EXPECT_EQ(1, actions.size());
+		EXPECT_EQ(CombatActionType::WAIT, actions[0].action);
+		combat_manager->nextStateByAction(actions[0]);
+
+		actions = combat_manager->generateActionsForAI();
+		EXPECT_EQ(1, actions.size());
+		EXPECT_EQ(CombatActionType::WALK, actions[0].action);
+		EXPECT_EQ(getHexId(5, 10), actions[0].target);
+		EXPECT_EQ(2, actions[0].param1); // result hex (5, 12)
+		combat_manager->nextStateByAction(actions[0]);
+
+		actions = combat_manager->generateActionsForAI();
+		EXPECT_EQ(1, actions.size());
+		EXPECT_EQ(CombatActionType::WALK, actions[0].action);
+		EXPECT_EQ(getHexId(5, 10), actions[0].target);
+		EXPECT_EQ(1, actions[0].param1); // result hex (8, 11)
+		combat_manager->nextStateByAction(actions[0]);
+	}
 }
