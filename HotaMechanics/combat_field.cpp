@@ -29,9 +29,9 @@ namespace HotaMechanics {
 		if (_template.size() != FIELD_SIZE)
 			throw std::exception("Wrong template size");
 
-		for (int i = 0; i < FIELD_SIZE; ++i) {
-			const auto occupation = _template[i] == 1 ? CombatHexOccupation::SOLID_OBSTACLE : CombatHexOccupation::EMPTY;
-			hexes[i] = CombatHex(i, occupation);
+		for (int hex = 0; hex < FIELD_SIZE; ++hex) {
+			const auto occupation = _template[hex] == 1 ? CombatHexOccupation::SOLID_OBSTACLE : CombatHexOccupation::EMPTY;
+			hexes[hex] = CombatHex(hex, occupation);
 		}
 	}
 }; // HotaMechanics

@@ -13,7 +13,7 @@ namespace CombatFieldTest {
 	TEST(CombatField, shouldReturnTrueIfHexIsWalkableFalseOtherwise) {
 		CombatField field(createField());
 
-		EXPECT_FALSE(field.isHexWalkable(-1)); // -1 is "no found" hex, so it cant be walkable
+		EXPECT_FALSE(field.isHexWalkable(INVALID_HEX_ID)); // -1 is "no found" hex, so it cant be walkable
 
 		field.fillHex(1, CombatHexOccupation::UNIT); // hex occupied by unit is not walkable
 		EXPECT_FALSE(field.isHexWalkable(1));

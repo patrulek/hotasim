@@ -10,6 +10,7 @@ namespace HotaMechanics::Constants {
 	static const int FIELD_COLS = 17;
 	static const int FIELD_ROWS = 11;
 	static constexpr int FIELD_SIZE = FIELD_COLS * FIELD_ROWS;
+	static const int INVALID_HEX_ID = FIELD_SIZE;
 
 	static std::vector<int16_t> EMPTY_PATH;
 

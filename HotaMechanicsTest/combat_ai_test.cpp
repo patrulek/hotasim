@@ -12,6 +12,71 @@ namespace CombatAITest {
 	using namespace HotaMechanics::Utils;
 	using namespace TestUtils;
 
+	// CombatAI::getReachableHexesForUnit
+	TEST(CombatAI, shouldReturnAllHexesInRangPlusAdjacenteWhenNoObstaclesAround) {
+		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
+		auto& ai = combat_manager->getCombatAI();
+
+		// start battle
+		combat_manager->nextState();
+
+		auto& active_stack = combat_manager->getActiveStack();
+		auto expected = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field);
+		auto value = ai.getAttackableHexesForUnit(active_stack);
+		value.erase(std::find(std::begin(value), std::end(value), active_stack.getHex())); // its not walkable but its attackable
+		EXPECT_EQ(expected, value);
+	}
+
+
+	// CombatAI::getReachableHexesForUnit
+	TEST(CombatAI, shouldReturnAllWalkableHexesInRangePlusAdjacentWhenSomeObstaclesAround) {
+		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
+		auto& ai = combat_manager->getCombatAI();
+
+		// start battle
+		combat_manager->nextState();
+
+		auto& active_stack = combat_manager->getActiveStack();
+		int walkable_size = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field).size();
+		combat_manager->getCurrentState().field.fillHex(getHexId(5, 2), CombatHexOccupation::SOLID_OBSTACLE);
+		const_cast<CombatAI&>(ai).initializeBattle();
+
+		auto expected = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true);
+		expected.erase(std::find(std::begin(expected), std::end(expected), getHexId(5, 5))); // this hex is not attackable due to obstacle
+		auto value = ai.getAttackableHexesForUnit(active_stack);
+		EXPECT_EQ(expected, value);
+		EXPECT_EQ(walkable_size, value.size() + 1);  // one hexes are not attackable (5,5 - not reachable)
+	}
+
+	// CombatAI::getReachableHexesForUnit
+	TEST(CombatAI, shouldReturnAllWalkableHexesInRangPlusAdjacenteWhenSomeObstaclesAroundAndEnemyUnitHexes) {
+		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
+		auto& ai = combat_manager->getCombatAI();
+
+		// start battle
+		combat_manager->nextState();
+
+		// turn 1
+		CombatAction player_action{ CombatActionType::DEFENSE, -1, -1, true };
+		combat_manager->nextStateByAction(player_action);
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(5, 2), true };
+		combat_manager->nextStateByAction(ai_action);
+		combat_manager->nextState();
+
+		// turn 2
+		auto& active_stack = combat_manager->getActiveStack();
+		int walkable_size = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true).size();
+		combat_manager->getCurrentState().field.fillHex(getHexId(5, 3), CombatHexOccupation::SOLID_OBSTACLE);
+		const_cast<CombatAI&>(ai).initializeBattle();
+
+		auto expected = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true);
+		auto value = ai.getAttackableHexesForUnit(active_stack);
+		expected.erase(std::find(std::begin(expected), std::end(expected), getHexId(5, 5))); // this hex is not attackable due to unit at (5, 2)
+		EXPECT_EQ(expected, value);
+		EXPECT_EQ(walkable_size, value.size() + 2); // two hexes are not attackable (5,5 - not reachable) and (5,3 - not attackable, obstacle)
+	}
+
+
 	// CombatAI::calculateFightValueAdvantageOnHexes(attacker, enemy_hero, field)
 	TEST(CombatAI, DISABLED_shouldSetFightValueGainOnHexes) {
 		EXPECT_TRUE(false);

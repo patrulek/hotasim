@@ -41,15 +41,16 @@ namespace HotaMechanics {
 		void addEventsToProcess(const std::vector<CombatEvent>& _events) { events_to_process.insert(std::end(events_to_process), std::begin(_events), std::end(_events)); }
 		void processEvents();
 
+		std::vector<int16_t> getAttackableHexesForUnit(const CombatUnit& _unit) const;
 		std::vector<int16_t> getReachableHexesForUnit(const CombatUnit& _unit) const;
-		std::vector<int16_t> getReachableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const;
-		std::vector<const CombatUnit*> getEnemyUnitsInRange(const CombatUnit& _unit) const;
+		std::vector<int16_t> getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const;
+		std::vector<const CombatUnit*> getEnemyUnitsInAttackRange(const CombatUnit& _unit) const;
 		// -------------------------------
 
 		// simple getters ----------------
 		const CombatPathfinder& getPathfinder() const { return *pathfinder; }
-		const std::array<int, Constants::FIELD_SIZE>& getAIReachables() const { return ai_unit_reachables; }
-		const std::array<int, Constants::FIELD_SIZE>& getPlayerReachables() const { return player_unit_reachables; }
+		const std::array<int, Constants::FIELD_SIZE + 1>& getAIAttackables() const { return ai_unit_attackables; }
+		const std::array<int, Constants::FIELD_SIZE + 1>& getPlayerAttackables() const { return player_unit_attackables; }
 		// -------------------------------
 	private:
 		// event processor ---------------
@@ -59,19 +60,14 @@ namespace HotaMechanics {
 
 		// AI state ----------------------
 		void initializePlayerUnitRanges();
-		void initializePlayerUnitReachables();
+		void initializePlayerUnitAttackables();
 		void initializeAIUnitRanges();
-		void initializeAIUnitReachables();
+		void initializeAIUnitAttackables();
 
-		void clearPlayerUnitRanges(const CombatUnit& _unit);
-		void clearPlayerUnitReachables(const CombatUnit& _unit);
-		void clearAIUnitRanges(const CombatUnit& _unit);
-		void clearAIUnitReachables(const CombatUnit& _unit);
-
-		void setPlayerUnitRanges(const CombatUnit& _unit);
-		void setPlayerUnitReachables(const CombatUnit& _unit);
-		void setAIUnitRanges(const CombatUnit& _unit);
-		void setAIUnitReachables(const CombatUnit& _unit);
+		void clearUnitRanges(const CombatUnit& _unit);
+		void clearUnitAttackables(const CombatUnit& _unit);
+		void setUnitRanges(const CombatUnit& _unit);
+		void setUnitAttackables(const CombatUnit& _unit);
 		// -------------------------------
 
 		const CombatManager& combat_manager;
@@ -80,15 +76,17 @@ namespace HotaMechanics {
 		Constants::AIDifficulty difficulty{ Constants::AIDifficulty::NORMAL };
 		bool similar_army_strength{ true }; // > 2x fight_value for one side
 
-		std::array<int, Constants::FIELD_SIZE> hexes_fight_value_gain;
+		std::array<int, Constants::FIELD_SIZE + 1> hexes_fight_value_gain;
 
 		std::vector<CombatEvent> events_to_process;
 
-		std::array<int, Constants::FIELD_SIZE> player_unit_ranges;
-		std::array<int, Constants::FIELD_SIZE> player_unit_reachables;
+		std::array<int, Constants::FIELD_SIZE + 1> player_unit_ranges;
+		std::array<int, Constants::FIELD_SIZE + 1> player_unit_reachables;
+		std::array<int, Constants::FIELD_SIZE + 1> player_unit_attackables;
 
-		std::array<int, Constants::FIELD_SIZE> ai_unit_ranges;
-		std::array<int, Constants::FIELD_SIZE> ai_unit_reachables;
+		std::array<int, Constants::FIELD_SIZE + 1> ai_unit_ranges;
+		std::array<int, Constants::FIELD_SIZE + 1> ai_unit_reachables;
+		std::array<int, Constants::FIELD_SIZE + 1> ai_unit_attackables;
 	};
 }; // HotaMechanics
 

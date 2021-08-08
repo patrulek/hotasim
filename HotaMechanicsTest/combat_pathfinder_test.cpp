@@ -22,8 +22,8 @@ namespace CombatPathfinderTest {
 	TEST(CombatPathfinder, shouldReturnTrueIfHexesAdjacentFalseOtherwise) {
 		CombatPathfinder pathfinder;
 
-		EXPECT_ANY_THROW(pathfinder.areAdjacent(-1, 150)); // invalid source
-		EXPECT_ANY_THROW(pathfinder.areAdjacent(150, -1)); // invalid target
+		EXPECT_FALSE(pathfinder.areAdjacent(INVALID_HEX_ID, 150)); // invalid source
+		EXPECT_FALSE(pathfinder.areAdjacent(150, INVALID_HEX_ID)); // invalid target
 
 		EXPECT_FALSE(pathfinder.areAdjacent(0, 0)); // source_hex == target_hex
 		EXPECT_FALSE(pathfinder.areAdjacent(0, 186)); // not adjacent
@@ -35,30 +35,31 @@ namespace CombatPathfinderTest {
 	TEST(CombatPathfinder, shouldReturnCorrectArrayOfAdjacentHexesIdsToGivenHex) {
 		CombatPathfinder pathfinder;
 
-		EXPECT_ANY_THROW(pathfinder.getAdjacentHexes(-1)); // invalid source
+		auto expected = std::array<int16_t, 6>{INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID};
+		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(INVALID_HEX_ID)); // invalid source
 
 		auto hex = getHexId(0, 0);
-		auto expected = std::array<int16_t, 6>{-1, -1, -1, 1, 17, 18};
+		expected = std::array<int16_t, 6>{INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, 1, 17, 18};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(0, 16);
-		expected = std::array<int16_t, 6>{-1, -1, 15, -1, 33, -1};
+		expected = std::array<int16_t, 6>{INVALID_HEX_ID, INVALID_HEX_ID, 15, INVALID_HEX_ID, 33, INVALID_HEX_ID};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(10, 0);
-		expected = std::array<int16_t, 6>{153, 154, -1, 171, -1, -1};
+		expected = std::array<int16_t, 6>{153, 154, INVALID_HEX_ID, 171, INVALID_HEX_ID, INVALID_HEX_ID};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(10, 16);
-		expected = std::array<int16_t, 6>{169, -1, 185, -1, -1, -1};
+		expected = std::array<int16_t, 6>{169, INVALID_HEX_ID, 185, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(9, 0);
-		expected = std::array<int16_t, 6>{-1, 136, -1, 154, -1, 170};
+		expected = std::array<int16_t, 6>{INVALID_HEX_ID, 136, INVALID_HEX_ID, 154, INVALID_HEX_ID, 170};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(9, 16);
-		expected = std::array<int16_t, 6>{151, 152, 168, -1, 185, 186};
+		expected = std::array<int16_t, 6>{151, 152, 168, INVALID_HEX_ID, 185, 186};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
 		hex = getHexId(4, 8);
@@ -71,15 +72,19 @@ namespace CombatPathfinderTest {
 		CombatPathfinder pathfinder;
 
 		auto hex = getHexId(10, 16);
-		auto expected = std::array<int16_t, 6>{169, -1, 185, -1, -1, -1};
+		auto expected = std::array<int16_t, 6>{169, INVALID_HEX_ID, 185, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexes(hex));
 
-		EXPECT_ANY_THROW(pathfinder.getAdjacentHexesClockwise(-1)); // invalid source hex
-		expected = std::array<int16_t, 6>{-1, -1, -1, -1, 185, 169};
+		expected = std::array<int16_t, 6>{INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID};
+		EXPECT_EQ(expected, pathfinder.getAdjacentHexesClockwise(INVALID_HEX_ID)); // invalid source hex
+
+		expected = std::array<int16_t, 6>{INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, 185, 169};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexesClockwise(hex));
 
-		EXPECT_ANY_THROW(pathfinder.getAdjacentHexesCounterClockwise(-1)); // invalid source hex
-		expected = std::array<int16_t, 6>{169, 185, -1, -1, -1, -1};
+		expected = std::array<int16_t, 6>{INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID};
+		EXPECT_EQ(expected, pathfinder.getAdjacentHexesCounterClockwise(INVALID_HEX_ID)); // invalid source hex
+
+		expected = std::array<int16_t, 6>{169, 185, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID};
 		EXPECT_EQ(expected, pathfinder.getAdjacentHexesCounterClockwise(hex));
 	}
 
@@ -87,9 +92,9 @@ namespace CombatPathfinderTest {
 	TEST(CombatPathfinder, shouldReturnHexesInRangeToGivenHex) {
 		CombatPathfinder pathfinder;
 
-		EXPECT_ANY_THROW(pathfinder.getHexesInRange(-1, 5)); // invalid source hex
-		EXPECT_ANY_THROW(pathfinder.getHexesInRange(150, 0)); // invalid range == 0
-		EXPECT_ANY_THROW(pathfinder.getHexesInRange(150, -1)); // invalid range < 0
+		EXPECT_TRUE(pathfinder.getHexesInRange(INVALID_HEX_ID, 5).empty()); // invalid source hex
+		EXPECT_TRUE(pathfinder.getHexesInRange(150, 0).empty()); // invalid range == 0
+		EXPECT_TRUE(pathfinder.getHexesInRange(150, -1).empty()); // invalid range < 0
 
 		int hex = getHexId(2, 1);
 		int unit_speed = 6;
@@ -120,9 +125,9 @@ namespace CombatPathfinderTest {
 		CombatPathfinder pathfinder;
 		CombatField field(createField());
 
-		EXPECT_ANY_THROW(pathfinder.getWalkableHexesInRange(-1, 5, field)); // invalid source hex
-		EXPECT_ANY_THROW(pathfinder.getWalkableHexesInRange(150, 0, field)); // invalid range == 0
-		EXPECT_ANY_THROW(pathfinder.getWalkableHexesInRange(150, -1, field)); // invalid range < 0
+		EXPECT_TRUE(pathfinder.getWalkableHexesInRange(INVALID_HEX_ID, 5, field).empty()); // invalid source hex
+		EXPECT_TRUE(pathfinder.getWalkableHexesInRange(150, 0, field).empty()); // invalid range == 0
+		EXPECT_TRUE(pathfinder.getWalkableHexesInRange(150, -1, field).empty()); // invalid range < 0
 
 		int hex = getHexId(2, 1);
 		int unit_speed = 6;
@@ -159,9 +164,9 @@ namespace CombatPathfinderTest {
 		CombatPathfinder pathfinder;
 		CombatField field(createField());
 
-		EXPECT_ANY_THROW(pathfinder.getReachableHexesInRange(-1, 5, field, false, false)); // invalid source hex
-		EXPECT_ANY_THROW(pathfinder.getReachableHexesInRange(150, 0, field, false, false)); // invalid range == 0
-		EXPECT_ANY_THROW(pathfinder.getReachableHexesInRange(150, -1, field, false, false)); // invalid range < 0
+		EXPECT_TRUE(pathfinder.getReachableHexesInRange(INVALID_HEX_ID, 5, field, false, false).empty()); // invalid source hex
+		EXPECT_TRUE(pathfinder.getReachableHexesInRange(150, 0, field, false, false).empty()); // invalid range == 0
+		EXPECT_TRUE(pathfinder.getReachableHexesInRange(150, -1, field, false, false).empty()); // invalid range < 0
 		EXPECT_ANY_THROW(pathfinder.getReachableHexesInRange(150, 5, field, true, false)); // invalid can_fly (not implemented yet)
 		EXPECT_ANY_THROW(pathfinder.getReachableHexesInRange(150, 5, field, false, true)); // invalid double_wide (not implemented yet)
 
@@ -208,16 +213,19 @@ namespace CombatPathfinderTest {
 	TEST(CombatPathfinder, shouldReturnCorrectDistanceBetweenHexes) {
 		CombatPathfinder pathfinder;
 
-		EXPECT_ANY_THROW(pathfinder.distanceBetweenHexes(-1, 150)); // invalid source hex
-		EXPECT_ANY_THROW(pathfinder.distanceBetweenHexes(150, -1)); // invalid target hex
+		EXPECT_EQ(FIELD_SIZE, pathfinder.distanceBetweenHexes(150, INVALID_HEX_ID)); // invalid target hex
+		EXPECT_EQ(FIELD_SIZE, pathfinder.distanceBetweenHexes(INVALID_HEX_ID, 150)); // invalid source hex
 
 		auto hex = getHexId(0, 0);
 		auto target_hex = getHexId(0, 0);
 		EXPECT_EQ(0, pathfinder.distanceBetweenHexes(hex, target_hex)); // equal hexes
 
-		for (auto adjacent_hex : pathfinder.getAdjacentHexes(hex))
-			if (adjacent_hex != -1)
+		for (auto adjacent_hex : pathfinder.getAdjacentHexes(hex)) {
+			if (adjacent_hex != INVALID_HEX_ID)
 				EXPECT_EQ(1, pathfinder.distanceBetweenHexes(hex, adjacent_hex)); // adjacent hexes
+			else
+				EXPECT_EQ(FIELD_SIZE, pathfinder.distanceBetweenHexes(hex, adjacent_hex));
+		}
 
 		target_hex = getHexId(0, 15);
 		EXPECT_EQ(15, pathfinder.distanceBetweenHexes(hex, target_hex));
@@ -257,10 +265,10 @@ namespace CombatPathfinderTest {
 		CombatPathfinder pathfinder;
 		CombatField field(createField());
 
-		EXPECT_ANY_THROW(pathfinder.findPath(-1, 150, field)); // invalid source hex
-		EXPECT_ANY_THROW(pathfinder.findPath(150, -1, field)); // invalid target hex
 		EXPECT_ANY_THROW(pathfinder.findPath(150, 138, field, true)); // finding path for double wide units (not implemented yet)
 		EXPECT_TRUE(pathfinder.findPath(5, 5, field).empty()); // equal source and target result in empty path
+		EXPECT_TRUE(pathfinder.findPath(INVALID_HEX_ID, 150, field).empty()); // invalid source hex
+		EXPECT_TRUE(pathfinder.findPath(150, INVALID_HEX_ID, field).empty()); // invalid target hex
 
 		int from = getHexId(8, 1);
 		int to = getHexId(10, 2);

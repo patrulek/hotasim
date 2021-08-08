@@ -33,7 +33,7 @@ namespace HotaMechanics {
 		std::string toString() const;
 		// ------------------------------
 	private:
-		int16_t id{ -1 };
+		int16_t id{ Constants::INVALID_HEX_ID };
 		Constants::CombatHexOccupation occupied_by{ Constants::CombatHexOccupation::EMPTY };
 	};
 
@@ -44,18 +44,18 @@ namespace HotaMechanics {
 
 		// change state ----------------------
 		void fillHex(const int16_t _target_hex, const Constants::CombatHexOccupation _occupied_by) {
-			if (_target_hex == -1) return;
 			hexes[_target_hex].occupyHex(_occupied_by);
 		}
 		void clearHex(const int16_t _target_hex) {
-			if (_target_hex == -1) return;
 			fillHex(_target_hex, Constants::CombatHexOccupation::EMPTY);
 		}
 		void setTemplate(const std::vector<int>& _template);
 		// ----------------------------------
 
 		// check state ----------------------
-		const bool isHexWalkable(const int16_t _hex_id) const { return _hex_id > -1 && _hex_id < Constants::FIELD_SIZE && hexes[_hex_id].isWalkable(); }
+		const bool isHexWalkable(const int16_t _hex_id, const bool _ghost_hex = false) const {
+			return hexes[_hex_id].isWalkable() || (_ghost_hex && hexes[_hex_id].getOccupation() == Constants::CombatHexOccupation::UNIT);
+		}
 		// ----------------------------------
 
 		// simple getters -------------------
@@ -64,6 +64,6 @@ namespace HotaMechanics {
 	private:
 		Constants::CombatFieldType combatFieldId{ Constants::CombatFieldType::GRASS };
 		Constants::CombatFieldTemplate combatFieldTemplate{ Constants::CombatFieldTemplate::EMPTY };
-		std::array<CombatHex, Constants::FIELD_SIZE> hexes;
+		std::array<CombatHex, Constants::FIELD_SIZE + 1> hexes;
 	};
 }; // HotaMechanics

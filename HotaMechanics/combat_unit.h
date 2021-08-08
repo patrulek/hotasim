@@ -114,7 +114,7 @@ namespace HotaMechanics {
 		const CombatHero* hero;
 
 		UnitStats stats;
-		int16_t hex{ -1 };
+		int16_t hex{ Constants::INVALID_HEX_ID };
 		int16_t stack_number{ 0 };
 		int16_t health_lost{ 0 };
 		CombatUnitState state{ 0 };
