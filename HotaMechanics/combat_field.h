@@ -12,11 +12,12 @@ namespace HotaMechanics {
 	class CombatHex {
 
 	public:
-		CombatHex() = default;
-		explicit CombatHex(const int16_t _id, const Constants::CombatHexOccupation _occupied_by = Constants::CombatHexOccupation::EMPTY)
+		CombatHex(const int16_t _id, const Constants::CombatHexOccupation _occupied_by = Constants::CombatHexOccupation::EMPTY)
 			: id(_id), occupied_by(_occupied_by), area(calcArea()), walkable(baseWalkable()) {}
-		CombatHex(const CombatHex& _obj) = default;
-		CombatHex(CombatHex&& _obj) = default;
+		CombatHex(const CombatHex& _obj)
+			: id(_obj.id), area(_obj.area), walkable(_obj.walkable) {}
+		CombatHex(CombatHex&& _obj)
+			: id(_obj.id), area(_obj.area), walkable(_obj.walkable) {}
 
 		// change state -----------------
 		void occupyHex(const Constants::CombatHexOccupation type) { occupied_by = type; }
@@ -58,9 +59,12 @@ namespace HotaMechanics {
 
 	};
 
+
 	class CombatField {
 
 	public:
+		static const HexArray base_hexes;
+
 		CombatField() = delete;
 		explicit CombatField(const Constants::CombatFieldType _field_type, const Constants::CombatFieldTemplate _field_template = Constants::CombatFieldTemplate::EMPTY);
 		CombatField(const CombatField& _obj) = default;
@@ -83,6 +87,8 @@ namespace HotaMechanics {
 		}
 		void clearHex(const int16_t _target_hex) {
 			fillHex(_target_hex, Constants::CombatHexOccupation::EMPTY);
+
+
 		}
 		void setTemplate(const std::vector<int>& _template);
 		// ----------------------------------
@@ -98,11 +104,8 @@ namespace HotaMechanics {
 		const HexArray& getHexes() const { return hexes; }
 		// ----------------------------------
 	private:
-		HexArray initializeHexes();
-
-		static const StaticHexArray base_hexes;
 		Constants::CombatFieldType combatFieldId{ Constants::CombatFieldType::GRASS };
 		Constants::CombatFieldTemplate combatFieldTemplate{ Constants::CombatFieldTemplate::EMPTY };
-		HexArray hexes;
+		HexArray hexes{ base_hexes };
 	};
 }; // HotaMechanics

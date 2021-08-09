@@ -35,7 +35,7 @@ namespace HotaMechanics {
 
 		auto new_event = createUnitPosChangedEvent(active_stack.getGlobalUnitId(), active_stack.getHex(), active_stack.getHex());
 		int walk_distance = _walk_distance == -1 ? active_stack.getCombatStats().spd : _walk_distance;
-		int range = std::min(path.size(), (size_t)walk_distance);
+		int16_t range = (int16_t)std::min(path.size(), (size_t)walk_distance);
 		for (int i = 0; i < range; ++i) {
 			moveUnit(active_stack, path[i]);
 			new_event.param3 = path[i];

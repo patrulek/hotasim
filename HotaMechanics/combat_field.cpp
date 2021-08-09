@@ -3,9 +3,11 @@
 #include "utils.h"
 
 #include <functional>
+#include <initializer_list>
 
 namespace HotaMechanics {
 	using namespace Constants;
+	using namespace Utils;
 
 	const int64_t CombatField::getHash() const {
 		int64_t hash{ 0 };
@@ -42,16 +44,14 @@ namespace HotaMechanics {
 		return walkable && (occupied_by == CombatHexOccupation::SOFT_OBSTACLE || occupied_by == CombatHexOccupation::EMPTY);
 	}
 
-	HexArray CombatField::initializeHexes() {
-		std::vector<CombatHex> vexes;
-		for (int hex = 0; hex < FIELD_SIZE + 1; ++hex)
-			vexes.push_back(CombatHex(hex));)
-	}
+	const HexArray CombatField::base_hexes;
 
 	CombatField::CombatField(const CombatFieldType _field_type, const CombatFieldTemplate _field_template)
-		: combatFieldId(_field_type), combatFieldTemplate(_field_template), hexes(initializeHexes()) {
+		: combatFieldId(_field_type), combatFieldTemplate(_field_template) {
 		auto field_template = Utils::getCombatFieldTemplate(_field_template);
 		setTemplate(field_template);
+		std::array<CombatHex, 1> array{ CombatHex(0) };
+
 	}
 
 	void CombatField::setTemplate(const std::vector<int>& _template) {

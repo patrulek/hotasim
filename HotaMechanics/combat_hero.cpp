@@ -123,13 +123,13 @@ namespace HotaMechanics {
 		return unit_ptrs;
 	}
 
-	const int CombatHero::getUnitId(const CombatUnit& _unit) const {
+	const int16_t CombatHero::getUnitId(const CombatUnit& _unit) const {
 		auto it = std::find_if(std::begin(units), std::end(units), [&_unit](const CombatUnit& _obj) { return &_obj == &_unit; });
 		bool found = (it != std::end(units));
-		return (it - std::begin(units)) * found - !found;
+		return (int16_t)((it - std::begin(units)) * found - !found);
 	}
 
-	const int CombatHero::getGlobalUnitId(const CombatUnit& _unit) const {
+	const int16_t CombatHero::getGlobalUnitId(const CombatUnit& _unit) const {
 		auto id = getUnitId(_unit);
 		return id + (21 * (side == CombatSide::DEFENDER));
 	}

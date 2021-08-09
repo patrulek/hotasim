@@ -260,7 +260,7 @@ namespace HotaMechanics {
 		if (distance_cache.find(PathCache(_field, _source_hex, _target_hex)) != std::end(distance_cache))
 			return distance_cache[PathCache(_field, _source_hex, _target_hex)]; 
 		
-		auto dist = findPath(_source_hex, _target_hex, _field, false, _ghost_hex).size();
+		auto dist = (int16_t)findPath(_source_hex, _target_hex, _field, false, _ghost_hex).size();
 		return dist;
 	}
 
@@ -340,7 +340,7 @@ namespace HotaMechanics {
 				return EMPTY_PATH;
 
 			std::reverse(std::begin(path), std::end(path));
-			distance_cache[PathCache(_field, _source_hex, _target_hex, _double_wide)] = path.size();
+			distance_cache[PathCache(_field, _source_hex, _target_hex, _double_wide)] = (int16_t)path.size();
 			return path;
 		}
 

@@ -51,13 +51,13 @@ namespace HotaMechanics {
 	void CombatManager::placeUnitsBeforeStart() {
 		int unit_order = 0;
 		for (auto& unit : current_state->attacker.getUnits()) {
-			int hex = ai->getPathfinder().getUnitStartHex(CombatSide::ATTACKER, unit_order++, current_state->attacker.getUnits().size(), unit->isDoubleWide(), combat_type);
+			const int16_t hex = (int16_t)ai->getPathfinder().getUnitStartHex(CombatSide::ATTACKER, unit_order++, (int16_t)current_state->attacker.getUnits().size(), unit->isDoubleWide(), combat_type);
 			moveUnit(const_cast<CombatUnit&>(*unit), hex);
 		}
 
 		unit_order = 0;
 		for (auto& unit : current_state->defender.getUnits()) {
-			int hex = ai->getPathfinder().getUnitStartHex(CombatSide::DEFENDER, unit_order++, current_state->defender.getUnits().size(), unit->isDoubleWide(), combat_type);
+			const int16_t hex = (int16_t)ai->getPathfinder().getUnitStartHex(CombatSide::DEFENDER, unit_order++, (int16_t)current_state->defender.getUnits().size(), unit->isDoubleWide(), combat_type);
 			moveUnit(const_cast<CombatUnit&>(*unit), hex);
 		}
 	}

@@ -5,13 +5,13 @@
 
 namespace HotaMechanics::Constants {
 
-	static const int MANA_PER_KGD = 10;
-	static const int MAX_ARMY_SIZE = 7;
-	static const int FIELD_COLS = 17;
-	static const int FIELD_ROWS = 11;
-	static constexpr int FIELD_SIZE = FIELD_COLS * FIELD_ROWS;
-	static const int INVALID_HEX_ID = FIELD_SIZE;
-	static const int GUID_OFFSET = 21;
+	static const int16_t MANA_PER_KGD = 10;
+	static const int16_t MAX_ARMY_SIZE = 7;
+	static const int16_t FIELD_COLS = 17;
+	static const int16_t FIELD_ROWS = 11;
+	static constexpr int16_t FIELD_SIZE = FIELD_COLS * FIELD_ROWS;
+	static const int16_t INVALID_HEX_ID = FIELD_SIZE;
+	static const int16_t GUID_OFFSET = 21;
 
 	static std::vector<int16_t> EMPTY_PATH;
 	static std::vector<int16_t> EMPTY_VEC;
