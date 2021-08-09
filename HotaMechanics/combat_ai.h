@@ -320,7 +320,7 @@ ecx = [ebp-44] - ten sam target
 
 ##################
 
-35D10 - tak, wygl¹da na obliczenie zadanych obra¿en + kontratak
+35D10 - tak, wygl¹da na obliczenie zadanych obra¿en + kontratak <-- 21b43
 [ebp-50] - ile zosta³o jednostek w atakowanym stacku (57)
 [ebp-4C] - ile zosta³o naszemu stackowi hp (500)
 

@@ -238,6 +238,15 @@ namespace HotaMechanics {
 		hexes_fight_value_gain.fill(0);
 
 		for (auto unit : const_cast<CombatHero&>(_enemy_hero).getUnitsPtrs()) {
+			bool can_reach_any_unit = false;
+
+			for (auto friendly_unit : _active_stack.getHero()->getUnits()) { // h3hota hd.exe + 2055D
+				can_reach_any_unit |= canUnitAttackHex(*unit, friendly_unit->getHex());
+			}
+
+			if( can_reach_any_unit )
+				continue;
+
 			int fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, _active_stack);
 
 			if (fight_value_gain <= 0)
@@ -471,7 +480,7 @@ namespace HotaMechanics {
 		int range = std::min(path.size(), (size_t)_active_stack.getCombatStats().spd);
 
 		for (int i = walk_distance; i < range; ++i) {
-			if (hexes_fight_value_gain[path[i]] >= fight_value_gain) {
+			if ( hexes_fight_value_gain[path[i]] >= fight_value_gain) {
 				fight_value_gain = hexes_fight_value_gain[path[i]];
 				walk_distance = i + 1;
 			}

@@ -28,9 +28,12 @@ namespace HotaSim {
 			auto& active_stack = _mgr.getActiveStack();
 			auto& ai = _mgr.getCombatAI();
 
+			int additional_score = 1;
+
+			int score = additional_score;
+
 			if (_action.action == CombatActionType::ATTACK) {
 				auto& unit = _mgr.getStackByLocalId(_action.param1, CombatSide::DEFENDER);
-				int score = 0;
 				float i = 0.0f; float j = 0.0f;
 
 				for (auto guid : state.order) {
@@ -42,7 +45,7 @@ namespace HotaSim {
 						for (auto adj_hex : adjacent) {
 							if (!state.field.isHexWalkable(adj_hex))
 								continue;
-							if (const_cast<CombatAI&>(ai).canUnitAttackHex(unit_order, adj_hex)) {
+							if (const_cast<CombatAI&>(ai).canUnitAttackHex(unit_order, adj_hex) && adj_hex != _action.target) {
 								auto unit_it = std::find(std::begin(state.order), std::end(state.order), unit.getGlobalUnitId());
 								auto unit_order_it = std::find(std::begin(state.order), std::end(state.order), guid);
 
@@ -57,10 +60,13 @@ namespace HotaSim {
 				}
 
 				score *= (i / j);
-				
-				if (unit.canRetaliate()) {
-					int fv_gain = Calculator::calculateFightValueAdvantageAfterMeleeUnitAttack(active_stack, unit);
-					score += fv_gain;
+				int fv_gain = Calculator::calculateFightValueAdvantageAfterMeleeUnitAttack(active_stack, unit);
+				score += fv_gain;
+
+				if (!unit.canRetaliate()) {
+					auto dmg = Calculator::calculateMeleeUnitAverageDamage(active_stack, unit);
+					auto base_dmg = active_stack.getBaseAverageDmg() * active_stack.getStackNumber();
+					score += (dmg > base_dmg) ? 50000 : 1000;
 				}
 
 				auto adjacent = ai.getPathfinder().getAdjacentHexes(unit.getHex());
@@ -74,16 +80,27 @@ namespace HotaSim {
 
 						if (const_cast<CombatAI&>(ai).canUnitAttackHex(*uu, hex) && std::find(std::begin(state.order), std::end(state.order), uu->getGlobalUnitId()) != std::end(state.order)) {
 							auto gunit = _mgr.getStackByLocalId(uu->getUnitId(), CombatSide::DEFENDER);
-							int fv_gain = Calculator::calculateFightValueAdvantageAfterMeleeUnitAttack(active_stack, unit);
+							int fv_gain = Calculator::calculateFightValueAdvantageAfterMeleeUnitAttack(unit, active_stack);
 							score -= fv_gain;
 						}
 					}
 				}
 
-				return score;
+				if (state.defender.getUnits().size() > 1) {
+					auto units = state.defender.getUnits();
+					for (auto it = std::begin(units), it2 = std::begin(units) + 1; it2 != std::end(units); ++it2)
+					{
+						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).findPath((*it)->getHex(), (*it2)->getHex(), state.field, false, true).size();
+						int turns = std::ceil((float)(dist) / std::max((*it)->getCombatStats().spd, (*it2)->getCombatStats().spd));
+
+						additional_score += (turns - 1) * 50000;
+					}
+				}
+
+				return score + additional_score;
 			}
 			if (_action.action == CombatActionType::DEFENSE)
-				return 1;
+				return score;
 			if (_action.action == CombatActionType::WAIT) {
 				int len = 999;
 				const CombatUnit* u{ nullptr };
@@ -95,10 +112,9 @@ namespace HotaSim {
 					}
 				}
 
-				int score = 0;
 				auto u_it = std::find(std::begin(state.order), std::end(state.order), u->getGlobalUnitId());
 				if(u_it != std::end(state.order))
-					score = 20000;
+					score += 20000;
 
 				for (auto unit : state.attacker.getUnitsPtrs()) {
 					if (unit == &active_stack)
@@ -113,16 +129,29 @@ namespace HotaSim {
 
 				if (len > active_stack.getCombatStats().spd + 1) {
 					if (len <= active_stack.getCombatStats().spd + u->getCombatStats().spd + 1)
-						return 29000 + score;
+						score += 129000;
 					else
-						return 1;
+						score = additional_score;
 				}
+
+
+				if (state.defender.getUnits().size() > 1) {
+					auto units = state.defender.getUnits();
+					for (auto it = std::begin(units), it2 = std::begin(units) + 1; it2 != std::end(units); ++it2)
+					{
+						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).findPath((*it)->getHex(), (*it2)->getHex(), state.field, false, true).size();
+						int turns = std::ceil((float)(dist) / std::max((*it)->getCombatStats().spd, (*it2)->getCombatStats().spd));
+
+						additional_score += (turns - 1) * 50000;
+					}
+				}
+
 				
-				return 1;
+				return score + additional_score;
 			}
 			if (_action.action == CombatActionType::WALK) {
 				int summed_dist = 0;
-				int score = 30000;
+				score += 30000;
 
 				
 
@@ -146,7 +175,7 @@ namespace HotaSim {
 				return score;
 			}
 
-			return 1;
+			return score;
 		}
 
 		const std::vector<int> shuffleActions(const std::vector<CombatAction>& _actions, const CombatManager& _manager, const int _seed) {
