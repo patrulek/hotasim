@@ -11,8 +11,14 @@ namespace HotaMechanics::Constants {
 	static const int FIELD_ROWS = 11;
 	static constexpr int FIELD_SIZE = FIELD_COLS * FIELD_ROWS;
 	static const int INVALID_HEX_ID = FIELD_SIZE;
+	static const int GUID_OFFSET = 21;
 
 	static std::vector<int16_t> EMPTY_PATH;
+	static std::vector<int16_t> EMPTY_VEC;
+
+	using AdjacentArray = std::array<int16_t, 6>;
+	using FieldArray = std::array<int, FIELD_SIZE + 1>;
+	using FieldFlagArray = std::array<bool, FIELD_SIZE + 1>;
 
 	enum class AIDifficulty : int8_t {
 		EASY /*80%, 100%*/, NORMAL /*130%, 160%, 200%*/

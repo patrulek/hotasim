@@ -77,6 +77,7 @@ namespace CombatManagerTest {
 	// CombatManager::generateActionsForPlayer()
 	TEST(CombatManager_Generator, shouldReturnNoSpellcastActionsForPlayerMeleeUnitWhenHeroDoesntHaveSpellbookAndHostileUnitsInRange) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
+		auto& ai = combat_manager->getCombatAI();
 
 		// start battle
 		combat_manager->nextState();

@@ -97,10 +97,13 @@ namespace HotaSim {
 
 	const bool CombatSimulator::simulatorConstraintsViolated(const CombatSequenceTree& _tree) {
 		// some states wasnt checked yet
-		bool some_states_left_rule_violated = _tree.isCurrentRoot() && !_tree.forgotten_paths.empty();
+		bool some_states_left_rule_violated = _tree.isCurrentRoot() && !_tree.canTakeForgotten();
 
 		// reached total states limit for simulation
 		bool state_limit_reached_rule_violated = _tree.getSize() > estimated_total_states;
+
+		if (_tree.isCurrentRoot() && !_tree.forgotten_paths.empty())
+			const_cast<CombatSequenceTree&>(_tree).takeForgotten();
 
 		return some_states_left_rule_violated || state_limit_reached_rule_violated;
 	}
@@ -142,6 +145,8 @@ namespace HotaSim {
 				int seed = std::random_device()();
 
 				while (!simulatorConstraintsViolated(tree)) {
+					int cb_finish_cnt = combat_finished_cnt;
+
 					while (!combatConstraintsViolated()) {
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
@@ -191,18 +196,18 @@ namespace HotaSim {
 
 					if (tree.getSize() < 15000) {
 						++jump_root;
-						tree.goRoot();
+						tree.goRoot(cb_finish_cnt != combat_finished_cnt);
 						root_jump = true;
 					}
 					else if ((float)tree.forgotten_paths.size() / tree.getSize() < 0.015f) {
 						if (tree.getSize() / 3 > jump_random_parent) {
 							++jump_random_parent;
-							tree.goRandomParent();
+							tree.goRandomParent(cb_finish_cnt != combat_finished_cnt);
 							random_jump = true;
 						}
 						else if (tree.getSize() / 7 > jump_root) {
 							++jump_root;
-							tree.goRoot();
+							tree.goRoot(cb_finish_cnt != combat_finished_cnt);
 							root_jump = true;
 						}
 					}

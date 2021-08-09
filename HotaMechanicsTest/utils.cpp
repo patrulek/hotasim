@@ -16,12 +16,12 @@ namespace TestUtils {
 	}
 
 
-	const std::vector<int> range(const int _size) {
+	const std::vector<size_t> range(const size_t _size) {
 		return range(0, _size);
 	}
 
-	const std::vector<int> range(const int _min, const int _max) {
-		std::vector<int> r(_max - _min);
+	const std::vector<size_t> range(const size_t _min, const size_t _max) {
+		std::vector<size_t> r(_max - _min);
 		std::iota(std::begin(r), std::end(r), _min);
 		return r;
 	}

@@ -37,7 +37,7 @@ namespace HotaMechanics {
 		// -------------------------------
 
 		// AI state ----------------------
-		void initializeBattle();
+		void initializeBattle(const Constants::FieldArray* _player_unit_reachables = nullptr, const Constants::FieldArray* _ai_unit_reachables = nullptr);
 		void addEventsToProcess(const std::vector<CombatEvent>& _events) { events_to_process.insert(std::end(events_to_process), std::begin(_events), std::end(_events)); }
 		void processEvents();
 
@@ -57,6 +57,8 @@ namespace HotaMechanics {
 
 		// simple getters ----------------
 		const CombatPathfinder& getPathfinder() const { return *pathfinder; }
+		const Constants::FieldArray getAIReachables() const { return ai_unit_reachables; }
+		const Constants::FieldArray getPlayerReachables() const { return player_unit_reachables; }
 		// -------------------------------
 	private:
 		// event processor ---------------
@@ -66,9 +68,9 @@ namespace HotaMechanics {
 
 		// AI state ----------------------
 		void initializePlayerUnitRanges();
-		void initializePlayerUnitAttackables();
+		void initializePlayerUnitAttackables(const Constants::FieldArray* _player_unit_reachables = nullptr);
 		void initializeAIUnitRanges();
-		void initializeAIUnitAttackables();
+		void initializeAIUnitAttackables(const Constants::FieldArray* _ai_unit_reachables = nullptr);
 
 		void clearUnitRanges(const CombatUnit& _unit);
 		void clearUnitAttackables(const CombatUnit& _unit);
@@ -82,17 +84,17 @@ namespace HotaMechanics {
 		Constants::AIDifficulty difficulty{ Constants::AIDifficulty::NORMAL };
 		bool similar_army_strength{ true }; // > 2x fight_value for one side
 
-		std::array<int, Constants::FIELD_SIZE + 1> hexes_fight_value_gain;
+		Constants::FieldArray hexes_fight_value_gain;
 
 		std::vector<CombatEvent> events_to_process;
 
-		std::array<int, Constants::FIELD_SIZE + 1> player_unit_ranges;
-		std::array<int, Constants::FIELD_SIZE + 1> player_unit_reachables;
-		std::array<int, Constants::FIELD_SIZE + 1> player_unit_attackables;
+		Constants::FieldArray player_unit_ranges;
+		Constants::FieldArray player_unit_reachables;
+		Constants::FieldArray player_unit_attackables;
 
-		std::array<int, Constants::FIELD_SIZE + 1> ai_unit_ranges;
-		std::array<int, Constants::FIELD_SIZE + 1> ai_unit_reachables;
-		std::array<int, Constants::FIELD_SIZE + 1> ai_unit_attackables;
+		Constants::FieldArray ai_unit_ranges;
+		Constants::FieldArray ai_unit_reachables;
+		Constants::FieldArray ai_unit_attackables;
 	};
 }; // HotaMechanics
 

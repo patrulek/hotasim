@@ -6,11 +6,19 @@
 
 #include "combat_field.h"
 
+PathCache::PathCache(const HotaMechanics::CombatField& _field, const int16_t _source_hex, const int16_t _target_hex, const bool _double_wide)
+	: field_hash(_field.getHash()), source_hex(_source_hex), target_hex(_target_hex), double_wide(_double_wide) {
+}
+
 namespace HotaMechanics {
 	using namespace Constants;
 
+	int CombatPathfinder::cache_access = 0;
+
 	CombatPathfinder::CombatPathfinder() {
 		path.reserve(64);
+		tmp_hexes.resize(128);
+		initializeAdjacents();
 	}
 
 	const int CombatPathfinder::getUnitStartHex(const CombatSide _side, const int _unit_order, const int _units_stacks, 
@@ -45,8 +53,13 @@ namespace HotaMechanics {
 		return std::find(std::begin(adjacent_hexes), std::end(adjacent_hexes), _target_hex) != std::end(adjacent_hexes);
 	}
 
-	const std::array<int16_t, 6> CombatPathfinder::getAdjacentHexes(const int16_t _source_hex) const {
-		std::array<int16_t, 6> hexes{ INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID };
+	void CombatPathfinder::initializeAdjacents() {
+		for (int16_t hex = 0; hex < FIELD_SIZE + 1; ++hex)
+			adjacents[hex] = findAdjacents(hex);
+	}
+
+	AdjacentArray CombatPathfinder::findAdjacents(const int16_t _source_hex) {
+		AdjacentArray hexes{ INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID };
 
 		if (_source_hex == INVALID_HEX_ID)
 			return hexes;
@@ -69,19 +82,23 @@ namespace HotaMechanics {
 		hexes[0] = (invalid_left_upper * INVALID_HEX_ID) + (!invalid_left_upper * (_source_hex - FIELD_COLS + offset));
 		hexes[1] = (invalid_right_upper * INVALID_HEX_ID) + (!invalid_right_upper * (_source_hex - FIELD_COLS + offset + 1));
 		hexes[2] = (invalid_left * INVALID_HEX_ID) + (!invalid_left * (_source_hex - 1));
-		hexes[3] = (invalid_right * INVALID_HEX_ID) +  (!invalid_right * (_source_hex + 1));
+		hexes[3] = (invalid_right * INVALID_HEX_ID) + (!invalid_right * (_source_hex + 1));
 		hexes[4] = (invalid_left_lower * INVALID_HEX_ID) + (!invalid_left_lower * (_source_hex + FIELD_COLS + offset));
 		hexes[5] = (invalid_right_lower * INVALID_HEX_ID) + (!invalid_right_lower * (_source_hex + FIELD_COLS + offset + 1));
 
 		return hexes;
 	}
 
-	const std::array<int16_t, 6> CombatPathfinder::getAdjacentHexesClockwise(const int16_t _source_hex) const {
+	const AdjacentArray& CombatPathfinder::getAdjacentHexes(const int16_t _source_hex) const {
+		return adjacents[_source_hex];
+	}
+
+	const AdjacentArray CombatPathfinder::getAdjacentHexesClockwise(const int16_t _source_hex) const {
 		auto hexes = getAdjacentHexes(_source_hex);
 		return std::array<int16_t, 6>{ hexes[1], hexes[3], hexes[5], hexes[4], hexes[2], hexes[0] };
 	}
 
-	const std::array<int16_t, 6> CombatPathfinder::getAdjacentHexesCounterClockwise(const int16_t _source_hex) const {
+	const AdjacentArray CombatPathfinder::getAdjacentHexesCounterClockwise(const int16_t _source_hex) const {
 		auto hexes = getAdjacentHexes(_source_hex);
 		return std::array<int16_t, 6>{ hexes[0], hexes[2], hexes[4], hexes[5], hexes[3], hexes[1] };
 	}
@@ -96,31 +113,33 @@ namespace HotaMechanics {
 
 	const std::vector<int16_t> CombatPathfinder::getHexesInRange(const int16_t _source_hex, const int _range) const {
 		if (_source_hex == INVALID_HEX_ID || _range <= 0)
-			return std::vector<int16_t>();
+			return EMPTY_VEC;
 
 		if (_range == 1) {
-			auto hexes = getAdjacentHexes(_source_hex);
-			return std::vector<int16_t>(std::begin(hexes), std::end(hexes));;
+			auto& hexes = getAdjacentHexes(_source_hex);
+			return std::vector<int16_t>(std::begin(hexes), std::end(hexes));
 		}
 
-		std::array<int16_t, FIELD_SIZE + 1> to_check; to_check.fill(0);
+		FieldArray to_check; to_check.fill(0);
 		int to_check_cnt = 0;
 		to_check[to_check_cnt++] = _source_hex;
 
-		std::array<int16_t, FIELD_SIZE + 1> next_to_check; next_to_check.fill(0);
+		FieldArray next_to_check; next_to_check.fill(0);
 		int next_to_check_cnt = 0;
 
-		std::array<bool, FIELD_SIZE + 1> checked; checked.fill(0);
+		FieldFlagArray checked; checked.fill(0);
 
 		int dist = 0;
-		std::vector<int16_t> hexes; hexes.reserve(128);
+
+		FieldArray hexes;
+		int idx = 0;
 
 		while (to_check_cnt > 0 && dist <= _range) {
 			const int hex_id = to_check[--to_check_cnt];
 			checked[hex_id] = true;
-			hexes.push_back(hex_id);
+			hexes[idx++] = hex_id;
 			
-			auto adjacent_hexes = getAdjacentHexes(hex_id);
+			auto& adjacent_hexes = getAdjacentHexes(hex_id);
 
 			for (auto hex : adjacent_hexes) {
 				const bool is_viable_hex = (hex != INVALID_HEX_ID);
@@ -136,31 +155,32 @@ namespace HotaMechanics {
 			next_to_check_cnt = (!check_next * next_to_check_cnt);
 			dist = (!check_next * dist) + (check_next * (dist + 1));
 
-			for (int hex = 0; hex < to_check_cnt; ++hex)
+			for (int hex = 0; hex < (check_next * to_check_cnt); ++hex)
 				to_check[hex] = (!check_next * to_check[hex]) + (check_next * next_to_check[hex]);
 		}
 
-		auto result = std::vector<int16_t>(std::begin(hexes), std::end(hexes));
-		std::sort(std::begin(result), std::end(result));
-		return result;
+		std::sort(std::begin(hexes), std::begin(hexes) + idx);
+		return std::vector<int16_t>(std::begin(hexes), std::begin(hexes) + idx);
 	}
 
-	const std::vector<int16_t> CombatPathfinder::getWalkableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field, const bool _ghost_hex) const {
+	const std::vector<int16_t> CombatPathfinder::getWalkableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field, const bool _ghost_hex) {
 		auto hexes = getHexesInRange(_source_hex, _range);
 		return getWalkableHexesFromList(hexes, _field, _ghost_hex);
 	}
 
-	const std::vector<int16_t> CombatPathfinder::getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field, const bool _ghost_hex) const {
-		std::vector<int16_t> walkable; walkable.resize(_hexes.size());
+	const std::vector<int16_t> CombatPathfinder::getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field, const bool _ghost_hex) {
 		int16_t idx = 0;
+		FieldArray hexes;
 
 		for (auto hex : _hexes) {
-			walkable[idx] = hex;
+			hexes[idx] = hex;
 			idx += _field.isHexWalkable(hex, _ghost_hex);
 		}
+		
+		if (idx == 0)
+			return EMPTY_VEC;
 
-		walkable.resize(idx);
-		return walkable;
+		return std::vector<int16_t>(std::begin(hexes), std::begin(hexes) + idx);//walkable;
 	}
 
 	const std::vector<int16_t> CombatPathfinder::getReachableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field,
@@ -191,9 +211,9 @@ namespace HotaMechanics {
 		int16_t idx = 0;
 
 		for (auto hex : _hexes) {
-			auto path = findPath(_source_hex, hex, _field, _double_wide, _ghost_hex);
+			auto distance = realDistanceBetweenHexes(_source_hex, hex, _field, _ghost_hex);
 			reachable[idx] = hex;
-			idx += (!path.empty() && path.size() <= _range);
+			idx += (distance > 0 && distance <= _range);
 		}
 
 		return std::vector<int16_t>(std::begin(reachable), std::begin(reachable) + idx);
@@ -234,6 +254,14 @@ namespace HotaMechanics {
 		}
 
 		return row_dist + col_dist - (row_dist >= std::max(odd_rows, even_rows) ? std::max(odd_rows, even_rows) : row_dist);
+	}
+
+	const int16_t CombatPathfinder::realDistanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _ghost_hex) {
+		if (distance_cache.find(PathCache(_field, _source_hex, _target_hex)) != std::end(distance_cache))
+			return distance_cache[PathCache(_field, _source_hex, _target_hex)]; 
+		
+		auto dist = findPath(_source_hex, _target_hex, _field, false, _ghost_hex).size();
+		return dist;
 	}
 
 	const std::vector<int16_t>& CombatPathfinder::findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide, const bool _ghost_hex, const int _range) {
@@ -289,14 +317,13 @@ namespace HotaMechanics {
 				checked[hex] = true;
 			}
 
-			if (to_check_cnt == 0 && next_to_check_cnt > 0) {
-				to_check = next_to_check;
-				to_check_cnt = next_to_check_cnt;
-				next_to_check_cnt = 0;
-				++dist;
+			const bool check_next = (to_check_cnt == 0 * next_to_check_cnt > 0);
+			to_check_cnt = (!check_next * to_check_cnt) + (check_next * next_to_check_cnt);
+			next_to_check_cnt = (!check_next * next_to_check_cnt);
+			dist = (!check_next * dist) + (check_next * (dist + 1));
 
-				std::reverse(std::begin(to_check), std::begin(to_check) + to_check_cnt);
-			}
+			for (int hex = 0; hex < (check_next * to_check_cnt); ++hex)
+				to_check[hex] = (check_next * next_to_check[to_check_cnt - hex - 1]); // reverse array
 		}
 
 		if (found) {
@@ -313,6 +340,7 @@ namespace HotaMechanics {
 				return EMPTY_PATH;
 
 			std::reverse(std::begin(path), std::end(path));
+			distance_cache[PathCache(_field, _source_hex, _target_hex, _double_wide)] = path.size();
 			return path;
 		}
 

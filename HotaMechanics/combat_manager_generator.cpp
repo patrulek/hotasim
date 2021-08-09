@@ -80,8 +80,9 @@ namespace HotaMechanics {
 		for (auto unit_id : units_to_attack) {
 			int hex = hexes_to_attack[unit_id];
 
-			int distance_to_hex = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), hex, current_state->field).size();
-			int turns = active_stack.getHex() == hex ? 1 : std::ceil((float)distance_to_hex / active_stack.getCombatStats().spd);
+			int distance_to_hex = const_cast<CombatPathfinder&>(ai->getPathfinder()).realDistanceBetweenHexes(active_stack.getHex(), hex, current_state->field);
+			const bool unit_hex = (active_stack.getHex() == hex);
+			int turns = static_cast<int>(unit_hex ? 1 : std::ceil((float)distance_to_hex / active_stack.getCombatStats().spd));
 
 			if (turns == 1)
 				actions.push_back(createAttackAction(unit_id, hex));
@@ -92,16 +93,6 @@ namespace HotaMechanics {
 					actions.push_back(createWaitAction());
 				else
 					actions.push_back(createWalkAction(hex, walk_distance));
-
-				/*if (walk_distance == 0) {
-					if (active_stack.canWait())
-						actions.push_back(createWaitAction());
-					else
-						actions.push_back(createWalkAction(hex));
-				}
-				else {
-					actions.push_back(createWalkAction(hex, walk_distance));
-				}*/
 			}
 		}
 

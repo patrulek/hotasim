@@ -16,14 +16,16 @@ namespace HotaSim {
 	namespace Estimator
 	{
 		const int estimateTurnsNumber(const CombatState& _initial_state) {
-			return 4; // TODO: implement
+			return 6; // TODO: implement
 		}
 
 		const int estimateTotalStatesNumber(const CombatState& _initial_state) {
-			return 50000; // TODO: implement
+			return 100000; // TODO: implement
 		}
 
 		const int estimateActionEffectivness(const CombatAction& _action, const CombatManager& _mgr) {
+			return 1; // TODO: remove after optimization
+
 			auto& state = _mgr.getCurrentState();
 			auto& active_stack = _mgr.getActiveStack();
 			auto& ai = _mgr.getCombatAI();
@@ -90,7 +92,7 @@ namespace HotaSim {
 					auto units = state.defender.getUnits();
 					for (auto it = std::begin(units), it2 = std::begin(units) + 1; it2 != std::end(units); ++it2)
 					{
-						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).findPath((*it)->getHex(), (*it2)->getHex(), state.field, false, true).size();
+						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true);
 						int turns = std::ceil((float)(dist) / std::max((*it)->getCombatStats().spd, (*it2)->getCombatStats().spd));
 
 						additional_score += (turns - 1) * 50000;
@@ -105,9 +107,9 @@ namespace HotaSim {
 				int len = 999;
 				const CombatUnit* u{ nullptr };
 				for (auto unit : state.defender.getUnitsPtrs()) {
-					auto path = const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).findPath(active_stack.getHex(), unit->getHex(), state.field, false, true);
-					if (path.size() < len) {
-						len = path.size();
+					auto path = const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).realDistanceBetweenHexes(active_stack.getHex(), unit->getHex(), state.field, true);
+					if (path < len) {
+						len = path;
 						u = unit;
 					}
 				}
@@ -139,7 +141,7 @@ namespace HotaSim {
 					auto units = state.defender.getUnits();
 					for (auto it = std::begin(units), it2 = std::begin(units) + 1; it2 != std::end(units); ++it2)
 					{
-						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).findPath((*it)->getHex(), (*it2)->getHex(), state.field, false, true).size();
+						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true);
 						int turns = std::ceil((float)(dist) / std::max((*it)->getCombatStats().spd, (*it2)->getCombatStats().spd));
 
 						additional_score += (turns - 1) * 50000;

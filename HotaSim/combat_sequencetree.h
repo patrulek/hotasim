@@ -83,31 +83,23 @@ namespace HotaSim {
 			since_last_sort = 0;
 		}
 
+		const bool canTakeForgotten() const {
+			return fp_cnt >= forgotten_paths.size();
+		}
+
 		void takeForgotten() {
 			if (since_last_sort > 500)
 				sortForgotten();
 
+			if (!canTakeForgotten()) {
+				return;
+			}
+
 			current = forgotten_paths[fp_cnt++];
-		}
-
-		int branchSize(CombatSequenceNode* _branch) {
-			if (_branch->children.empty())
-				return 1;
-
-			int sum = 1;
-			for (auto child : _branch->children)
-				sum += branchSize(child.get());
-
-			return sum;
 		}
 
 		int getSize() const {
 			return size;
-		}
-
-		int calcSize() {
-			CombatSequenceNode* main_branch = root.get();
-			return branchSize(main_branch);
 		}
 
 		void goParent() {
@@ -117,20 +109,23 @@ namespace HotaSim {
 			current = current->parent;
 		}
 
-		void goRandomParent() {
+		void goRandomParent(const bool _combat_finished) {
 			if (current->depth < 6) {
-				goRoot();
+				goRoot(_combat_finished);
 				return;
 			}
 
+			if( !_combat_finished)
+				forgotten_paths.push_back(current);
 
-			forgotten_paths.push_back(current);
 			while (current->parent && current->parent->parent != root.get() && current->state.turn > 1)
 				goParent();
 		}
 
-		void goRoot() {
-			forgotten_paths.push_back(current);
+		void goRoot(const bool _combat_finished) {
+			if(!_combat_finished)
+				forgotten_paths.push_back(current);
+
 			while (current->parent && current->parent->parent != root.get())
 				goParent();
 		}

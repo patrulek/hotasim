@@ -22,8 +22,8 @@ namespace HotaMechanics {
 		: hero_template(_obj.hero_template) {
 		stats = _obj.stats;
 
-		for (auto unit : _obj.units)
-			units.emplace_back(CombatUnit(unit, *this));
+		for (auto unit : _obj.getUnits())
+			units.emplace_back(CombatUnit(*unit, *this));
 
 		side = _obj.side;
 		army_permutation = _obj.army_permutation;
@@ -38,8 +38,8 @@ namespace HotaMechanics {
 		stats = _obj.stats;
 
 		units.clear();
-		for (auto unit : _obj.units)
-			units.emplace_back(CombatUnit(unit, *this));
+		for (auto unit : _obj.getUnits())
+			units.emplace_back(CombatUnit(*unit, *this));
 
 		side = _obj.side;
 		army_permutation = _obj.army_permutation;
@@ -50,8 +50,8 @@ namespace HotaMechanics {
 		: hero_template(_obj.hero_template) {
 		stats = std::move(_obj.stats);
 
-		for (auto unit : _obj.units)
-			units.emplace_back(CombatUnit(unit, *this));
+		for (auto unit : _obj.getUnits())
+			units.emplace_back(CombatUnit(*unit, *this));
 		_obj.units.clear();
 
 		side = std::move(_obj.side);
@@ -67,8 +67,8 @@ namespace HotaMechanics {
 		stats = std::move(_obj.stats);
 
 		units.clear();
-		for (auto unit : _obj.units)
-			units.emplace_back(CombatUnit(unit, *this));
+		for (auto unit : _obj.getUnits())
+			units.emplace_back(CombatUnit(*unit, *this));
 		_obj.units.clear();
 
 		side = std::move(_obj.side);

@@ -88,7 +88,6 @@ namespace HotaMechanics {
 		// -------------------------------
 
 		//	hero getters ------------------
-		const int getUnitId() const;
 		const int getGlobalUnitId() const;
 		const Constants::CombatSide getCombatSide() const;
 		const Constants::CombatSide getEnemyCombatSide() const;
@@ -104,12 +103,14 @@ namespace HotaMechanics {
 		int16_t getStackNumber() const { return stack_number; }
 		float getFightValue() const { return unit_template.stats.fight_value; }
 		const CombatHero* getHero() const { return hero; }
+		const int16_t getUnitId() const { return uid; }
 		// -------------------------------
 
 		// util --------------------------
 		std::string toString() const;
 		// -------------------------------
 	private:
+		int16_t uid{ -1 };
 		Unit unit_template;
 		const CombatHero* hero;
 

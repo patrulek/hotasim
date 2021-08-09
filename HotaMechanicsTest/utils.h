@@ -15,8 +15,8 @@ namespace TestUtils {
 	using namespace HotaMechanics::Constants;
 
 	const bool isAttackOrSpellcastAction(const CombatAction& _action);
-	const std::vector<int> range(const int _size);
-	const std::vector<int> range(const int _min, const int _max);
+	const std::vector<size_t> range(const size_t _size);
+	const std::vector<size_t> range(const size_t _min, const size_t _max);
 	const std::vector<UnitStack> createArmy(const std::string tmp1, const int16_t size1,
 		const std::string tmp2 = "", const int16_t size2 = 0,
 		const std::string tmp3 = "", const int16_t size3 = 0,

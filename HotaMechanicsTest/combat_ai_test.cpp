@@ -21,7 +21,7 @@ namespace CombatAITest {
 		combat_manager->nextState();
 
 		auto& active_stack = combat_manager->getActiveStack();
-		auto expected = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field);
+		auto expected = const_cast<CombatPathfinder&>(ai.getPathfinder()).getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field);
 		auto value = ai.getAttackableHexesForUnit(active_stack);
 		value.erase(std::find(std::begin(value), std::end(value), active_stack.getHex())); // its not walkable but its attackable
 		EXPECT_EQ(expected, value);
@@ -37,11 +37,12 @@ namespace CombatAITest {
 		combat_manager->nextState();
 
 		auto& active_stack = combat_manager->getActiveStack();
-		int walkable_size = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field).size();
+		auto& pathfinder = const_cast<CombatPathfinder&>(ai.getPathfinder());
+		size_t walkable_size = pathfinder.getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field).size();
 		combat_manager->getCurrentState().field.fillHex(getHexId(5, 2), CombatHexOccupation::SOLID_OBSTACLE);
 		const_cast<CombatAI&>(ai).initializeBattle();
 
-		auto expected = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true);
+		auto expected = pathfinder.getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true);
 		expected.erase(std::find(std::begin(expected), std::end(expected), getHexId(5, 5))); // this hex is not attackable due to obstacle
 		auto value = ai.getAttackableHexesForUnit(active_stack);
 		EXPECT_EQ(expected, value);
@@ -65,11 +66,11 @@ namespace CombatAITest {
 
 		// turn 2
 		auto& active_stack = combat_manager->getActiveStack();
-		int walkable_size = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true).size();
+		size_t walkable_size = const_cast<CombatPathfinder&>(ai.getPathfinder()).getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true).size();
 		combat_manager->getCurrentState().field.fillHex(getHexId(5, 3), CombatHexOccupation::SOLID_OBSTACLE);
 		const_cast<CombatAI&>(ai).initializeBattle();
 
-		auto expected = ai.getPathfinder().getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true);
+		auto expected = const_cast<CombatPathfinder&>(ai.getPathfinder()).getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true);
 		auto value = ai.getAttackableHexesForUnit(active_stack);
 		expected.erase(std::find(std::begin(expected), std::end(expected), getHexId(5, 5))); // this hex is not attackable due to unit at (5, 2)
 		EXPECT_EQ(expected, value);

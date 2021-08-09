@@ -10,8 +10,8 @@ namespace HotaMechanics {
 
 	namespace Calculator {
 		const int calculateMeleeUnitAverageDamage(const CombatUnit& attacker, const CombatUnit& defender) {
-			int attacker_base_dmg = attacker.getBaseAverageDmg() * attacker.getStackNumber();
-			float attacker_bonus_dmg = attacker_base_dmg;
+			int attacker_base_dmg = static_cast<int>(attacker.getBaseAverageDmg() * attacker.getStackNumber());
+			float attacker_bonus_dmg = static_cast<float>(attacker_base_dmg);
 
 			int attack_advantage = attacker.getBaseStats().atk - defender.getBaseStats().def;
 			attacker_bonus_dmg *= (((attack_advantage > 0) * 0.05f) + ((attack_advantage < 0) * 0.025f)) * attack_advantage;
@@ -72,7 +72,7 @@ namespace HotaMechanics {
 		const int calculateHeroFightValue(const CombatHero& hero) {
 			int hero_fight_value = 0;
 
-			for (const auto unit : hero.getUnits())
+			for (const auto unit : const_cast<CombatHero&>(hero).getUnitsPtrs())
 				hero_fight_value += calculateStackUnitFightValue(*unit);
 
 			return hero_fight_value;
@@ -89,8 +89,8 @@ namespace HotaMechanics {
 			attacker_copy.applyDamage(counter_attack_dmg);
 
 			// TODO: when one side fight value > 2 * second side fight value -> then * 1000 for stronger side, and * 100 for weaker side
-			int attacker_fight_value_gain = first_attack_dmg * defender_copy.getFightValuePerOneHp();
-			int defender_fight_value_gain = counter_attack_dmg * attacker_copy.getFightValuePerOneHp();
+			int attacker_fight_value_gain = static_cast<int>(first_attack_dmg * defender_copy.getFightValuePerOneHp());
+			int defender_fight_value_gain = static_cast<int>(counter_attack_dmg * attacker_copy.getFightValuePerOneHp());
 
 			return attacker_fight_value_gain - defender_fight_value_gain;
 		}

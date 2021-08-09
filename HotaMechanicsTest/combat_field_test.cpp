@@ -53,22 +53,22 @@ namespace CombatFieldTest {
 		CombatField field(createField());
 
 		int empty_values = 0;
-		for (auto i : range(FIELD_SIZE))
-			empty_values += field.getById(i).getOccupation() == CombatHexOccupation::EMPTY;
+		for (auto hex : range(FIELD_SIZE))
+			empty_values += field.getById(hex).getOccupation() == CombatHexOccupation::EMPTY;
 		EXPECT_EQ(FIELD_SIZE, empty_values); // new field without template should have all empty hexes
 
 		field = CombatField(createField(CombatFieldType::GRASS, CombatFieldTemplate::IMPS_2x100));
 
 		empty_values = 0;
-		for (auto i : range(FIELD_SIZE))
-			empty_values += field.getById(i).getOccupation() == CombatHexOccupation::EMPTY;
+		for (auto hex : range(FIELD_SIZE))
+			empty_values += field.getById(hex).getOccupation() == CombatHexOccupation::EMPTY;
 		EXPECT_NE(FIELD_SIZE, empty_values); // setting custom template with obstacles should set some
 
 		empty_values = 0;
 		auto field_template = getCombatFieldTemplate(CombatFieldTemplate::EMPTY);
 		field.setTemplate(field_template);
-		for (auto i : range(FIELD_SIZE))
-			empty_values += field.getById(i).getOccupation() == CombatHexOccupation::EMPTY;
+		for (auto hex : range(FIELD_SIZE))
+			empty_values += field.getById(hex).getOccupation() == CombatHexOccupation::EMPTY;
 		EXPECT_EQ(FIELD_SIZE, empty_values); // were changing field template back to empty
 	}
 };

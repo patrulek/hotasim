@@ -110,6 +110,7 @@ namespace HotaMechanics {
 		void placeUnitsBeforeStart();
 		void setCombatResult();
 		const bool isInitialTacticsState() const;
+		void setAIState();
 		// -----------------------------
 
 		// during battle

@@ -18,6 +18,8 @@ namespace HotaMechanics {
 		CombatField field;
 
 		std::list<int16_t> order;	// for attacker it will be 0-20; for defender it will be 21-41
+		std::array<int, Constants::FIELD_SIZE + 1> player_unit_reachables;
+		std::array<int, Constants::FIELD_SIZE + 1> ai_unit_reachables;
 	};
 
 }; // HotaMechanics

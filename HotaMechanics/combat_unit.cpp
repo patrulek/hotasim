@@ -7,10 +7,13 @@ namespace HotaMechanics {
 	using namespace Constants;
 
 	CombatUnit::CombatUnit(const Unit& _unit_template, const int _stack_number, const CombatHero& _hero)
-		: unit_template(_unit_template), stats(_unit_template.stats), stack_number(_stack_number), hero(&_hero) {};
+		: unit_template(_unit_template), stats(_unit_template.stats), stack_number(_stack_number), hero(&_hero) {
+		uid = hero->getUnits().size();
+	}
 
 	CombatUnit::CombatUnit(const CombatUnit& _unit, const CombatHero& _hero)
 		: hero(&_hero), unit_template(_unit.unit_template) {
+		uid = hero->getUnits().size();
 		state = _unit.state;
 		hex = _unit.hex;
 		stats = _unit.stats;
@@ -21,6 +24,7 @@ namespace HotaMechanics {
 
 	CombatUnit::CombatUnit(CombatUnit&& _unit, const CombatHero& _hero)
 		: hero(&_hero), unit_template(std::move(_unit.unit_template)) {
+		uid = hero->getUnits().size();
 		state = std::move(_unit.state);
 		hex = std::move(_unit.hex);
 		stats = std::move(_unit.stats);
@@ -30,7 +34,7 @@ namespace HotaMechanics {
 	}
 
 	std::string CombatUnit::toString() const {
-		return unit_template.name + " : StackNumber(" + std::to_string(stack_number) + ") : Hex(" + std::to_string(hex / FIELD_COLS) + ", " 
+		return unit_template.name + "(" + std::to_string(uid) + ") : StackNumber(" + std::to_string(stack_number) + ") : Hex(" + std::to_string(hex / FIELD_COLS) + ", " 
 			+ std::to_string(hex % FIELD_COLS) + ") : " + (getCombatSide() == CombatSide::ATTACKER ? "player_unit" : "ai_unit");
 	}
 
@@ -119,12 +123,8 @@ namespace HotaMechanics {
 		return stack_number * stats.primary_stats.hp - health_lost;
 	}
 
-	const int CombatUnit::getUnitId() const {
-		return hero->getUnitId(*this);
-	}
-
 	const int CombatUnit::getGlobalUnitId() const {
-		return hero->getGlobalUnitId(*this);
+		return getCombatSide() == CombatSide::ATTACKER ? uid : uid + GUID_OFFSET;
 	}
 
 	const CombatSide CombatUnit::getCombatSide() const {
