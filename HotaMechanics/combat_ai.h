@@ -37,7 +37,8 @@ namespace HotaMechanics {
 		// -------------------------------
 
 		// AI state ----------------------
-		void initializeBattle(const Constants::FieldArray* _player_unit_reachables = nullptr, const Constants::FieldArray* _ai_unit_reachables = nullptr);
+		void initializeBattle(const Constants::FieldArray* _player_unit_reachables = nullptr, const Constants::FieldArray* _player_unit_attackables = nullptr,
+									 const Constants::FieldArray* _ai_unit_reachables = nullptr, const Constants::FieldArray* _ai_unit_attackables = nullptr);
 		void addEventsToProcess(const std::vector<CombatEvent>& _events) { events_to_process.insert(std::end(events_to_process), std::begin(_events), std::end(_events)); }
 		void processEvents();
 
@@ -58,7 +59,9 @@ namespace HotaMechanics {
 		// simple getters ----------------
 		const CombatPathfinder& getPathfinder() const { return *pathfinder; }
 		const Constants::FieldArray getAIReachables() const { return ai_unit_reachables; }
+		const Constants::FieldArray getAIAttackables() const { return ai_unit_attackables; }
 		const Constants::FieldArray getPlayerReachables() const { return player_unit_reachables; }
+		const Constants::FieldArray getPlayerAttackables() const { return player_unit_attackables; }
 		// -------------------------------
 	private:
 		// event processor ---------------
@@ -68,9 +71,9 @@ namespace HotaMechanics {
 
 		// AI state ----------------------
 		void initializePlayerUnitRanges();
-		void initializePlayerUnitAttackables(const Constants::FieldArray* _player_unit_reachables = nullptr);
+		void initializePlayerUnitAttackables(const Constants::FieldArray* _player_unit_reachables = nullptr, const Constants::FieldArray* _player_unit_attackables = nullptr);
 		void initializeAIUnitRanges();
-		void initializeAIUnitAttackables(const Constants::FieldArray* _ai_unit_reachables = nullptr);
+		void initializeAIUnitAttackables(const Constants::FieldArray* _ai_unit_reachables = nullptr, const Constants::FieldArray* _ai_unit_attackables = nullptr);
 
 		void clearUnitRanges(const CombatUnit& _unit);
 		void clearUnitAttackables(const CombatUnit& _unit);

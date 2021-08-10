@@ -34,8 +34,10 @@ namespace HotaMechanics {
 		// simple getters -----------------
 		const int getMana() const { return stats.primary_stats.mana; }
 		const BaseStats& getBaseStats() const { return stats.base_stats; }
+		const HeroStats& getStats() const { return stats; }
 		const Hero& getTemplate() const { return hero_template; }
 		const Constants::CombatSide getCombatSide() const { return side; }
+		const ArmyPermutation& getArmyPermutation() const { return army_permutation; }
 		// --------------------------------
 	private:
 		void initialize();

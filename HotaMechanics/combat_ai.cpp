@@ -101,11 +101,12 @@ namespace HotaMechanics {
 		return units;
 	}
 
-	void CombatAI::initializeBattle(const FieldArray* _player_unit_reachables, const FieldArray* _ai_unit_reachables) {
+	void CombatAI::initializeBattle(const FieldArray* _player_unit_reachables, const FieldArray* _player_unit_attackables,
+											  const FieldArray* _ai_unit_reachables, const FieldArray* _ai_unit_attackables) {
 		initializePlayerUnitRanges();
-		initializePlayerUnitAttackables(_player_unit_reachables);
+		initializePlayerUnitAttackables(_player_unit_reachables, _player_unit_attackables);
 		initializeAIUnitRanges();
-		initializeAIUnitAttackables(_ai_unit_reachables);
+		initializeAIUnitAttackables(_ai_unit_reachables, _ai_unit_attackables);
 	}
 
 	void CombatAI::initializePlayerUnitRanges() {
@@ -115,9 +116,10 @@ namespace HotaMechanics {
 		}
 	}
 
-	void CombatAI::initializePlayerUnitAttackables(const FieldArray* _player_unit_reachables) {
+	void CombatAI::initializePlayerUnitAttackables(const FieldArray* _player_unit_reachables, const FieldArray* _player_unit_attackables) {
 		if (_player_unit_reachables) {
 			player_unit_reachables = *_player_unit_reachables;
+			player_unit_attackables = *_player_unit_attackables;
 			return;
 		}
 
@@ -134,9 +136,10 @@ namespace HotaMechanics {
 		}
 	}
 
-	void CombatAI::initializeAIUnitAttackables(const FieldArray* _ai_unit_reachables) {
+	void CombatAI::initializeAIUnitAttackables(const FieldArray* _ai_unit_reachables, const FieldArray* _ai_unit_attackables) {
 		if (_ai_unit_reachables) {
 			ai_unit_reachables = *_ai_unit_reachables;
+			ai_unit_attackables = *_ai_unit_attackables;
 			return;
 		}
 

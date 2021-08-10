@@ -93,10 +93,20 @@ namespace HotaMechanics {
 		const Constants::CombatSide getEnemyCombatSide() const;
 		// -------------------------------
 
+		// simple setters ----------------
+		void setUnitState(const CombatUnitState& _state) { state = _state; }
+		void setStats(const UnitStats& _stats) { stats = _stats; }
+		void setStackNumber(const int16_t _stack_number) { stack_number = _stack_number; }
+		void setHealthLost(const int16_t _health_lost) { health_lost = _health_lost; }
+		void setHex(const int16_t _hex) { hex = _hex; }
+		// -------------------------------
+
 		// simple getters ----------------
 		const CombatStats& getCombatStats() const { return stats.combat_stats; }
 		const BaseStats& getBaseStats() const { return stats.base_stats; }
 		const PrimaryStats& getPrimaryStats() const { return stats.primary_stats; }
+		const UnitStats& getStats() const { return stats; }
+		const CombatUnitState getState() const { return state; }
 		int16_t getHealthLost() const { return health_lost; }
 		int16_t getHex() const { return hex; };
 		const Unit& getTemplate() const { return unit_template; }

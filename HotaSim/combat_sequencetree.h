@@ -8,6 +8,11 @@
 #include <memory>
 #include <random>
 
+namespace HotaMechanics {
+	class CombatManager;
+}
+
+
 using namespace HotaMechanics;
 
 namespace HotaSim {
@@ -28,29 +33,13 @@ namespace HotaSim {
 			: state(_state), action(_action), action_size(_action_size), seed(_seed), score(_score), best_branch_score(_score), parent(_parent) {
 		}
 
-
-		void addChild(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed) {
-			score = _state_score;
-
-			CombatSequenceNode* branch = this;
-			int new_depth = children.empty();
-
-			while (branch) {
-				if (_state_score > branch->best_branch_score)
-					branch->best_branch_score = _state_score;
-				
-				branch->depth = std::max(branch->depth, new_depth++);
-				branch = branch->parent;
-			}
-
-			auto child = std::make_shared<CombatSequenceNode>(_state, _action, _action_size, _state_score, this, _seed);
-			children.push_back(child);
-		}
+		void addChild(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed);
 	};
 
 	class CombatSequenceTree
 	{
 	public:
+		const CombatManager& manager;
 		std::shared_ptr<CombatSequenceNode> root{ nullptr };
 		CombatSequenceNode* current{ nullptr };
 		uint64_t size{ 0 };
@@ -60,97 +49,28 @@ namespace HotaSim {
 		std::vector<CombatSequenceNode*> forgotten_paths;
 		std::array<int, 32> turns_occurence;
 
-		CombatSequenceTree(const CombatState& _initial_state, const uint64_t _initial_state_score = 0x0000800080008000) {
+		CombatSequenceTree(const HotaMechanics::CombatManager& _manager, const CombatState& _initial_state, const uint64_t _initial_state_score = 0x0000800080008000)
+		: manager(_manager) {
 			root = std::make_shared<CombatSequenceNode>(_initial_state, 0, 1, _initial_state_score, nullptr, 1);
 			current = root.get();
 			forgotten_paths.reserve(8096);
 			turns_occurence.fill(0);
 		}
 
-		void addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed) {
-			current->addChild(_state, _action, _action_size, _state_score, _seed);
-			current = current->children.back().get();
-			++size;
-			++turns_occurence[_state.turn];
-		}
+		void addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed);
+		bool isCurrentRoot() const { return current == root.get(); }
 
-		bool isCurrentRoot() const {
-			return current == root.get();
-		}
+		void sortForgotten();
+		void takeForgotten();
 
-		void sortForgotten() {
-			std::sort(std::begin(forgotten_paths) + fp_cnt, std::end(forgotten_paths), [](auto _node1, auto _node2) { return _node1->best_branch_score > _node2->best_branch_score; });
-			since_last_sort = 0;
-		}
+		int getSize() const { return size; }
+		const bool canTakeForgotten() const { return fp_cnt >= forgotten_paths.size(); }
 
-		const bool canTakeForgotten() const {
-			return fp_cnt >= forgotten_paths.size();
-		}
+		void goParent();
+		void goRandomParent(const bool _combat_finished);
+		void goRoot(const bool _combat_finished);
 
-		void takeForgotten() {
-			if (since_last_sort > 500)
-				sortForgotten();
-
-			if (!canTakeForgotten()) {
-				return;
-			}
-
-			current = forgotten_paths[fp_cnt++];
-		}
-
-		int getSize() const {
-			return size;
-		}
-
-		void goParent() {
-			if (!current->parent)
-				throw std::exception("Should never happen (cant go to null parent node)");
-
-			current = current->parent;
-		}
-
-		void goRandomParent(const bool _combat_finished) {
-			if (current->depth < 6) {
-				goRoot(_combat_finished);
-				return;
-			}
-
-			if( !_combat_finished)
-				forgotten_paths.push_back(current);
-
-			while (current->parent && current->parent->parent != root.get() && current->state.turn > 1)
-				goParent();
-		}
-
-		void goRoot(const bool _combat_finished) {
-			if(!_combat_finished)
-				forgotten_paths.push_back(current);
-
-			while (current->parent && current->parent->parent != root.get())
-				goParent();
-		}
-
-		CombatSequenceNode* findBestLeaf() {
-			CombatSequenceNode* branch = root.get();
-
-			while (!branch->children.empty()) {
-				int best_depth = 999;
-				int best_idx = 0, idx = 0;
-
-				for (auto child : branch->children) {
-					if (child->best_branch_score == branch->best_branch_score && child->depth < best_depth) {
-						best_idx = idx;
-					}
-					++idx;
-				}
-
-				auto it = std::begin(branch->children);
-				std::advance(it, best_idx);
-				branch = (*it).get();
-			}
-
-			return branch;
-		}
+		CombatSequenceNode* findBestLeaf();
 	};
 
 }; // HotaSim

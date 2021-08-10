@@ -64,7 +64,6 @@ namespace HotaMechanics {
 
 	void CombatManager::setCurrentState(const CombatState& _state) {
 		current_state = std::make_unique<CombatState>(_state);
-		ai->initializeBattle(&current_state->player_unit_reachables, &current_state->ai_unit_reachables);
 	}
 
 	void CombatManager::nextState() {
@@ -108,15 +107,9 @@ namespace HotaMechanics {
 		ai->addEventsToProcess(action_events);
 
 		setCombatResult();
-		setAIState();
 
 		if (action.param2)
 			nextUnit();
-	}
-
-	void CombatManager::setAIState() {
-		current_state->ai_unit_reachables = const_cast<CombatAI&>(*ai).getAIReachables();
-		current_state->player_unit_reachables = const_cast<CombatAI&>(*ai).getPlayerReachables();
 	}
 
 	const std::vector<CombatUnit*> CombatManager::getUnitsInRange(const CombatSide _side, const std::vector<int16_t>& _hexes) const {

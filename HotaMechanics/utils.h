@@ -8,12 +8,12 @@
 
 #include "combat_field.h"
 
+
 namespace HotaMechanics {
 	class CombatUnit;
 };
 
 namespace HotaMechanics::Utils {
-	using namespace HotaMechanics;
 
 	BaseStats baseStats(int _atk, int _def, int _pow, int _kgd);
 	CombatStats combatStats(int _min, int _max, int _spd, int _shots);
@@ -33,6 +33,9 @@ namespace HotaMechanics::Utils {
 			return _printable.toString();
 	}
 
+	constexpr size_t ceil(const double _val) {
+		return (size_t)_val;
+	}
 	//template<int16_t hex, typename... Args>
 	//static const std::array<CombatHex, 32> make_hexarray(const CombatHex& t, const Args&... _args) {
 	//	if constexpr (sizeof...(_args) == 31)

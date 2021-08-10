@@ -182,7 +182,9 @@ namespace HotaSim {
 						std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 						std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
 						std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]
-							<< " [2] = " << tree.turns_occurence[2] << " [3] = " << tree.turns_occurence[3] << " [4] = " << tree.turns_occurence[4] << std::endl;
+							<< " [2] = " << tree.turns_occurence[2] << " [3] = " << tree.turns_occurence[3] << " [4] = " << tree.turns_occurence[4]
+							<< " [5] = " << tree.turns_occurence[5] << " [6] = " << tree.turns_occurence[6] << " [7] = " << tree.turns_occurence[7] << std::endl;
+						std::cout << "Cache access/miss: " << std::dec << CombatPathfinder::cache_access << " / " << CombatPathfinder::cache_misses << std::endl;
 						std::cout << "Best score so far: " << std::hex << tree.root->best_branch_score << std::endl << std::endl;
 					}
 
@@ -194,12 +196,12 @@ namespace HotaSim {
 					&& tree.getSize() % 12 == 0)
 						take_forgotten = true;
 
-					if (tree.getSize() < 15000) {
+					/*if (tree.getSize() < 45000) {
 						++jump_root;
 						tree.goRoot(cb_finish_cnt != combat_finished_cnt);
 						root_jump = true;
 					}
-					else if ((float)tree.forgotten_paths.size() / tree.getSize() < 0.015f) {
+					else */if ((float)tree.forgotten_paths.size() / tree.getSize() < 0.015f) {
 						if (tree.getSize() / 3 > jump_random_parent) {
 							++jump_random_parent;
 							tree.goRandomParent(cb_finish_cnt != combat_finished_cnt);

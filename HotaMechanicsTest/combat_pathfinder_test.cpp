@@ -200,6 +200,7 @@ namespace CombatPathfinderTest {
 		field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
 
 		walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
+		pathfinder.clearCache();
 		reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
 
 		expected = std::vector<int16_t>(walkable);

@@ -57,6 +57,9 @@
     <ClCompile Include="combat_manager_turnordering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="combat_manager_serializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="structures.h">

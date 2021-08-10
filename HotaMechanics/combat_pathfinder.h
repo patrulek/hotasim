@@ -27,9 +27,9 @@ namespace std {
 	template<>
 	struct std::hash<PathCache> {
 		std::size_t operator()(const PathCache& _cache) const noexcept {
-			std::size_t h1 = std::hash<int16_t>{}(_cache.source_hex);
-			h1 ^= (std::hash<int16_t>{}(_cache.target_hex) << (int16_t)_cache.double_wide);
-			h1 ^= (_cache.field_hash << (int16_t)!_cache.double_wide);
+			//std::size_t h1 = _cache.field_hash;
+			std::size_t h1 = std::hash<int>{}(_cache.source_hex ^ (int)_cache.double_wide);
+			h1 ^= std::hash<int>{}(_cache.target_hex ^ (int)!_cache.double_wide);
 			return h1;
 		}
 	};
@@ -43,7 +43,9 @@ namespace HotaMechanics {
 
 	public:
 		CombatPathfinder();
-
+		void clearCache() { distance_cache.clear(); }
+		static uint64_t cache_access;
+		static uint64_t cache_misses;
 
 		const int getUnitStartHex(const Constants::CombatSide _side, const int _unit_order, const int _units_stacks, 
 										  const bool _double_wide, const Constants::CombatType _combat_type) const;
@@ -78,6 +80,5 @@ namespace HotaMechanics {
 		std::vector<int16_t> tmp_hexes;
 		std::unordered_map<PathCache, int16_t> distance_cache;
 		std::array<Constants::AdjacentArray, Constants::FIELD_SIZE + 1> adjacents;
-		static int cache_access;
 	};
 }; // HotaMechanics

@@ -12,12 +12,14 @@ namespace HotaMechanics {
 	class CombatHex {
 
 	public:
+		CombatHex() = default;
 		CombatHex(const int16_t _id, const Constants::CombatHexOccupation _occupied_by = Constants::CombatHexOccupation::EMPTY)
 			: id(_id), occupied_by(_occupied_by), area(calcArea()), walkable(baseWalkable()) {}
 		CombatHex(const CombatHex& _obj)
 			: id(_obj.id), area(_obj.area), walkable(_obj.walkable) {}
-		CombatHex(CombatHex&& _obj)
+		CombatHex(CombatHex&& _obj) noexcept
 			: id(_obj.id), area(_obj.area), walkable(_obj.walkable) {}
+		CombatHex& operator=(const CombatHex& _obj) = default;
 
 		// change state -----------------
 		void occupyHex(const Constants::CombatHexOccupation type) { occupied_by = type; }
@@ -40,10 +42,10 @@ namespace HotaMechanics {
 		const int16_t calcArea() const;
 		const bool baseWalkable() const;
 
-		const int16_t id{ Constants::INVALID_HEX_ID };
+		int16_t id{ Constants::INVALID_HEX_ID };
 		Constants::CombatHexOccupation occupied_by{ Constants::CombatHexOccupation::EMPTY };
-		const int16_t area;
-		const bool walkable;
+		int16_t area;
+		bool walkable;
 	};
 	
 	using HexArray = std::array<CombatHex, Constants::FIELD_SIZE + 1>;
@@ -63,15 +65,13 @@ namespace HotaMechanics {
 	class CombatField {
 
 	public:
-		static const HexArray base_hexes;
-
 		CombatField() = delete;
 		explicit CombatField(const Constants::CombatFieldType _field_type, const Constants::CombatFieldTemplate _field_template = Constants::CombatFieldTemplate::EMPTY);
 		CombatField(const CombatField& _obj) = default;
 		CombatField& operator=(const CombatField& _field) {
 			combatFieldId = _field.combatFieldId;
 			combatFieldTemplate = _field.combatFieldTemplate;
-			for (auto hex : _field.hexes)
+			for (auto& hex : _field.hexes)
 				hexes[hex.getId()].occupyHex(hex.getOccupation());
 
 			return *this;
@@ -102,10 +102,12 @@ namespace HotaMechanics {
 		// simple getters -------------------
 		const CombatHex& getById(const int16_t _hex_id) const { return hexes[_hex_id]; }
 		const HexArray& getHexes() const { return hexes; }
+		const Constants::CombatFieldType getType() { return combatFieldId; }
+		const Constants::CombatFieldTemplate getTemplate() { return combatFieldTemplate; }
 		// ----------------------------------
 	private:
 		Constants::CombatFieldType combatFieldId{ Constants::CombatFieldType::GRASS };
 		Constants::CombatFieldTemplate combatFieldTemplate{ Constants::CombatFieldTemplate::EMPTY };
-		HexArray hexes{ base_hexes };
+		HexArray hexes;
 	};
 }; // HotaMechanics

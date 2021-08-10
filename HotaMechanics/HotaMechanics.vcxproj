@@ -150,6 +150,7 @@
     <ClCompile Include="combat_manager_executor.cpp" />
     <ClCompile Include="combat_manager_generator.cpp" />
     <ClCompile Include="combat_manager_processor.cpp" />
+    <ClCompile Include="combat_manager_serializer.cpp" />
     <ClCompile Include="combat_manager_turnordering.cpp" />
     <ClCompile Include="combat_pathfinder.cpp" />
     <ClCompile Include="combat_field.cpp" />

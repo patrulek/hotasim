@@ -13,7 +13,8 @@ PathCache::PathCache(const HotaMechanics::CombatField& _field, const int16_t _so
 namespace HotaMechanics {
 	using namespace Constants;
 
-	int CombatPathfinder::cache_access = 0;
+	uint64_t CombatPathfinder::cache_access = 0;
+	uint64_t CombatPathfinder::cache_misses = 0;
 
 	CombatPathfinder::CombatPathfinder() {
 		path.reserve(64);
@@ -257,9 +258,12 @@ namespace HotaMechanics {
 	}
 
 	const int16_t CombatPathfinder::realDistanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _ghost_hex) {
-		if (distance_cache.find(PathCache(_field, _source_hex, _target_hex)) != std::end(distance_cache))
-			return distance_cache[PathCache(_field, _source_hex, _target_hex)]; 
+		if (distance_cache.find(PathCache(_field, _source_hex, _target_hex)) != std::end(distance_cache)) {
+			++CombatPathfinder::cache_access;
+			return distance_cache[PathCache(_field, _source_hex, _target_hex)];
+		}
 		
+		++CombatPathfinder::cache_misses;
 		auto dist = (int16_t)findPath(_source_hex, _target_hex, _field, false, _ghost_hex).size();
 		return dist;
 	}
