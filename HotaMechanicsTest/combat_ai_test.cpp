@@ -28,7 +28,7 @@ namespace CombatAITest {
 	}
 
 
-	// CombatAI::getReachableHexesForUnit
+	// CombatAI::getAttackableHexesForUnit
 	TEST(CombatAI, shouldReturnAllWalkableHexesInRangePlusAdjacentWhenSomeObstaclesAround) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
 		auto& ai = combat_manager->getCombatAI();
@@ -40,10 +40,12 @@ namespace CombatAITest {
 		auto& pathfinder = const_cast<CombatPathfinder&>(ai.getPathfinder());
 		size_t walkable_size = pathfinder.getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field).size();
 		combat_manager->getCurrentState().field.fillHex(getHexId(5, 2), CombatHexOccupation::SOLID_OBSTACLE);
+		pathfinder.clearCache();
 		const_cast<CombatAI&>(ai).initializeBattle();
 
+
 		auto expected = pathfinder.getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true);
-		expected.erase(std::find(std::begin(expected), std::end(expected), getHexId(5, 5))); // this hex is not attackable due to obstacle
+		expected.erase(std::find(std::begin(expected), std::end(expected), getHexId(5, 5))); // this hex is not reachable (and attackable) due to obstacle
 		auto value = ai.getAttackableHexesForUnit(active_stack);
 		EXPECT_EQ(expected, value);
 		EXPECT_EQ(walkable_size, value.size() + 1);  // one hexes are not attackable (5,5 - not reachable)
@@ -68,6 +70,7 @@ namespace CombatAITest {
 		auto& active_stack = combat_manager->getActiveStack();
 		size_t walkable_size = const_cast<CombatPathfinder&>(ai.getPathfinder()).getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true).size();
 		combat_manager->getCurrentState().field.fillHex(getHexId(5, 3), CombatHexOccupation::SOLID_OBSTACLE);
+		const_cast<CombatPathfinder&>(ai.getPathfinder()).clearCache();
 		const_cast<CombatAI&>(ai).initializeBattle();
 
 		auto expected = const_cast<CombatPathfinder&>(ai.getPathfinder()).getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true);

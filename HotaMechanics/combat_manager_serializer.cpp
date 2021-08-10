@@ -5,7 +5,7 @@ namespace HotaMechanics {
 	using namespace Constants;
 
 	std::shared_ptr<CombatStatePacked> CombatManager::packCombatState(const CombatState& _state) {
-		std::shared_ptr<CombatStatePacked> packed_state = std::make_shared<CombatStatePacked>(new CombatStatePacked());
+		CombatStatePacked* packed_state = new CombatStatePacked();
 
 		packed_state->last_unit = _state.last_unit;
 		packed_state->turn = _state.turn;
@@ -64,7 +64,7 @@ namespace HotaMechanics {
 			packed_state->ai_attackables[i] = static_cast<int8_t>(ai->getAIAttackables()[i] & 0xFF);
 		}
 
-		return packed_state;
+		return std::make_shared<CombatStatePacked>(std::move(*packed_state));
 	}
 
 	std::shared_ptr<CombatState> CombatManager::unpackCombatState(const CombatStatePacked& _packed_state) {
