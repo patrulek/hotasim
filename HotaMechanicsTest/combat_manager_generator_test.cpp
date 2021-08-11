@@ -173,7 +173,7 @@ namespace CombatManagerTest {
 		EXPECT_NE(actions[0].param1, actions[1].param1); // actions with different unit_id (targets)
 
 		auto& current_state = combat_manager->getCurrentState();
-		const_cast<CombatUnit*>(current_state.attacker.getUnits()[0])->applyDamage(50);
+		const_cast<CombatUnit*>(current_state.attacker.getUnitsPtrs()[0])->applyDamage(50);
 
 		// when two player's units in range, and one of then is definitely weaker, pick the one, that fight value gain is better
 		// (100 peasants attacking 100 peasants, will get avg 1500 fight value; 100 peasants attacking 50 peasants, will get avg 750 fight value)
@@ -183,7 +183,7 @@ namespace CombatManagerTest {
 		EXPECT_EQ(1, actions[0].param1); // unit_id == 1 (pick unit with greater fv gain)
 
 
-		//const_cast<CombatUnit*>(current_state.attacker.getUnits()[1])->moveTo(getHexId(7, 1));
+		//const_cast<CombatUnit*>(current_state.attacker.getUnitsPtrs()[1])->moveTo(getHexId(7, 1));
 		//current_state.field.clearHex(getHexId(7, 1));
 		//current_state.field.fillHex(getHexId(7, 1), CombatHexOccupation::UNIT);
 

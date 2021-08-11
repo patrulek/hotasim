@@ -21,8 +21,7 @@ namespace HotaMechanics {
 
 
 		// complex getters ---------------
-		const std::vector<const CombatUnit*> getUnits() const;
-		const std::vector<const CombatUnit*> getUnitsPtrs();
+		const std::vector<const CombatUnit*>& getUnitsPtrs() const;
 		const int16_t getUnitId(const CombatUnit& _unit) const;
 		const int16_t getGlobalUnitId(const CombatUnit& _unit) const;
 		// -------------------------------

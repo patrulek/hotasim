@@ -64,6 +64,8 @@ namespace HotaMechanics {
 	{
 		std::vector<UnitPermutation> permutations;
 
+		ArmyPermutation() { permutations.reserve(7); }
+
 		bool operator==(const ArmyPermutation& _obj) const {
 			return permutations == _obj.permutations;
 		}
@@ -91,6 +93,7 @@ namespace HotaMechanics {
 		HeroStats stats;
 		std::vector<UnitStack> army;
 
+		Hero() { army.reserve(7); }
 		~Hero() {}
 	};
 

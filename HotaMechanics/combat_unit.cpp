@@ -8,12 +8,12 @@ namespace HotaMechanics {
 
 	CombatUnit::CombatUnit(const Unit& _unit_template, const int _stack_number, const CombatHero& _hero)
 		: unit_template(_unit_template), stats(_unit_template.stats), stack_number(_stack_number), hero(&_hero) {
-		uid = (int16_t)hero->getUnits().size();
+		uid = (int16_t)hero->getUnitsPtrs().size();
 	}
 
 	CombatUnit::CombatUnit(const CombatUnit& _unit, const CombatHero& _hero)
 		: hero(&_hero), unit_template(_unit.unit_template) {
-		uid = (int16_t)hero->getUnits().size();
+		uid = (int16_t)hero->getUnitsPtrs().size();
 		state = _unit.state;
 		hex = _unit.hex;
 		stats = _unit.stats;
@@ -24,7 +24,7 @@ namespace HotaMechanics {
 
 	CombatUnit::CombatUnit(CombatUnit&& _unit, const CombatHero& _hero)
 		: hero(&_hero), unit_template(std::move(_unit.unit_template)) {
-		uid = (int16_t)hero->getUnits().size();
+		uid = (int16_t)hero->getUnitsPtrs().size();
 		state = std::move(_unit.state);
 		hex = std::move(_unit.hex);
 		stats = std::move(_unit.stats);

@@ -61,7 +61,7 @@ namespace HotaMechanics {
 					break;
 
 				auto& hero = prev / 21 == 0 ? current_state->attacker : current_state->defender;
-				auto unit = hero.getUnits()[prev % 21];
+				auto unit = hero.getUnitsPtrs()[prev % 21];
 
 				if (unit->canWait())
 					break;
@@ -76,8 +76,8 @@ namespace HotaMechanics {
 
 	void CombatManager::orderUnitsInTurn()
 	{
-		auto units = current_state->attacker.getUnits();
-		auto defender_units = current_state->defender.getUnits();
+		auto units = current_state->attacker.getUnitsPtrs();
+		auto defender_units = current_state->defender.getUnitsPtrs();
 		units.insert(std::end(units), std::begin(defender_units), std::end(defender_units));
 		std::sort(std::begin(units), std::end(units), [](auto _obj1, auto _obj2) { return _obj1->getCombatStats().spd > _obj2->getCombatStats().spd; });
 

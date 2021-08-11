@@ -59,6 +59,6 @@ namespace HotaMechanics {
 		}
 
 		hexes[INVALID_HEX_ID] = CombatHex(INVALID_HEX_ID);
-		rehash();
+		//rehash();
 	}
 }; // HotaMechanics

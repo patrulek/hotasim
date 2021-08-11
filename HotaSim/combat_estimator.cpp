@@ -88,8 +88,8 @@ namespace HotaSim {
 					}
 				}
 
-				if (state.defender.getUnits().size() > 1) {
-					auto units = state.defender.getUnits();
+				if (state.defender.getUnitsPtrs().size() > 1) {
+					auto units = state.defender.getUnitsPtrs();
 					for (auto it = std::begin(units), it2 = std::begin(units) + 1; it2 != std::end(units); ++it2)
 					{
 						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true);
@@ -137,8 +137,8 @@ namespace HotaSim {
 				}
 
 
-				if (state.defender.getUnits().size() > 1) {
-					auto units = state.defender.getUnits();
+				if (state.defender.getUnitsPtrs().size() > 1) {
+					auto units = state.defender.getUnitsPtrs();
 					for (auto it = std::begin(units), it2 = std::begin(units) + 1; it2 != std::end(units); ++it2)
 					{
 						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true);

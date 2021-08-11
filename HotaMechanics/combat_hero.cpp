@@ -20,13 +20,18 @@ namespace HotaMechanics {
 
 	CombatHero::CombatHero(const CombatHero& _obj)
 		: hero_template(_obj.hero_template) {
-		stats = _obj.stats;
-
-		for (auto unit : _obj.getUnits())
-			units.emplace_back(CombatUnit(*unit, *this));
-
-		side = _obj.side;
 		army_permutation = _obj.army_permutation;
+
+		initialize();
+
+		stats = _obj.stats;
+		side = _obj.side;
+
+		unit_ptrs.clear();
+		for (auto unit : _obj.getUnitsPtrs()) {
+			units.emplace_back(CombatUnit(*unit, *this));
+			unit_ptrs.push_back(&(units.back()));
+		}
 	}
 
 	// TODO: fix it
@@ -34,28 +39,34 @@ namespace HotaMechanics {
 		if (this == &_obj)
 			return *this;
 
+		//initialize();
 		hero_template = _obj.hero_template;
 		stats = _obj.stats;
-
-		units.clear();
-		for (auto unit : _obj.getUnits())
-			units.emplace_back(CombatUnit(*unit, *this));
-
 		side = _obj.side;
 		army_permutation = _obj.army_permutation;
+
+		//units.clear();
+		unit_ptrs.clear();
+		for (auto unit : _obj.getUnitsPtrs()) {
+			units.emplace_back(CombatUnit(*unit, *this));
+			unit_ptrs.push_back(&(units.back()));
+		}
 		return *this;
 	}
 
 	CombatHero::CombatHero(CombatHero&& _obj) noexcept
 		: hero_template(_obj.hero_template) {
+		//initialize();
 		stats = std::move(_obj.stats);
-
-		for (auto unit : _obj.getUnits())
-			units.emplace_back(CombatUnit(*unit, *this));
-		_obj.units.clear();
-
 		side = std::move(_obj.side);
 		army_permutation = std::move(_obj.army_permutation);
+
+		unit_ptrs.clear();
+		for (auto unit : _obj.getUnitsPtrs()) {
+			units.emplace_back(CombatUnit(*unit, *this));
+			unit_ptrs.push_back(&(units.back()));
+		}
+		_obj.units.clear();
 	}
 
 	// TODO: fix it
@@ -63,22 +74,25 @@ namespace HotaMechanics {
 		if (this == &_obj)
 			return *this;
 
+		//initialize();
 		hero_template = std::move(_obj.hero_template);
 		stats = std::move(_obj.stats);
-
-		units.clear();
-		for (auto unit : _obj.getUnits())
-			units.emplace_back(CombatUnit(*unit, *this));
-		_obj.units.clear();
-
 		side = std::move(_obj.side);
 		army_permutation = std::move(_obj.army_permutation);
+
+		//units.clear();
+		unit_ptrs.clear();
+		for (auto unit : _obj.getUnitsPtrs()) {
+			units.emplace_back(CombatUnit(*unit, *this));
+			unit_ptrs.push_back(&(units.back()));
+		}
+		_obj.units.clear();
 		return *this;
 	}
 
 	void CombatHero::initialize() {
-		units.reserve(21);
-		unit_ptrs.reserve(21);
+		units.reserve(7);
+		unit_ptrs.reserve(7);
 		stats = hero_template.stats;
 
 		if (army_permutation.permutations.empty())
@@ -92,7 +106,7 @@ namespace HotaMechanics {
 		ArmyPermutation permutation;
 
 		for (int8_t i = 0; i < hero_template.army.size(); ++i)
-			permutation.permutations.push_back(UnitPermutation{ i, i, hero_template.army[i].stack_number });
+			permutation.permutations.emplace_back(i, i, hero_template.army[i].stack_number);
 
 		return permutation;
 	}
@@ -106,20 +120,10 @@ namespace HotaMechanics {
 		const auto& unit_template = hero_template.army[_unit_perm.unit_id].unit;
 		units.emplace_back(CombatUnit{ unit_template, _unit_perm.unit_number, *this });
 		units.back().initUnit();
+		unit_ptrs.push_back(&(units.back()));
 	}
 
-
-	const std::vector<const CombatUnit*> CombatHero::getUnits() const {
-		std::vector<const CombatUnit*> units_{};
-		std::transform(std::begin(units), std::end(units), std::back_inserter(units_), [](const auto& _obj) { return &_obj; });
-
-		return units_;
-	}
-
-	const std::vector<const CombatUnit*> CombatHero::getUnitsPtrs() {
-		unit_ptrs.clear();
-		std::transform(std::begin(units), std::end(units), std::back_inserter(unit_ptrs), [](const auto& _obj) { return &_obj; });
-
+	const std::vector<const CombatUnit*>& CombatHero::getUnitsPtrs() const {
 		return unit_ptrs;
 	}
 

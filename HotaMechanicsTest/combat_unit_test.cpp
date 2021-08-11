@@ -18,7 +18,7 @@ namespace CombatUnitTest {
 	// CombatUnit::applyDamage(damage >= CombatUnit::getStackHP())
 	TEST(CombatUnit, shouldKillStackIfDmgGreaterEqualStackHp) {
 		auto hero = createHero(createArmy("Peasant", 500));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->initUnit();
 
 		EXPECT_TRUE(unit->isAlive());
@@ -28,7 +28,7 @@ namespace CombatUnitTest {
 		EXPECT_EQ(0, unit->getHealthLost());
 
 		hero = createHero(createArmy("Peasant", 500));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->initUnit();
 
 		EXPECT_TRUE(unit->isAlive());
@@ -38,7 +38,7 @@ namespace CombatUnitTest {
 		EXPECT_EQ(0, unit->getHealthLost());
 
 		hero = createHero(createArmy("Imp", 100));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->initUnit();
 
 		EXPECT_TRUE(unit->isAlive());
@@ -51,7 +51,7 @@ namespace CombatUnitTest {
 	// CombatUnit::applyDamage(damage >= 0 && damage < CombatUnit::getStackHP())
 	TEST(CombatUnit, shouldSpareSomeUnitsIfDmgLesserThanStackHP) {
 		auto hero = createHero(createArmy("Peasant", 500));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->initUnit();
 
 		EXPECT_TRUE(unit->isAlive());
@@ -61,7 +61,7 @@ namespace CombatUnitTest {
 		EXPECT_EQ(0, unit->getHealthLost());
 
 		hero = createHero(createArmy("Imp", 100));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->initUnit();
 
 		EXPECT_TRUE(unit->isAlive());
@@ -71,7 +71,7 @@ namespace CombatUnitTest {
 		EXPECT_EQ(0, unit->getHealthLost());
 
 		hero = createHero(createArmy("Imp", 100));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->initUnit();
 
 		EXPECT_TRUE(unit->isAlive());
@@ -81,7 +81,7 @@ namespace CombatUnitTest {
 		EXPECT_EQ(3, unit->getHealthLost());
 
 		hero = createHero(createArmy("Imp", 100));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->initUnit();
 
 		EXPECT_TRUE(unit->isAlive());
@@ -94,7 +94,7 @@ namespace CombatUnitTest {
 	// CombatUnit::applyHeroStats()
 	TEST(CombatUnit, shouldApplyHeroStatsOnlyOnce) {
 		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		EXPECT_EQ(1, unit->getBaseStats().atk);
 		EXPECT_EQ(1, unit->getBaseStats().def);
@@ -113,7 +113,7 @@ namespace CombatUnitTest {
 	// CombatUnit::getAttackGain()
 	TEST(CombatUnit, shouldReturnAttackGainWithOnlyHeroStatsAsModifier) {
 		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		EXPECT_EQ(0, unit->getAttackGain());
 		unit->applyHeroStats();
@@ -123,7 +123,7 @@ namespace CombatUnitTest {
 	// CombatUnit::getDefenseGain()
 	TEST(CombatUnit, shouldReturnDefenseGainWithOnlyHeroStatsAsModifier) {
 		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		EXPECT_EQ(0, unit->getDefenseGain());
 		unit->applyHeroStats();
@@ -133,7 +133,7 @@ namespace CombatUnitTest {
 	// CombatUnit::getDefenseGain()
 	TEST(CombatUnit, shouldIncreaseDefenseGainByOneIfUnitIsDefending) {
 		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		EXPECT_EQ(0, unit->getDefenseGain());
 		unit->applyHeroStats();
@@ -145,22 +145,22 @@ namespace CombatUnitTest {
 	// CombatUnit::getBaseAverageDmg()
 	TEST(CombatUnit, shouldReturnBaseAverageDmgForMeleeUnit) {
 		auto hero = createHero(createArmy("Peasant", 100));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		EXPECT_FLOAT_EQ(1.0f, unit->getBaseAverageDmg());
 
 		hero = createHero(createArmy("Imp", 100));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		EXPECT_FLOAT_EQ(1.5f, unit->getBaseAverageDmg());
 	}
 
 	// CombatUnit::getFightValuePerOneHP()
 	TEST(CombatUnit, shouldReturnUnitFightValuePerOneHpNoMatterModifiersAndStats) {
 		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		EXPECT_EQ(15, unit->getFightValuePerOneHp());
 
 		hero = createHero(createArmy("Imp", 50));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->applyDamage(1);
 		EXPECT_FLOAT_EQ(12.5, unit->getFightValuePerOneHp());
 
@@ -174,11 +174,11 @@ namespace CombatUnitTest {
 	// CombatUnit::getFightValuePerUnitStack()
 	TEST(CombatUnit, shouldReturnStackUnitFightValueNoMatterModifiers) {
 		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		EXPECT_EQ(1500, unit->getFightValuePerUnitStack());
 
 		hero = createHero(createArmy("Imp", 50));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->applyDamage(1);
 		EXPECT_FLOAT_EQ(2487.5, unit->getFightValuePerUnitStack());
 
@@ -192,24 +192,24 @@ namespace CombatUnitTest {
 	// CombatUnits::getUnitStackHP()
 	TEST(CombatUnit, shouldGetUnitStackHPReturnCorrectValues) {
 		auto hero = createHero(createArmy("Peasant", 100));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		EXPECT_EQ(100, unit->getUnitStackHP());
 
 		hero = createHero(createArmy("Imp", 0));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		EXPECT_EQ(0, unit->getUnitStackHP());
 
 		hero = createHero(createArmy("Goblin", 11));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		EXPECT_EQ(55, unit->getUnitStackHP());
 
 		hero = createHero(createArmy("Imp", 1));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->applyDamage(2);
 		EXPECT_EQ(2, unit->getUnitStackHP());
 
 		hero = createHero(createArmy("Goblin", 11));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->applyDamage(1);
 		EXPECT_EQ(54, unit->getUnitStackHP());
 	}
@@ -217,11 +217,11 @@ namespace CombatUnitTest {
 	// CombatUnit::getFightValue()
 	TEST(CombatUnit, shouldReturnSingleUnitFightValueNoMatterTheStats) {
 		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		EXPECT_EQ(15, unit->getFightValue());
 
 		hero = createHero(createArmy("Imp", 50));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->applyDamage(2);
 		EXPECT_EQ(50, unit->getFightValue());
 	}

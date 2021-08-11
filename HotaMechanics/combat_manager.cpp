@@ -36,7 +36,7 @@ namespace HotaMechanics {
 
 		createInitState();
 		placeUnitsBeforeStart();
-		const_cast<CombatField&>(current_state->field).rehash();
+		//const_cast<CombatField&>(current_state->field).rehash();
 		initialized = true;
 	}
 
@@ -51,21 +51,21 @@ namespace HotaMechanics {
 
 	void CombatManager::placeUnitsBeforeStart() {
 		int unit_order = 0;
-		for (auto& unit : current_state->attacker.getUnits()) {
-			const int16_t hex = (int16_t)ai->getPathfinder().getUnitStartHex(CombatSide::ATTACKER, unit_order++, (int16_t)current_state->attacker.getUnits().size(), unit->isDoubleWide(), combat_type);
+		for (auto& unit : current_state->attacker.getUnitsPtrs()) {
+			const int16_t hex = (int16_t)ai->getPathfinder().getUnitStartHex(CombatSide::ATTACKER, unit_order++, (int16_t)current_state->attacker.getUnitsPtrs().size(), unit->isDoubleWide(), combat_type);
 			moveUnit(const_cast<CombatUnit&>(*unit), hex);
 		}
 
 		unit_order = 0;
-		for (auto& unit : current_state->defender.getUnits()) {
-			const int16_t hex = (int16_t)ai->getPathfinder().getUnitStartHex(CombatSide::DEFENDER, unit_order++, (int16_t)current_state->defender.getUnits().size(), unit->isDoubleWide(), combat_type);
+		for (auto& unit : current_state->defender.getUnitsPtrs()) {
+			const int16_t hex = (int16_t)ai->getPathfinder().getUnitStartHex(CombatSide::DEFENDER, unit_order++, (int16_t)current_state->defender.getUnitsPtrs().size(), unit->isDoubleWide(), combat_type);
 			moveUnit(const_cast<CombatUnit&>(*unit), hex);
 		}
 	}
 
 	void CombatManager::setCurrentState(const CombatState& _state) {
-		current_state = std::make_unique<CombatState>(_state);
-		const_cast<CombatField&>(current_state->field).rehash();
+		current_state = std::make_unique<CombatState>(std::move(_state));
+		//const_cast<CombatField&>(current_state->field).rehash();
 		ai->initializeBattle(nullptr, nullptr, nullptr, nullptr, true);
 		//const_cast<CombatPathfinder&>(ai->getPathfinder()).clearCache();
 	}
@@ -121,7 +121,7 @@ namespace HotaMechanics {
 		std::vector<CombatUnit*> units_in_range;
 		auto& hero = _side == CombatSide::ATTACKER ? current_state->attacker : current_state->defender;
 
-		for (auto& unit : hero.getUnits()) {
+		for (auto& unit : hero.getUnitsPtrs()) {
 			if (!unit->isAlive())
 				continue;
 

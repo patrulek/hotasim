@@ -20,7 +20,7 @@ namespace HotaSim {
 	struct CombatSequenceNode {
 		const std::shared_ptr<CombatStatePacked> state;
 		CombatSequenceNode* parent{ nullptr };
-		std::list<std::shared_ptr<CombatSequenceNode>> children;
+		std::vector<std::shared_ptr<CombatSequenceNode>> children;
 		int action{ 0 };
 		int action_size{ 1 };
 		int depth{ 0 };
@@ -33,6 +33,8 @@ namespace HotaSim {
 
 		CombatSequenceNode(std::shared_ptr<CombatStatePacked> _state, const int _action, const int _action_size, const uint64_t _score, CombatSequenceNode* _parent, const int _seed)
 			: state(_state), action(_action), action_size(_action_size), score(_score), best_branch_score(_score), parent(_parent), seed(_seed) {
+
+			children.reserve(64);
 		}
 
 		void addChild(std::shared_ptr<CombatStatePacked> _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const int _size);

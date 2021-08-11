@@ -5,7 +5,7 @@ namespace HotaMechanics {
 	using namespace Constants;
 
 	std::shared_ptr<CombatStatePacked> CombatManager::packCombatState(const CombatState& _state) {
-		CombatStatePacked* packed_state = new CombatStatePacked();
+		auto packed_state = std::make_shared<CombatStatePacked>();
 
 		packed_state->last_unit = _state.last_unit;
 		packed_state->turn = _state.turn;
@@ -20,13 +20,13 @@ namespace HotaMechanics {
 		}
 
 		packed_state->attacker_stats = _state.attacker.getStats();
-		packed_state->attacker_units_size = _state.attacker.getUnits().size();
+		packed_state->attacker_units_size = _state.attacker.getUnitsPtrs().size();
 
 		if (packed_state->attacker_units_size > 0) {
 			packed_state->attacker_units = new CombatUnitPacked[packed_state->attacker_units_size];
 			int i = 0;
 
-			for (auto unit : _state.attacker.getUnits()) {
+			for (auto unit : _state.attacker.getUnitsPtrs()) {
 				packed_state->attacker_units[i].stats = unit->getStats();
 				packed_state->attacker_units[i].hex = unit->getHex();
 				packed_state->attacker_units[i].stack_number = unit->getStackNumber();
@@ -37,13 +37,13 @@ namespace HotaMechanics {
 		}
 
 		packed_state->defender_stats = _state.defender.getStats();
-		packed_state->defender_units_size = _state.defender.getUnits().size();
+		packed_state->defender_units_size = _state.defender.getUnitsPtrs().size();
 
 		if (packed_state->defender_units_size > 0) {
 			packed_state->defender_units = new CombatUnitPacked[packed_state->defender_units_size];
 			int i = 0;
 
-			for (auto unit : _state.defender.getUnits()) {
+			for (auto unit : _state.defender.getUnitsPtrs()) {
 				packed_state->defender_units[i].stats = unit->getStats();
 				packed_state->defender_units[i].hex = unit->getHex();
 				packed_state->defender_units[i].stack_number = unit->getStackNumber();
@@ -54,7 +54,7 @@ namespace HotaMechanics {
 		}
 
 		for (int i = 0; i < FIELD_SIZE + 1; ++i) {
-			const int idx = std::floor(i / 2.0f);
+			const int idx = i / 2;
 			const int shift = (i % 2 == 1) * 4;
 			packed_state->hex_occupations[idx] |= (static_cast<int8_t>(_state.field.getById(i).getOccupation()) << shift);
 		}
@@ -66,7 +66,7 @@ namespace HotaMechanics {
 			packed_state->ai_attackables[i] = static_cast<int8_t>(ai->getAIAttackables()[i]);
 		}
 
-		return std::make_shared<CombatStatePacked>(std::move(*packed_state));
+		return packed_state;
 	}
 
 	std::shared_ptr<CombatState> CombatManager::unpackCombatState(const CombatStatePacked& _packed_state) {

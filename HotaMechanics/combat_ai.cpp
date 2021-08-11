@@ -90,7 +90,7 @@ namespace HotaMechanics {
 		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
 		int uid = _unit.getUnitId();
 
-		for (auto enemy_unit : hero.getUnits()) {
+		for (auto enemy_unit : hero.getUnitsPtrs()) {
 			if (!enemy_unit->isAlive())
 				continue;
 			
@@ -124,7 +124,7 @@ namespace HotaMechanics {
 	}
 
 	void CombatAI::initializePlayerUnitRanges() {
-		for (auto unit : combat_manager.getCurrentState().attacker.getUnits()) {
+		for (auto unit : combat_manager.getCurrentState().attacker.getUnitsPtrs()) {
 			clearUnitRanges(*unit);
 			setUnitRanges(*unit);
 		}
@@ -139,14 +139,14 @@ namespace HotaMechanics {
 			return;
 		}
 
-		for (auto unit : combat_manager.getCurrentState().attacker.getUnits()) {
+		for (auto unit : combat_manager.getCurrentState().attacker.getUnitsPtrs()) {
 			clearUnitAttackables(*unit);
 			setUnitAttackables(*unit);
 		}
 	}
 
 	void CombatAI::initializeAIUnitRanges() {
-		for (auto unit : combat_manager.getCurrentState().defender.getUnits()) {
+		for (auto unit : combat_manager.getCurrentState().defender.getUnitsPtrs()) {
 			clearUnitRanges(*unit);
 			setUnitRanges(*unit);
 		}
@@ -161,7 +161,7 @@ namespace HotaMechanics {
 			return;
 		}
 
-		for (auto unit : combat_manager.getCurrentState().defender.getUnits()) {
+		for (auto unit : combat_manager.getCurrentState().defender.getUnitsPtrs()) {
 			clearUnitAttackables(*unit);
 			setUnitAttackables(*unit);
 		}
@@ -180,7 +180,7 @@ namespace HotaMechanics {
 
 	void CombatAI::processUnitPosChangedEvent(const CombatEvent& _ev) {
 		auto& unit = combat_manager.getStackByGlobalId(_ev.param1);
-		combat_manager.getCurrentState().field.rehash();
+		//combat_manager.getCurrentState().field.rehash();
 
 		clearUnitRanges(unit);
 		clearUnitAttackables(unit);
@@ -191,11 +191,11 @@ namespace HotaMechanics {
 			if (u == &unit)
 				continue;
 
-			//if (isHexInUnitRange(*u, _ev.param3)) {
+			if (isHexInUnitRange(*u, _ev.param3) || isHexInUnitRange(*u, _ev.param2)) {
 			// TODO: when in range recheck adjacent hexes for reacheable recursive (if one of reachable hex changes, check adjecent to that etc)
 				clearUnitAttackables(*u);
 				setUnitAttackables(*u);
-			//}
+			}
 		}
 	}
 	
@@ -208,23 +208,24 @@ namespace HotaMechanics {
 	}
 
 	void CombatAI::setUnitAttackables(const CombatUnit& _unit) {
-		auto adjacent_hexes = pathfinder->getWalkableHexesInRange(_unit.getHex(), 1, combat_manager.getCurrentState().field, true);
+		auto& adjacent_hexes = pathfinder->getAdjacentHexes(_unit.getHex());
 		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
 		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
+		const int unit_bit = (1 << _unit.getUnitId());
 
-		attackables[_unit.getHex()] |= (1 << _unit.getUnitId());
+		attackables[_unit.getHex()] |= unit_bit;
 
 		for (auto adj_hex : adjacent_hexes)
-			attackables[adj_hex] |= (1 << _unit.getUnitId());
+			attackables[adj_hex] |= unit_bit;
 
-		auto hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false, false);
+		auto&& hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false, false);
 		for (auto hex : hexes) {
-			reachables[hex] |= (1 << _unit.getUnitId());
-			attackables[hex] |= (1 << _unit.getUnitId());
+			reachables[hex] |= unit_bit;
+			attackables[hex] |= unit_bit;
 
-			adjacent_hexes = pathfinder->getReachableHexesInRange(hex, 1, combat_manager.getCurrentState().field, false, false, true);
-			for (auto adj_hex : adjacent_hexes)
-				attackables[adj_hex] |= (1 << _unit.getUnitId());
+			auto& attackable_adjacent = pathfinder->getAdjacentHexes(hex);
+			for (auto att_adj_hex : attackable_adjacent)
+				attackables[att_adj_hex] |= unit_bit;
 		}
 	}
 
@@ -234,7 +235,7 @@ namespace HotaMechanics {
 		if (unit.isAlive())
 			return;
 
-		combat_manager.getCurrentState().field.rehash();
+		//combat_manager.getCurrentState().field.rehash();
 		clearUnitRanges(unit);
 		clearUnitAttackables(unit);
 
@@ -242,10 +243,11 @@ namespace HotaMechanics {
 			if (u == &unit)
 				continue;
 
-			//if (isHexInUnitRange(*u, unit.getHex())) {
+			if (isHexInUnitRange(*u, unit.getHex())) {
+				// TODO: when in range recheck adjacent hexes for reacheable recursive (if one of reachable hex changes, check adjecent to that etc)
 				clearUnitAttackables(*u);
 				setUnitAttackables(*u);
-			//}
+			}
 		}
 	}
 
@@ -274,7 +276,7 @@ namespace HotaMechanics {
 		for (auto unit : const_cast<CombatHero&>(_enemy_hero).getUnitsPtrs()) {
 			bool can_reach_any_unit = false;
 
-			for (auto friendly_unit : _active_stack.getHero()->getUnits()) { // h3hota hd.exe + 2055D
+			for (auto friendly_unit : _active_stack.getHero()->getUnitsPtrs()) { // h3hota hd.exe + 2055D
 				can_reach_any_unit |= canUnitAttackHex(*unit, friendly_unit->getHex());
 			}
 
@@ -312,8 +314,8 @@ namespace HotaMechanics {
 	// because of randomization which cant be mirrored in this project, this function can possibly return more
 	// than one unit to attack (only if some specified conditions are met; for most cases there will be only one unit)
 	const std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const std::vector<int16_t>& _hexes_to_attack) const {
-		if (_enemy_hero.getUnits().size() == 1)
-			return std::vector<int>{ _enemy_hero.getUnits()[0]->getUnitId() }; // todo: to could not always be [0]
+		if (_enemy_hero.getUnitsPtrs().size() == 1)
+			return std::vector<int>{ _enemy_hero.getUnitsPtrs()[0]->getUnitId() }; // todo: to could not always be [0]
 
 		int turns = 999;
 		std::vector<int> unit_ids{};
@@ -325,7 +327,7 @@ namespace HotaMechanics {
 		auto& field = combat_manager.getCurrentState().field;
 		int cnt = -1;
 
-		for (auto unit : _enemy_hero.getUnits()) {
+		for (auto unit : _enemy_hero.getUnitsPtrs()) {
 			++cnt;
 			const bool hex_reachable = _hexes_to_attack[cnt] == _active_stack.getHex() || field.isHexWalkable(_hexes_to_attack[cnt]);
 			const bool unit_attackable = true;// !isUnitBlockedFor(*unit, _active_stack);

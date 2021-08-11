@@ -50,7 +50,7 @@ namespace HotaMechanics {
 
 	public:
 		CombatPathfinder();
-		void clearCache() { distance_cache.clear(); }
+		//void clearCache() { distance_cache.clear(); }
 		static uint64_t cache_access;
 		static uint64_t cache_misses;
 
@@ -61,9 +61,6 @@ namespace HotaMechanics {
 		const Constants::AdjacentArray& getAdjacentHexes(const int16_t _source_hex) const;
 		const Constants::AdjacentArray getAdjacentHexesClockwise(const int16_t _source_hex) const;
 		const Constants::AdjacentArray getAdjacentHexesCounterClockwise(const int16_t _source_hex) const;
-
-		std::vector<int16_t> getReachableAdjacentHexes(const int16_t _adjacent_to, const int16_t _source_hex, const int _range,
-																		const CombatField& _field, const bool _can_fly, const bool _double_wide);
 
 		std::vector<int16_t> getHexesInRange(const int16_t _source_hex, const int16_t _range);
 		// from hexes in range check which one are not occupied
@@ -80,8 +77,8 @@ namespace HotaMechanics {
 	private:
 		const int16_t nextPathMove(const int16_t _source_hex, const int16_t _target_hex);
 
-		std::vector<int16_t> getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field, const bool _ghost_hex = false);
-		std::vector<int16_t> getReachableHexesFromWalkableHexes(const int16_t _source_hex, const int _range, std::vector<int16_t>& _hexes,
+		std::vector<int16_t> getWalkableHexesFromList(std::vector<int16_t>&& _hexes, const CombatField& _field, const bool _ghost_hex = false);
+		std::vector<int16_t> getReachableHexesFromWalkableHexes(const int16_t _source_hex, const int _range, std::vector<int16_t>&& _hexes,
 																					 const CombatField& _field, const bool _can_fly, const bool _double_wide, const bool _ghost_hex = false);
 
 		void initializeAdjacents();
@@ -89,7 +86,7 @@ namespace HotaMechanics {
 
 		std::vector<int16_t> path;
 		std::vector<int16_t> tmp_hexes;
-		std::unordered_map<PathCache, int16_t> distance_cache;
+		//std::unordered_map<PathCache, int16_t> distance_cache;
 		std::unordered_map<int16_t, std::vector<int16_t>> range_cache;
 		std::array<Constants::AdjacentArray, Constants::FIELD_SIZE + 1> adjacents;
 	};

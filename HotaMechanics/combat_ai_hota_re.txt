@@ -440,7 +440,7 @@ Dla ataku w 2 ch³opów
 //
 //	// iterate over player units
 //	for (int i = 0; i < 1 /*21 get player unit number*/; ++i) {
-//		CombatUnit& unit = const_cast<CombatUnit&>(*state.heroes[0].getUnits()[i]);
+//		CombatUnit& unit = const_cast<CombatUnit&>(*state.heroes[0].getUnitsPtrs()[i]);
 //		int unitStackNumber = unit.stackNumber;
 //		bool arrowTower = unit.isArrowTower(unit);
 //		int diffAtk = unit.calcDiffAtk();
@@ -455,7 +455,7 @@ Dla ataku w 2 ch³opów
 //
 //	// iterate over ai units
 //	for (int i = 0; i < 1 /*21 get player unit number*/; ++i) {
-//		CombatUnit& unit = const_cast<CombatUnit&>(*state.heroes[1].getUnits()[i]);
+//		CombatUnit& unit = const_cast<CombatUnit&>(*state.heroes[1].getUnitsPtrs()[i]);
 //		int unitStackNumber = unit.stackNumber;
 //		bool arrowTower = unit.isArrowTower(unit);
 //		int diffAtk = unit.calcDiffAtk();

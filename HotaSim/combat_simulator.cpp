@@ -148,7 +148,7 @@ namespace HotaSim {
 					int cb_finish_cnt = combat_finished_cnt;
 
 					while (!combatConstraintsViolated()) {
-						bool h1 = manager->getCombatAI().getPlayerReachables()[91] == 0 && manager->getCurrentState().attacker.getUnits()[0]->getHex() == 88;
+						bool h1 = manager->getCombatAI().getPlayerReachables()[91] == 0 && manager->getCurrentState().attacker.getUnitsPtrs()[0]->getHex() == 88;
 						int tsize = tree.getSize();
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {

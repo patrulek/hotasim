@@ -46,8 +46,8 @@ namespace CombatManagerTest {
 		auto combat_manager = createCombatManager(createHero(createArmy("Peasant", 100)), createHero(createArmy("Peasant", 100), CombatSide::DEFENDER));
 		// createCombatManager calls initialize,  units should be placed
 		auto& current_state = combat_manager->getCurrentState();
-		auto attacker_units = current_state.attacker.getUnits();
-		auto defender_units = current_state.defender.getUnits();
+		auto attacker_units = current_state.attacker.getUnitsPtrs();
+		auto defender_units = current_state.defender.getUnitsPtrs();
 
 		std::for_each(std::begin(attacker_units), std::end(attacker_units), [](const auto _obj) { EXPECT_NE(-1, _obj->getHex()); });
 		std::for_each(std::begin(defender_units), std::end(defender_units), [](const auto _obj) { EXPECT_NE(-1, _obj->getHex()); });

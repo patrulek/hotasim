@@ -21,8 +21,8 @@ namespace HotaMechanics {
 	CombatPathfinder::CombatPathfinder() {
 		path.reserve(64);
 		tmp_hexes.resize(128);
-		distance_cache.rehash(32768);
-		range_cache.rehash(2048);
+		//distance_cache.rehash(131072);
+		range_cache.rehash(4096);
 		initializeAdjacents();
 	}
 
@@ -108,13 +108,6 @@ namespace HotaMechanics {
 		return std::array<int16_t, 6>{ hexes[0], hexes[2], hexes[4], hexes[5], hexes[3], hexes[1] };
 	}
 
-	std::vector<int16_t> CombatPathfinder::getReachableAdjacentHexes(const int16_t _adjacent_to, const int16_t _source_hex, const int _range,
-																							const CombatField& _field, const bool _can_fly, const bool _double_wide) {
-		auto& hexes = getAdjacentHexes(_adjacent_to);
-		auto&& walkable_hexes = getWalkableHexesFromList(std::vector<int16_t>(std::begin(hexes), std::end(hexes)), _field);
-		return getReachableHexesFromWalkableHexes(_source_hex, _range, walkable_hexes, _field, _can_fly, _double_wide);
-	}
-
 	std::vector<int16_t> CombatPathfinder::getHexesInRange(const int16_t _source_hex, const int16_t _range) {
 		if (_source_hex == INVALID_HEX_ID || _range <= 0)
 			return EMPTY_VEC;
@@ -167,23 +160,22 @@ namespace HotaMechanics {
 	}
 
 	std::vector<int16_t> CombatPathfinder::getWalkableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field, const bool _ghost_hex) {
-		auto hexes = getHexesInRange(_source_hex, _range);
-		return getWalkableHexesFromList(hexes, _field, _ghost_hex);
+		return getWalkableHexesFromList(getHexesInRange(_source_hex, _range), _field, _ghost_hex);
 	}
 
-	std::vector<int16_t> CombatPathfinder::getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field, const bool _ghost_hex) {
+	std::vector<int16_t> CombatPathfinder::getWalkableHexesFromList(std::vector<int16_t>&& _hexes, const CombatField& _field, const bool _ghost_hex) {
 		int16_t idx = 0;
-		FieldArray hexes;
 
 		for (auto hex : _hexes) {
-			hexes[idx] = hex;
+			_hexes[idx] = hex;
 			idx += _field.isHexWalkable(hex, _ghost_hex);
 		}
 		
 		if (idx == 0)
 			return EMPTY_VEC;
 
-		return std::vector<int16_t>(std::begin(hexes), std::begin(hexes) + idx);//walkable;
+		_hexes.resize(idx);
+		return _hexes;
 	}
 
 	std::vector<int16_t> CombatPathfinder::getReachableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field,
@@ -193,13 +185,12 @@ namespace HotaMechanics {
 		if (_can_fly || _double_wide)
 			throw std::exception("Not implemented yet");
 
-		auto&& hexes = getWalkableHexesInRange(_source_hex, _range, _field, _ghost_hex);
-		return getReachableHexesFromWalkableHexes(_source_hex, _range, hexes, _field, _can_fly, _double_wide, _ghost_hex);
+		return getReachableHexesFromWalkableHexes(_source_hex, _range, getHexesInRange(_source_hex, _range), _field, _can_fly, _double_wide, _ghost_hex);
 	}
 
 
 	std::vector<int16_t> CombatPathfinder::getReachableHexesFromWalkableHexes(const int16_t _source_hex, const int _range,
-																										std::vector<int16_t>& _hexes, const CombatField& _field,
+																										std::vector<int16_t>&& _hexes, const CombatField& _field,
 																										const bool _can_fly, const bool _double_wide, const bool _ghost_hex) {
 		if (_can_fly) {
 			if (_double_wide)
@@ -214,7 +205,7 @@ namespace HotaMechanics {
 
 		for (auto hex : _hexes) {
 			auto distance = realDistanceBetweenHexes(_source_hex, hex, _field, _ghost_hex);
-			_hexes[idx] = hex;
+			_hexes[idx] = hex;// | (distance << 8);
 			idx += (distance > 0 && distance <= _range);
 		}
 

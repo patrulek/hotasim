@@ -16,10 +16,10 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateMeleeUnitAverageDamage(attacker, defender)
 	TEST(CombatCalculator, shouldReturnCorrectMeleeUnitDmgWithoutAnyModifiers) {
 		auto hero = createHero(createArmy("Imp", 200));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
-		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+		auto unit2 = const_cast<CombatUnit*>(hero2.getUnitsPtrs().front());
 
 		// 200 imps should do 315 dmg on average to 500 peasants without any attack/defense and/or spells modifiers
 		EXPECT_EQ(315, calculateMeleeUnitAverageDamage(*unit, *unit2));
@@ -29,7 +29,7 @@ namespace CombatCalculatorTest {
 
 
 		hero = createHero(createArmy("Imp", 100));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		// 100 imps should do 157 dmg on average to 500 peasants without any attack/defense and/or spells modifiers
 		EXPECT_EQ(157, calculateMeleeUnitAverageDamage(*unit, *unit2));
@@ -38,7 +38,7 @@ namespace CombatCalculatorTest {
 		EXPECT_EQ(400, calculateMeleeUnitAverageDamage(*unit2, *unit));
 
 		hero = createHero(createArmy("Imp", 50));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		// 50 imps should do 78 dmg on average to 500 peasants without any attack/defense and/or spells modifiers
 		EXPECT_EQ(78, calculateMeleeUnitAverageDamage(*unit, *unit2));
@@ -47,7 +47,7 @@ namespace CombatCalculatorTest {
 		EXPECT_EQ(200, calculateMeleeUnitAverageDamage(*unit2, *unit));
 
 		hero = createHero(createArmy("Goblin", 30));
-		unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		// 30 goblins should do 51 dmg on average to peasants without any attack/defense and/or spells modifiers
 		EXPECT_EQ(51, calculateMeleeUnitAverageDamage(*unit, *unit2));
@@ -56,17 +56,17 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateCounterAttackMeleeUnitAverageDamage(attacker, defender)
 	TEST(CombatCalculator, shouldReturnZeroForCounterattackMeleeUnitDmgWithoutAnyModifiersWhenUnitIsKilledOrCantRetaliate) {
 		auto hero = createHero(createArmy("Imp", 200));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		auto hero2 = createHero(createArmy("Peasant", 100));
-		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+		auto unit2 = const_cast<CombatUnit*>(hero2.getUnitsPtrs().front());
 		unit2->resetState();
 
 		// 200 imps should kill all peasants, so 0 dmg in counterattack
 		EXPECT_EQ(0, calculateCounterAttackMeleeUnitAverageDamage(*unit, *unit2));
 
 		hero2 = createHero(createArmy("Peasant", 500));
-		unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+		unit2 = const_cast<CombatUnit*>(hero2.getUnitsPtrs().front());
 		unit2->setRetaliated();
 
 		// 200 imps will not kill all peasants, but they already retaliated so 0 dmg
@@ -76,10 +76,10 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateCounterAttackMeleeUnitAverageDamage(attacker, defender)
 	TEST(CombatCalculator, shouldReturnCorrectValueForCounterattackMeleeUnitDmgWithoutAnyModifiersWhenUnitIsNotKilledAndCanRetaliate) {
 		auto hero = createHero(createArmy("Imp", 200));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
-		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+		auto unit2 = const_cast<CombatUnit*>(hero2.getUnitsPtrs().front());
 		unit2->resetState();
 
 		// 200 imps should kill 315 peasants, so 185 peasants should retaliate 175 dmg to imps
@@ -92,7 +92,7 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateUnitFightValueModifier(unit); calculateUnitAttack/DefenseFightValueModifier(unit)
 	TEST(CombatCalculator, shouldReturn1IfNoOtherModifiersAndEqualStats) {
 		auto hero = createHero(createArmy("Peasant", 100));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		EXPECT_FLOAT_EQ(1.0f, calculateUnitAttackFightValueModifier(*unit));
 		EXPECT_FLOAT_EQ(1.0f, calculateUnitDefenceFightValueModifier(*unit));
@@ -103,7 +103,7 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateUnitFightValueModifier(unit); calculateUnitAttack/DefenseFightValueModifier(unit)
 	TEST(CombatCalculator, shouldReturnGreaterThan1IfNoOtherModifiersAndAppliedHeroStats) {
 		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->applyHeroStats();
 
 		EXPECT_FLOAT_EQ(1.1f, calculateUnitAttackFightValueModifier(*unit));
@@ -114,7 +114,7 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateStackUnitFightValue(unit)
 	TEST(CombatCalculator, shouldReturnUnitFightValueModifierTimesStackUnitFightValue) {
 		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		EXPECT_EQ(1500, calculateStackUnitFightValue(*unit)); // stack unit fight value for base stats
 		unit->applyHeroStats();
@@ -128,8 +128,8 @@ namespace CombatCalculatorTest {
 
 	// CombatCalculator::calculateHeroFightValue(hero)
 	TEST(CombatCalculator, shouldReturnSummedUnitFightValuesForHero) {
-		auto hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto& hero = createHero(createArmy("Peasant", 100), CombatSide::ATTACKER, 2, 1);
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		EXPECT_EQ(1500, calculateHeroFightValue(hero)); // all hero units without modifiers
 		unit->applyHeroStats();
@@ -137,7 +137,7 @@ namespace CombatCalculatorTest {
 
 		hero = createHero(createArmy("Peasant", 100, "Peasant", 49), CombatSide::ATTACKER, 2, 1);
 		EXPECT_EQ(1500 + 735, calculateBaseHeroFightValue(hero)); // all hero units without modifiers
-		for (auto unit : hero.getUnits())
+		for (auto unit : hero.getUnitsPtrs())
 			const_cast<CombatUnit*>(unit)->applyHeroStats();
 		EXPECT_EQ(1612 + 789, calculateHeroFightValue(hero)); // all hero units with hero stats applied
 	}
@@ -145,10 +145,10 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateFightValueAdvantageAfterMeleeUnitAttack(attacker, defender)
 	TEST(CombatCalculator, shouldReturnCorrectFightValueGainForMeleeUnitAttackWithoutAnyModifiersWhenSimilarArmyStrength) {
 		auto hero = createHero(createArmy("Imp", 200));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
-		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+		auto unit2 = const_cast<CombatUnit*>(hero2.getUnitsPtrs().front());
 
 		// fight value gain when 200 imps attack 500 peasants first
 		EXPECT_EQ(2538, calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, *unit2));
@@ -160,11 +160,11 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateFightValueAdvantageOnHexes(attacker, enemy_hero, field)
 	TEST(CombatCalculator, shouldReturnOnlyZeroFightValueGainOnHexesForMeleeUnitWhenAttackerWeakerThanDefender) {
 		auto hero = createHero(createArmy("Imp", 50));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->moveTo(getHexId(8, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
-		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+		auto unit2 = const_cast<CombatUnit*>(hero2.getUnitsPtrs().front());
 		unit2->moveTo(getHexId(8, 2));
 
 		CombatField field(createField());
@@ -182,11 +182,11 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateFightValueAdvantageOnHexes(attacker, enemy_hero, field)
 	TEST(CombatCalculator, shouldReturnCorrectFightValueGainOnHexesForMeleeUnitWhenAttackerLittleStrongerThanDefender) {
 		auto hero = createHero(createArmy("Imp", 200));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->moveTo(getHexId(5, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
-		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+		auto unit2 = const_cast<CombatUnit*>(hero2.getUnitsPtrs().front());
 		unit2->moveTo(getHexId(5, 15));
 
 		CombatField field(createField());
@@ -216,11 +216,11 @@ namespace CombatCalculatorTest {
 	// CombatCalculator::calculateFightValueAdvantageOnHexes(attacker, enemy_hero, field)
 	TEST(CombatCalculator, DISABLED_shouldReturnMaximumFightValueGainOnHexesForMeleeUnitWhenAttackerIncrediblyStrongerThanDefender) {
 		auto hero = createHero(createArmy("Imp", 301));
-		auto unit = const_cast<CombatUnit*>(hero.getUnits().front());
+		auto unit = const_cast<CombatUnit*>(hero.getUnitsPtrs().front());
 		unit->moveTo(getHexId(5, 1));
 
 		auto hero2 = createHero(createArmy("Peasant", 500));
-		auto unit2 = const_cast<CombatUnit*>(hero2.getUnits().front());
+		auto unit2 = const_cast<CombatUnit*>(hero2.getUnitsPtrs().front());
 		unit2->moveTo(getHexId(5, 15));
 
 		CombatField field(createField());

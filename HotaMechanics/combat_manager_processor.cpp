@@ -35,10 +35,10 @@ namespace HotaMechanics {
 	}
 
 	void CombatManager::processPreTurnAction(const CombatAction& _action) {
-		for (auto& unit : current_state->attacker.getUnits())
+		for (auto& unit : current_state->attacker.getUnitsPtrs())
 			const_cast<CombatUnit*>(unit)->resetState();
 
-		for (auto& unit : current_state->defender.getUnits())
+		for (auto& unit : current_state->defender.getUnitsPtrs())
 			const_cast<CombatUnit*>(unit)->resetState();
 
 		// reactivate spellbook

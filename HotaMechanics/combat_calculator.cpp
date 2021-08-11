@@ -100,7 +100,7 @@ namespace HotaMechanics {
 			hexes_fight_value.fill(0);
 			int max_fight_value_gain = calculateStackUnitFightValue(activeStack);
 
-			for (auto unit : enemy_hero.getUnits()) {
+			for (auto unit : enemy_hero.getUnitsPtrs()) {
 				int fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, activeStack);
 
 				if (fight_value_gain <= 0)
