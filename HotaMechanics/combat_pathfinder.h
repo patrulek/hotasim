@@ -1,7 +1,6 @@
 #pragma once
 
 #include "structures.h"
-#include "utils.h"
 
 #include <array>
 #include <vector>
@@ -63,32 +62,32 @@ namespace HotaMechanics {
 		const Constants::AdjacentArray getAdjacentHexesClockwise(const int16_t _source_hex) const;
 		const Constants::AdjacentArray getAdjacentHexesCounterClockwise(const int16_t _source_hex) const;
 
-		const Utils::FieldArray getHexesInRange(const int16_t _source_hex, const int _range, const bool _temp) const;
-		const Constants::FieldArray getHexesInRange(const int16_t _source_hex, const int _range) const;
+		const std::vector<int16_t> getReachableAdjacentHexes(const int16_t _adjacent_to, const int16_t _source_hex, const int _range,
+																		const CombatField& _field, const bool _can_fly, const bool _double_wide);
+
+		const std::vector<int16_t> getHexesInRange(const int16_t _source_hex, const int _range) const;
 		// from hexes in range check which one are not occupied
-		const Constants::FieldArray getWalkableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field, const bool _ghost_hex = false);
+		const std::vector<int16_t> getWalkableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field, const bool _ghost_hex = false);
 		// checking pathfinding to hexes which arent occupied
-		const Constants::FieldArray  getReachableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field,
+		const std::vector<int16_t> getReachableHexesInRange(const int16_t _source_hex, const int _range, const CombatField& _field,
 																		const bool _can_fly, const bool _double_wide, const bool _ghost_hex = false);
 
 		const int16_t distanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex) const;
 		const int16_t realDistanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _ghost_hex = false);
 
-		const Constants::FieldArray& findSimplePath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide = false, const bool _ghost_hex = false, const int _range = 999);
-		const Constants::FieldArray& findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide = false, const bool _ghost_hex = false, const int _range = 999);
+		const std::vector<int16_t>& findSimplePath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide = false, const bool _ghost_hex = false, const int _range = 999);
+		const std::vector<int16_t>& findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide = false, const bool _ghost_hex = false, const int _range = 999);
 	private:
 		const int16_t nextPathMove(const int16_t _source_hex, const int16_t _target_hex);
 
-		const Constants::FieldArray getWalkableHexesFromList(Constants::FieldArray&& _hexes, const CombatField& _field, const bool _ghost_hex = false);
-		const Constants::FieldArray getReachableHexesFromWalkableHexes(const int16_t _source_hex, const int _range, Constants::FieldArray&& _hexes,
+		const std::vector<int16_t> getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field, const bool _ghost_hex = false);
+		const std::vector<int16_t> getReachableHexesFromWalkableHexes(const int16_t _source_hex, const int _range, const std::vector<int16_t>& _hexes,
 																					 const CombatField& _field, const bool _can_fly, const bool _double_wide, const bool _ghost_hex = false);
 
 		void initializeAdjacents();
 		Constants::AdjacentArray findAdjacents(const int16_t _source_hex);
 
-		Constants::FieldArray path;
-		Constants::FieldArray empty_field;
-		Utils::FieldArray empty_array;
+		std::vector<int16_t> path;
 		std::vector<int16_t> tmp_hexes;
 		std::unordered_map<PathCache, int16_t> distance_cache;
 		std::array<Constants::AdjacentArray, Constants::FIELD_SIZE + 1> adjacents;
