@@ -149,7 +149,7 @@ namespace CombatPathfinderTest {
 		EXPECT_EQ(expected, value); // filled with some obstacles at field
 
 
-		field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::EMPTY));
+		field.setTemplate(CombatFieldTemplate::EMPTY);
 		hex = getHexId(5, 15);
 		unit_speed = 3;
 		expected = std::vector<int16_t>{ 47, 48, 49, 64, 65, 66, 80, 81, 82, 83, 97, 98, 99, 100, 114, 115, 116, 117,
@@ -315,7 +315,7 @@ namespace CombatPathfinderTest {
 		expected = std::vector<int16_t>{ 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 65, 82, to };
 		EXPECT_EQ(expected, path);
 
-		field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::IMPS_2x100));
+		field.setTemplate(CombatFieldTemplate::IMPS_2x100);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(15, path.size());
 		expected = std::vector<int16_t>{ 36, 37, 38, 39, 40, 41, 42, 43, 61, 78, 79, 80, 81, 82, to };

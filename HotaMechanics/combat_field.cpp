@@ -9,18 +9,13 @@ namespace HotaMechanics {
 	using namespace Constants;
 	using namespace Utils;
 
-	const int64_t CombatField::getHash() const {
-		return std::hash<int64_t>{}(42);
-		/*int64_t hash{ 0 };
-		std::array<int16_t, 9> areas; areas.fill(0);
-
+	void CombatField::rehash() {
 		for (auto& hex : hexes)
-			areas[hex.getArea()] += !hex.isWalkable();
-		
-		for (int area_id = 0; area_id < areas.size(); ++area_id)
-			hash |= ((int64_t)areas[area_id] << area_id);
+			hash += (hex.isWalkable() * ((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
+	}
 
-		return std::hash<int64_t>{}(hash);*/
+	const int64_t CombatField::getHash() const {
+		return hash;
 	}
 
 	const bool CombatHex::baseWalkable() const {
@@ -47,14 +42,16 @@ namespace HotaMechanics {
 
 	CombatField::CombatField(const CombatFieldType _field_type, const CombatFieldTemplate _field_template)
 		: combatFieldId(_field_type), combatFieldTemplate(_field_template) {
-		auto field_template = Utils::getCombatFieldTemplate(_field_template);
-		setTemplate(field_template);
-
+		setTemplate(_field_template);
 	}
 
-	void CombatField::setTemplate(const std::vector<int>& _template) {
+	void CombatField::setTemplate(const CombatFieldTemplate _field_template) {
+		const std::vector<int>& _template = Utils::getCombatFieldTemplate(_field_template);
+
 		if (_template.size() != FIELD_SIZE)
 			throw std::exception("Wrong template size");
+
+		combatFieldTemplate = _field_template;
 
 		for (int hex = 0; hex < FIELD_SIZE; ++hex) {
 			const auto occupation = _template[hex] == 1 ? CombatHexOccupation::SOLID_OBSTACLE : CombatHexOccupation::EMPTY;
@@ -62,5 +59,6 @@ namespace HotaMechanics {
 		}
 
 		hexes[INVALID_HEX_ID] = CombatHex(INVALID_HEX_ID);
+		rehash();
 	}
 }; // HotaMechanics

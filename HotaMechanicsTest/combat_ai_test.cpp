@@ -118,7 +118,7 @@ namespace CombatAITest {
 		combat_manager->nextStateByAction(player_action);
 
 		auto& field = combat_manager->getCurrentState().field;
-		field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::TMP1));
+		field.setTemplate(CombatFieldTemplate::TMP1);
 		auto& active_stack = combat_manager->getActiveStack();
 		auto& attacker = combat_manager->getCurrentState().attacker;
 		auto unit = combat_manager->getCurrentState().attacker.getUnits()[0];
@@ -166,7 +166,7 @@ namespace CombatAITest {
 		std::vector<int16_t> hexes{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 
 		auto& field = manager->getCurrentState().field;
-		field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::TMP1));
+		field.setTemplate(CombatFieldTemplate::TMP1);
 
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
@@ -207,7 +207,7 @@ namespace CombatAITest {
 		auto& attacker = manager->getCurrentState().attacker;
 
 		auto& field = manager->getCurrentState().field;
-		field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::TMP1));
+		field.setTemplate(CombatFieldTemplate::TMP1);
 
 		const_cast<CombatAI&>(ai).calculateFightValueAdvantageOnHexes(*active_stack, manager->getCurrentState().attacker, field);
 
@@ -241,6 +241,6 @@ namespace CombatAITest {
 		auto& attacker = manager->getCurrentState().attacker;
 
 		auto& field = manager->getCurrentState().field;
-		field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::TMP1));
+		field.setTemplate(CombatFieldTemplate::TMP1);
 	}
 }; // CombatAITest

@@ -36,6 +36,7 @@ namespace HotaMechanics {
 
 		createInitState();
 		placeUnitsBeforeStart();
+		const_cast<CombatField&>(current_state->field).rehash();
 		initialized = true;
 	}
 
@@ -64,6 +65,9 @@ namespace HotaMechanics {
 
 	void CombatManager::setCurrentState(const CombatState& _state) {
 		current_state = std::make_unique<CombatState>(_state);
+		const_cast<CombatField&>(current_state->field).rehash();
+		ai->initializeBattle(nullptr, nullptr, nullptr, nullptr, true);
+		//const_cast<CombatPathfinder&>(ai->getPathfinder()).clearCache();
 	}
 
 	void CombatManager::nextState() {
@@ -105,6 +109,7 @@ namespace HotaMechanics {
 			processCombatAction(action);
 
 		ai->addEventsToProcess(action_events);
+		ai->processEvents();
 
 		setCombatResult();
 

@@ -251,7 +251,7 @@ namespace CombatManagerTest {
 	TEST(CombatManager_Generator, shouldFixFirstWaitActionBug) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 50, "Imp", 100, "Imp", 50)), 
 																createHero(createArmy("Peasant", 250, "Peasant", 250), CombatSide::DEFENDER));
-		combat_manager->getCurrentState().field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::IMPS_2x100));
+		combat_manager->getCurrentState().field.setTemplate(CombatFieldTemplate::IMPS_2x100);
 		// start battle
 		combat_manager->nextState();
 
@@ -307,7 +307,7 @@ namespace CombatManagerTest {
 	TEST(CombatManager_Generator, shouldFixFirstWalkAfterWaitActionBug) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 50, "Imp", 100, "Imp", 50)),
 			createHero(createArmy("Peasant", 250, "Peasant", 250), CombatSide::DEFENDER));
-		combat_manager->getCurrentState().field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::IMPS_2x100));
+		combat_manager->getCurrentState().field.setTemplate(CombatFieldTemplate::IMPS_2x100);
 		// start battle
 		combat_manager->nextState();
 
@@ -364,7 +364,7 @@ namespace CombatManagerTest {
 	TEST(CombatManager_Generator, shouldFixSecondWalkAfterWaitActionBug) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 50, "Imp", 100, "Imp", 50)),
 			createHero(createArmy("Peasant", 250, "Peasant", 250), CombatSide::DEFENDER));
-		combat_manager->getCurrentState().field.setTemplate(getCombatFieldTemplate(CombatFieldTemplate::IMPS_2x100));
+		combat_manager->getCurrentState().field.setTemplate(CombatFieldTemplate::IMPS_2x100);
 		// start battle
 		combat_manager->nextState();
 

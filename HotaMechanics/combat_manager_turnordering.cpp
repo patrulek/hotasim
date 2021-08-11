@@ -20,10 +20,14 @@ namespace HotaMechanics {
 	void CombatManager::nextUnit() {
 		current_state->last_unit = current_state->order.front();
 		current_state->order.pop_front();
+		active_stack = nullptr;
 	}
 
 
 	CombatUnit& CombatManager::getActiveStack() const {
+		if (active_stack)
+			return const_cast<CombatUnit&>(*active_stack);
+
 		if (current_state->order.empty())
 			throw std::exception("Cant get active stack from empty queue");
 

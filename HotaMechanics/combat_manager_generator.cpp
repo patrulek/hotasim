@@ -15,7 +15,6 @@ namespace HotaMechanics {
 			return std::vector<CombatAction>{};
 
 		std::vector<CombatAction> actions{};
-		ai->processEvents();
 
 		if (active_stack.canDefend())
 			actions.push_back(createDefendAction());
@@ -25,6 +24,7 @@ namespace HotaMechanics {
 
 		// get reachable hexes;
 		auto reachable_hexes = ai->getReachableHexesForUnit(active_stack);
+		//reachable_hexes.erase(std::remove(std::begin(reachable_hexes), std::end(reachable_hexes), active_stack.getHex()), std::end(reachable_hexes));
 
 		//auto& field = current_state->field;
 		//auto reachable_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd, field, false, false);
@@ -64,7 +64,6 @@ namespace HotaMechanics {
 		if (!active_stack.canMakeAction())
 			return std::vector<CombatAction>{};
 
-		ai->processEvents();
 		ai->calculateFightValueAdvantageOnHexes(active_stack, current_state->attacker, current_state->field);
 
 		std::vector<CombatAction> actions{};
@@ -94,6 +93,14 @@ namespace HotaMechanics {
 				else
 					actions.push_back(createWalkAction(hex, walk_distance));
 			}
+		}
+
+		// TODO: make tests to find out the behaviour
+		if (actions.empty()) {
+			if (active_stack.canWait())
+				actions.push_back(createWaitAction());
+			else
+				actions.push_back(createDefendAction());
 		}
 
 		return actions;

@@ -28,8 +28,9 @@ namespace HotaMechanics {
 		auto path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
 
 		if (path.empty()) {
-			//path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
+			path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
 			//this->generateActionsForPlayer();
+			this->generateActionsForPlayer();
 			throw std::exception("Should never happen (we already found that path earlier or target hex is invalid)");
 		}
 

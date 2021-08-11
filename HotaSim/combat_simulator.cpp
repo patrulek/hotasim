@@ -102,8 +102,8 @@ namespace HotaSim {
 		// reached total states limit for simulation
 		bool state_limit_reached_rule_violated = _tree.getSize() > estimated_total_states;
 
-		if (_tree.isCurrentRoot() && !_tree.forgotten_paths.empty())
-			const_cast<CombatSequenceTree&>(_tree).takeForgotten();
+		//if (_tree.isCurrentRoot() && !_tree.forgotten_paths.empty())
+		//	const_cast<CombatSequenceTree&>(_tree).takeForgotten();
 
 		return some_states_left_rule_violated || state_limit_reached_rule_violated;
 	}
@@ -129,7 +129,7 @@ namespace HotaSim {
 			for (auto permutation : permutations) {
 				prepareCombat(permutation, /*i*/ CombatFieldTemplate::IMPS_2x100);
 
-				CombatSequenceTree tree(manager->getInitialState());
+				CombatSequenceTree tree(*manager, manager->getInitialState());
 				int last_size = 0;
 				int jump_root = 0;
 				int jump_random_parent = 0;
@@ -142,22 +142,28 @@ namespace HotaSim {
 				manager->nextState();
 				tree.addState(manager->getCurrentState(), 0, 1, 0x0000800080008000, 1);
 				int action_cnt = 0;
-				int seed = std::random_device()();
+				int seed = 42;// std::random_device()();
 
 				while (!simulatorConstraintsViolated(tree)) {
 					int cb_finish_cnt = combat_finished_cnt;
 
 					while (!combatConstraintsViolated()) {
+						bool h1 = manager->getCombatAI().getPlayerReachables()[91] == 0 && manager->getCurrentState().attacker.getUnits()[0]->getHex() == 88;
+						int tsize = tree.getSize();
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
 								auto actions = manager->generateActionsForPlayer();
-								auto action_order = Estimator::shuffleActions(actions, *manager, seed);
-								auto action_idx = action_order[action_cnt];
+								//auto action_order = Estimator::shuffleActions(actions, *manager, seed);
+								
+								auto action_idx = action_cnt;//action_order[action_cnt];
+
 								manager->nextStateByAction(actions[action_idx]);
 								tree.addState(manager->getCurrentState(), action_cnt, actions.size(), 
 									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), seed);
-								seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
-								//seed = 42;
+								//seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
+								//if (tree.current->level >= 2)
+								//	std::cout << "Processing pl level: (" << tree.current->level << ", " << action_cnt << ", " << (float)action_cnt / (actions.size() - 1) << ")\n";
+								seed = 42;
 								action_cnt = 0;
 							}
 							else {
@@ -166,10 +172,13 @@ namespace HotaSim {
 								manager->nextStateByAction(actions[0]);
 								tree.addState(manager->getCurrentState(), 0, 1, 
 									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1);
+								//if (tree.current->level >= 2)
+								//	std::cout << "Processing ai level: (" << tree.current->level << ", " << 0 << ", " << 1 << ")\n";
 							}
 							continue;
 						}
 
+						//std::cout << "\n";
 						manager->nextState();
 						tree.addState(manager->getCurrentState(), 0, 1,
 							evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1);
@@ -178,65 +187,78 @@ namespace HotaSim {
 					if (tree.getSize() / 5000 > last_size) {
 						++last_size;
 						std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
-						std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << std::endl;
+						std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
 						std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 						std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
 						std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]
 							<< " [2] = " << tree.turns_occurence[2] << " [3] = " << tree.turns_occurence[3] << " [4] = " << tree.turns_occurence[4]
 							<< " [5] = " << tree.turns_occurence[5] << " [6] = " << tree.turns_occurence[6] << " [7] = " << tree.turns_occurence[7] << std::endl;
+						std::cout << "Depth occurence: [0] = " << tree.level_occurence[0] << " [1] = " << tree.level_occurence[1]
+							<< " [2] = " << tree.level_occurence[2] << " [3] = " << tree.level_occurence[3] << " [4] = " << tree.level_occurence[4]
+							<< " [5] = " << tree.level_occurence[5] << " [6] = " << tree.level_occurence[6] << " [7] = " << tree.level_occurence[7]
+							<< " [8] = " << tree.level_occurence[8] << " [9] = " << tree.level_occurence[9] << " [10] = " << tree.level_occurence[10] << std::endl;
 						std::cout << "Cache access/miss: " << std::dec << CombatPathfinder::cache_access << " / " << CombatPathfinder::cache_misses << std::endl;
-						std::cout << "Best score so far: " << std::hex << tree.root->best_branch_score << std::endl << std::endl;
+						std::cout << "Best score so far: " << std::hex << tree.root->best_branch_score << std::dec << std::endl << std::endl;
 					}
 
 					bool random_jump = false;
 					bool root_jump = false;
 					bool take_forgotten = false;
 
-					if ((float)tree.forgotten_paths.size() / tree.getSize() > 0.01f 
-					&& tree.getSize() % 12 == 0)
-						take_forgotten = true;
+					//if ((float)tree.forgotten_paths.size() / tree.getSize() > 0.01f 
+					//&& tree.getSize() % 12 == 0)
+					//	take_forgotten = true;
 
-					/*if (tree.getSize() < 45000) {
-						++jump_root;
-						tree.goRoot(cb_finish_cnt != combat_finished_cnt);
-						root_jump = true;
-					}
-					else */if ((float)tree.forgotten_paths.size() / tree.getSize() < 0.015f) {
-						if (tree.getSize() / 3 > jump_random_parent) {
-							++jump_random_parent;
-							tree.goRandomParent(cb_finish_cnt != combat_finished_cnt);
-							random_jump = true;
-						}
-						else if (tree.getSize() / 7 > jump_root) {
-							++jump_root;
-							tree.goRoot(cb_finish_cnt != combat_finished_cnt);
-							root_jump = true;
-						}
-					}
+					//if (tree.getSize() < 45000) {
+					//	++jump_root;
+					//	tree.goRoot(cb_finish_cnt != combat_finished_cnt);
+					//	root_jump = true;
+					//}
+					//else if ((float)tree.forgotten_paths.size() / tree.getSize() < 0.015f) {
+					//	if (tree.getSize() / 3 > jump_random_parent) {
+					//		++jump_random_parent;
+					//		tree.goRandomParent(cb_finish_cnt != combat_finished_cnt);
+					//		random_jump = true;
+					//	}
+					//	else if (tree.getSize() / 7 > jump_root) {
+					//		++jump_root;
+					//		tree.goRoot(cb_finish_cnt != combat_finished_cnt);
+					//		root_jump = true;
+					//	}
+					//}
+
+					//if (tree.current->parent == tree.root.get() && take_forgotten) {
+					//	tree.takeForgotten();
+					//}
 
 					// check if need to go up further
-					if (!root_jump) {
-						if(!random_jump)
+					if (!root_jump && !random_jump) {
+						while (tree.current->parent != tree.root.get() && tree.current->action_size <= tree.current->action + 1)
 							tree.goParent();
 
-						while (tree.current->parent && tree.current->action + 1 >= tree.current->action_size)
+						tree.goParent();
+						//tree.goParent();
+						/*while (tree.current->parent && tree.current->action + 1 >= tree.current->action_size)
 							tree.goParent();
 
 						if (tree.current->parent)
-							tree.goParent();
+							tree.goParent();*/
 					}
 
-					if (tree.current->parent == tree.root.get() && take_forgotten) {
-						tree.takeForgotten();
-					}
-
-					action_cnt = tree.current->action + 1;
+					action_cnt = tree.current->children.empty() ? 0 : tree.current->children.back()->action + 1;
 					seed = tree.current->seed;
-					manager->setCurrentState(tree.current->state);
+					auto forgotten_state = manager->unpackCombatState(*tree.current->state);
+					manager->setCurrentState(*forgotten_state);
+					//std::cout << "\n\n ----------------- \n\n";
+
+					if (action_cnt == tree.current->children.back()->action_size) {
+						std::cout << "All states reached. End simulation\n";
+						break;
+					}
 				}
 
 				auto best_leaf = tree.findBestLeaf();
-				int best_leaf_turns = best_leaf->state.turn;
+				int best_leaf_turns = best_leaf->state->turn;
 				std::vector<int> action_order;
 				std::vector<int> action_seeds;
 				while (best_leaf) {
@@ -250,6 +272,19 @@ namespace HotaSim {
 				std::reverse(std::begin(action_order), std::end(action_order));
 				std::reverse(std::begin(action_seeds), std::end(action_seeds));
 
+				std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
+				std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
+				std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
+				std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
+				std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]
+					<< " [2] = " << tree.turns_occurence[2] << " [3] = " << tree.turns_occurence[3] << " [4] = " << tree.turns_occurence[4]
+					<< " [5] = " << tree.turns_occurence[5] << " [6] = " << tree.turns_occurence[6] << " [7] = " << tree.turns_occurence[7] << std::endl;
+				std::cout << "Level occurence: [0] = " << tree.level_occurence[0] << " [1] = " << tree.level_occurence[1]
+					<< " [2] = " << tree.level_occurence[2] << " [3] = " << tree.level_occurence[3] << " [4] = " << tree.level_occurence[4]
+					<< " [5] = " << tree.level_occurence[5] << " [6] = " << tree.level_occurence[6] << " [7] = " << tree.level_occurence[7]
+					<< " [8] = " << tree.level_occurence[8] << " [9] = " << tree.level_occurence[9] << " [10] = " << tree.level_occurence[10] << std::endl;
+				std::cout << "Cache access/miss: " << std::dec << CombatPathfinder::cache_access << " / " << CombatPathfinder::cache_misses << std::endl;
+				std::cout << "Best score so far: " << std::hex << tree.root->best_branch_score << std::endl << std::endl;
 				std::cout << "Total actions: " << std::dec << action_order.size() << std::endl;
 				std::cout << "Total turns: " << best_leaf_turns + 1 << std::endl;
 				std::cout << "Total states checked: " << tree.getSize() << std::endl;
@@ -271,9 +306,7 @@ namespace HotaSim {
 	}
 
 	std::shared_ptr<CombatField> CombatSimulator::prepareCombatField(const CombatFieldTemplate _field_template) {
-		auto combat_field = std::make_shared<CombatField>(field_type);
-		auto combat_field_template = getCombatFieldTemplate(_field_template);
-		combat_field->setTemplate(combat_field_template);
+		auto combat_field = std::make_shared<CombatField>(field_type, _field_template);
 		return combat_field;
 	}
 

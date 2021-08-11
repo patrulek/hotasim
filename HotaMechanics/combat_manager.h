@@ -120,6 +120,8 @@ namespace HotaMechanics {
 		// during battle
 		std::vector<CombatEvent> action_events;
 		std::vector<const CombatUnit*> hero_units;
+		const CombatUnit* active_stack{ nullptr };
+		
 
 		// post-initialization
 		bool initialized{ false };

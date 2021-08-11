@@ -26,11 +26,11 @@ namespace HotaMechanics {
 	};
 
 	struct CombatUnitPacked {
-		UnitStats stats;
-		int16_t hex;
-		int16_t stack_number;
-		int16_t health_lost;
-		CombatUnitState state;
+		UnitStats stats{ 0 };
+		uint16_t hex{ 0 };
+		uint16_t stack_number{ 0 };
+		uint16_t health_lost{ 0 };
+		CombatUnitState state{ 0 };
 	};
 
 	struct CombatStatePacked {
@@ -48,24 +48,24 @@ namespace HotaMechanics {
 		int16_t* order{ nullptr };
 
 		// attacker state
-		HeroStats attacker_stats;
-		int16_t attacker_units_size : 3;
+		HeroStats attacker_stats{ 0 };
+		uint16_t attacker_units_size : 3;
 		CombatUnitPacked* attacker_units{ nullptr };
 
 		// defender state
-		HeroStats defender_stats;
-		int16_t defender_units_size : 3;
+		HeroStats defender_stats{ 0 };
+		uint16_t defender_units_size : 3;
 		CombatUnitPacked* defender_units{ nullptr };
 
 		// field state
 		static constexpr size_t HEX_OCCUPATION_SIZE = Utils::ceil((Constants::FIELD_SIZE + 1) / 2.0f);
-		std::array<int8_t, HEX_OCCUPATION_SIZE> hex_occupations; // 4 bity na jeden hex -> 
+		std::array<uint8_t, HEX_OCCUPATION_SIZE> hex_occupations; // 4 bity na jeden hex -> 
 
 		// ai state
-		std::array<int8_t, Constants::FIELD_SIZE + 1> player_reachables; // 4 bity, na razie i tak wiêcej jednostek nie mo¿emy
-		std::array<int8_t, Constants::FIELD_SIZE + 1> player_attackables;
-		std::array<int8_t, Constants::FIELD_SIZE + 1> ai_reachables;
-		std::array<int8_t, Constants::FIELD_SIZE + 1> ai_attackables;
+		std::array<uint8_t, Constants::FIELD_SIZE + 1> player_reachables; // 4 bity, na razie i tak wiêcej jednostek nie mo¿emy
+		std::array<uint8_t, Constants::FIELD_SIZE + 1> player_attackables;
+		std::array<uint8_t, Constants::FIELD_SIZE + 1> ai_reachables;
+		std::array<uint8_t, Constants::FIELD_SIZE + 1> ai_attackables;
 	};
 
 

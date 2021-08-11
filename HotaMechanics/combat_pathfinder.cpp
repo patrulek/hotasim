@@ -6,9 +6,11 @@
 
 #include "combat_field.h"
 
-PathCache::PathCache(const HotaMechanics::CombatField& _field, const int16_t _source_hex, const int16_t _target_hex, const bool _double_wide)
-	: field_hash(_field.getHash()), source_hex(_source_hex), target_hex(_target_hex), double_wide(_double_wide) {
+PathCache::PathCache(const HotaMechanics::CombatField& _field, const int16_t _source_hex, const int16_t _target_hex, const bool _double_wide, const bool _ghost_hex)
+	: field_hash(_field.getHash()), source_hex(std::min(_source_hex, _target_hex)), target_hex(std::max(_source_hex, _target_hex)), double_wide(_double_wide), ghost_hex(_ghost_hex) {
 }
+
+int std::hash<PathCache>::some_val = 0;
 
 namespace HotaMechanics {
 	using namespace Constants;
@@ -19,6 +21,7 @@ namespace HotaMechanics {
 	CombatPathfinder::CombatPathfinder() {
 		path.reserve(64);
 		tmp_hexes.resize(128);
+		distance_cache.rehash(32768);
 		initializeAdjacents();
 	}
 
@@ -258,11 +261,20 @@ namespace HotaMechanics {
 	}
 
 	const int16_t CombatPathfinder::realDistanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _ghost_hex) {
-		if (distance_cache.find(PathCache(_field, _source_hex, _target_hex)) != std::end(distance_cache)) {
-			++CombatPathfinder::cache_access;
-			return distance_cache[PathCache(_field, _source_hex, _target_hex)];
-		}
+		if (_target_hex == INVALID_HEX_ID)
+			return 999;
+
+		if (_source_hex == _target_hex)
+			return 0;
 		
+	/*	if (distance_cache.find(PathCache(_field, _source_hex, _target_hex, false, _ghost_hex)) != std::end(distance_cache)) {
+
+			++CombatPathfinder::cache_access;
+			return distance_cache[PathCache(_field, _source_hex, _target_hex, false, _ghost_hex)];
+		}*/
+
+	/*	if (distance_cache.load_factor() > 0.98)
+			std::cout << "Bucket count: " << distance_cache.bucket_count() << " | Load factor: " << distance_cache.load_factor() << std::endl;*/
 		++CombatPathfinder::cache_misses;
 		auto dist = (int16_t)findPath(_source_hex, _target_hex, _field, false, _ghost_hex).size();
 		return dist;
@@ -344,7 +356,7 @@ namespace HotaMechanics {
 				return EMPTY_PATH;
 
 			std::reverse(std::begin(path), std::end(path));
-			distance_cache[PathCache(_field, _source_hex, _target_hex, _double_wide)] = (int16_t)path.size();
+			//distance_cache[PathCache(_field, _source_hex, _target_hex, _double_wide)] = (int16_t)path.size();
 			return path;
 		}
 

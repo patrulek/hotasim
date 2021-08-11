@@ -65,8 +65,7 @@ namespace CombatFieldTest {
 		EXPECT_NE(FIELD_SIZE, empty_values); // setting custom template with obstacles should set some
 
 		empty_values = 0;
-		auto field_template = getCombatFieldTemplate(CombatFieldTemplate::EMPTY);
-		field.setTemplate(field_template);
+		field.setTemplate(CombatFieldTemplate::EMPTY);
 		for (int16_t hex : range(FIELD_SIZE))
 			empty_values += field.getById(hex).getOccupation() == CombatHexOccupation::EMPTY;
 		EXPECT_EQ(FIELD_SIZE, empty_values); // were changing field template back to empty

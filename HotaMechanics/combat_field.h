@@ -7,6 +7,7 @@
 #include <array>
 
 #include "structures.h"
+#include <iostream>
 
 namespace HotaMechanics {
 	class CombatHex {
@@ -15,10 +16,8 @@ namespace HotaMechanics {
 		CombatHex() = default;
 		CombatHex(const int16_t _id, const Constants::CombatHexOccupation _occupied_by = Constants::CombatHexOccupation::EMPTY)
 			: id(_id), occupied_by(_occupied_by), area(calcArea()), walkable(baseWalkable()) {}
-		CombatHex(const CombatHex& _obj)
-			: id(_obj.id), area(_obj.area), walkable(_obj.walkable) {}
-		CombatHex(CombatHex&& _obj) noexcept
-			: id(_obj.id), area(_obj.area), walkable(_obj.walkable) {}
+		CombatHex(const CombatHex& _obj) = default;
+		CombatHex(CombatHex&& _obj) = default;
 		CombatHex& operator=(const CombatHex& _obj) = default;
 
 		// change state -----------------
@@ -67,7 +66,10 @@ namespace HotaMechanics {
 	public:
 		CombatField() = delete;
 		explicit CombatField(const Constants::CombatFieldType _field_type, const Constants::CombatFieldTemplate _field_template = Constants::CombatFieldTemplate::EMPTY);
-		CombatField(const CombatField& _obj) = default;
+		CombatField(const CombatField& _obj) = default; /*{
+
+			std::cout << "copy " << std::endl;
+		}*/
 		CombatField& operator=(const CombatField& _field) {
 			combatFieldId = _field.combatFieldId;
 			combatFieldTemplate = _field.combatFieldTemplate;
@@ -90,7 +92,8 @@ namespace HotaMechanics {
 
 
 		}
-		void setTemplate(const std::vector<int>& _template);
+		void setTemplate(const Constants::CombatFieldTemplate _field_template);
+		void rehash();
 		// ----------------------------------
 
 		// check state ----------------------
@@ -109,5 +112,6 @@ namespace HotaMechanics {
 		Constants::CombatFieldType combatFieldId{ Constants::CombatFieldType::GRASS };
 		Constants::CombatFieldTemplate combatFieldTemplate{ Constants::CombatFieldTemplate::EMPTY };
 		HexArray hexes;
+		int64_t hash{ 0 };
 	};
 }; // HotaMechanics
