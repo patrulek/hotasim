@@ -74,8 +74,12 @@ namespace HotaMechanics {
 
 		const int16_t distanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex) const;
 		const int16_t realDistanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _ghost_hex = false);
+
+		const std::vector<int16_t>& findSimplePath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide = false, const bool _ghost_hex = false, const int _range = 999);
 		const std::vector<int16_t>& findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide = false, const bool _ghost_hex = false, const int _range = 999);
 	private:
+		const int16_t nextPathMove(const int16_t _source_hex, const int16_t _target_hex);
+
 		const std::vector<int16_t> getWalkableHexesFromList(const std::vector<int16_t>& _hexes, const CombatField& _field, const bool _ghost_hex = false);
 		const std::vector<int16_t> getReachableHexesFromWalkableHexes(const int16_t _source_hex, const int _range, const std::vector<int16_t>& _hexes,
 																					 const CombatField& _field, const bool _can_fly, const bool _double_wide, const bool _ghost_hex = false);

@@ -90,7 +90,6 @@ namespace CombatManagerTest {
 		combat_manager->nextState();
 
 		// start turn 2
-		const_cast<CombatPathfinder&>(ai.getPathfinder()).clearCache();
 		auto actions = combat_manager->generateActionsForPlayer();
 		EXPECT_EQ(25, actions.size()); // 17 walking actions ([5,2] blokuje), 6 attack actions, 1 wait action, 1 defend action
 

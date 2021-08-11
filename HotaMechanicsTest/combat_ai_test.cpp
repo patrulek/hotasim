@@ -40,7 +40,6 @@ namespace CombatAITest {
 		auto& pathfinder = const_cast<CombatPathfinder&>(ai.getPathfinder());
 		size_t walkable_size = pathfinder.getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field).size();
 		combat_manager->getCurrentState().field.fillHex(getHexId(5, 2), CombatHexOccupation::SOLID_OBSTACLE);
-		pathfinder.clearCache();
 		const_cast<CombatAI&>(ai).initializeBattle();
 
 
@@ -70,7 +69,6 @@ namespace CombatAITest {
 		auto& active_stack = combat_manager->getActiveStack();
 		size_t walkable_size = const_cast<CombatPathfinder&>(ai.getPathfinder()).getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true).size();
 		combat_manager->getCurrentState().field.fillHex(getHexId(5, 3), CombatHexOccupation::SOLID_OBSTACLE);
-		const_cast<CombatPathfinder&>(ai.getPathfinder()).clearCache();
 		const_cast<CombatAI&>(ai).initializeBattle();
 
 		auto expected = const_cast<CombatPathfinder&>(ai.getPathfinder()).getWalkableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd + 1, combat_manager->getCurrentState().field, true);

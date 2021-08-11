@@ -280,6 +280,64 @@ namespace HotaMechanics {
 		return dist;
 	}
 
+	const int16_t CombatPathfinder::nextPathMove(const int16_t _source_hex, const int16_t _target_hex) {
+		int x_diff = (_target_hex % FIELD_COLS) - (_source_hex % FIELD_COLS);
+		int y_diff = (_target_hex / FIELD_COLS) - (_source_hex / FIELD_COLS);
+
+		bool even_row = (_source_hex / FIELD_COLS % 2) == 1;
+
+		bool upper_row = y_diff < 0; // we go up
+		bool lower_row = y_diff > 0; // we go down
+		bool same_row = y_diff == 0;
+		bool further_col = x_diff > 0; // we go right
+		bool closer_col = x_diff < 0; // we go left
+		bool same_col = x_diff == 0;
+
+		if (same_row && further_col) return 3;
+		if (same_row && closer_col) return 2;
+		if (upper_row && further_col) return 1;
+		if (upper_row && same_col) return even_row;
+		if (upper_row && closer_col && abs(x_diff) > abs(std::ceil(y_diff / 2.0))) return 2;
+		if (lower_row && further_col) return 5 - 2 * (abs(x_diff) > abs(std::ceil(y_diff / 2.0)));
+		if (lower_row && same_col) return 4 + ((even_row && abs(y_diff) % 2 == 1) || (!even_row && abs(y_diff) % 2 == 0));
+		
+		return 4 + (abs(x_diff) < abs(std::ceil(y_diff / 2.0)));
+	}
+
+	const std::vector<int16_t>& CombatPathfinder::findSimplePath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide, const bool _ghost_hex, const int _range) {
+		int16_t cur_hex = _source_hex;
+		int dist = 0;
+		std::array<int16_t, 32> p; p.fill(INVALID_HEX_ID);
+		bool found = true;
+
+		while (cur_hex != _target_hex) {
+			int next_move = nextPathMove(cur_hex, _target_hex);
+			auto adjacent = getAdjacentHexes(cur_hex);
+
+			if(_field.isHexWalkable(adjacent[next_move]) || (adjacent[next_move] == _target_hex && _field.isHexWalkable(adjacent[next_move], _ghost_hex))) {
+				p[dist++] = adjacent[next_move];
+				cur_hex = adjacent[next_move];
+			}
+			else {
+
+				found = false;
+					break;
+			}
+		}
+
+		if (found ) {
+			path.clear();
+
+			for (int i = 0; i < dist; ++i)
+				path.push_back(p[i]);
+
+			return path;
+		}
+
+		return EMPTY_PATH;
+	}
+
+
 	const std::vector<int16_t>& CombatPathfinder::findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide, const bool _ghost_hex, const int _range) {
 		if (_double_wide )
 			throw std::exception("Not implemented yet");
@@ -292,6 +350,9 @@ namespace HotaMechanics {
 
 		if (!_field.isHexWalkable(_target_hex, _ghost_hex) || _source_hex == _target_hex)
 			return EMPTY_PATH;
+
+		if (!findSimplePath(_source_hex, _target_hex, _field, _double_wide, _ghost_hex, _range).empty())
+			return path;
 
 		std::array<int16_t, FIELD_SIZE + 1> to_check; to_check.fill(0);
 		int to_check_cnt = 0;
