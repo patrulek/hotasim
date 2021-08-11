@@ -16,7 +16,7 @@ namespace HotaSim {
 	namespace Estimator
 	{
 		const int estimateTurnsNumber(const CombatState& _initial_state) {
-			return 3; // TODO: implement
+			return 4; // TODO: implement
 		}
 
 		const int estimateTotalStatesNumber(const CombatState& _initial_state) {

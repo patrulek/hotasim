@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 #include "structures.h"
 
@@ -36,6 +37,68 @@ namespace HotaMechanics::Utils {
 	constexpr size_t ceil(const double _val) {
 		return (size_t)_val;
 	}
+
+	template<typename T, size_t Size>
+	struct FixedVector {
+		
+		std::array<T, Size> data;
+
+		FixedVector() {
+			data.fill(0);
+		}
+		FixedVector(std::initializer_list<int16_t> _il) {
+			data.fill(0);
+			for (auto val : _il)
+				pushBack(val);
+		}
+
+		bool operator==(const FixedVector& _rhs) const {
+			return getSize() == _rhs.getSize() && equalValues(_rhs);
+		}
+
+		template<class Array>
+		inline void from(const Array& _arr) {
+			std::copy(std::begin(_arr), std::begin(_arr) + _arr.getSize(), std::begin(data));
+			data[Size - 1] = _arr.getSize();
+		}
+		template<>
+		inline void from<std::array<int16_t, 6>>(const std::array<int16_t, 6>& _arr) {
+			std::copy(std::begin(_arr), std::begin(_arr) + _arr.size(), std::begin(data));
+			data[Size - 1] = _arr.size();
+		}
+		template<>
+		inline void from<std::array<int16_t, 188>>(const std::array<int16_t, 188>& _arr) {
+			std::copy(std::begin(_arr), std::begin(_arr) + _arr.size(), std::begin(data));
+			data[Size - 1] = _arr.size();
+		}
+		template<>
+		inline void from<FixedVector<T, Size>>(const FixedVector<T, Size>& _arr) {
+			std::copy(std::begin(_arr.data), std::begin(_arr.data) + _arr.getSize(), std::begin(data));
+			data[Size - 1] = _arr.getSize();
+		}
+		inline const bool empty() const { return data[Size - 1] == 0; }
+		inline void pushBack(const T& _val, const bool _real_push = true) { data[data[Size - 1]] = _val;  data[Size - 1] += _real_push; }
+		inline T& popBack() { return data[--data[Size - 1]]; }
+		inline void clear() { data[Size - 1] = 0; }
+		inline T& operator[](int _idx) { return data[_idx]; }
+
+		inline void sort(const bool _reverse = false) {
+			std::sort(std::begin(data), std::begin(data) + getSize(),
+				[_reverse](auto v, auto v2) { return (!_reverse * v) - (_reverse * v) < (!_reverse * v2) - (_reverse * v2); });
+		}
+		inline void setSize(const int16_t _size) { data[Size - 1] = _size; }
+
+		inline const bool equalValues(const FixedVector& _rhs) const {
+			for (int i = 0; i < getSize(); ++i)
+				if (_rhs.data[i] != data[i])
+					return false;
+			return true;
+		}
+		inline const int16_t getSize() const { return data[Size - 1]; }
+	};
+
+	using FieldArray = FixedVector<int16_t, Constants::FIELD_SIZE + 1>;
+
 	//template<int16_t hex, typename... Args>
 	//static const std::array<CombatHex, 32> make_hexarray(const CombatHex& t, const Args&... _args) {
 	//	if constexpr (sizeof...(_args) == 31)
