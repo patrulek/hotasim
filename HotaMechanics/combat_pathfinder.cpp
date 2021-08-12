@@ -24,6 +24,7 @@ namespace HotaMechanics {
 		//distance_cache.rehash(131072);
 		range_cache.rehash(4096);
 		initializeAdjacents();
+		initializePathMoves();
 	}
 
 	const int CombatPathfinder::getUnitStartHex(const CombatSide _side, const int _unit_order, const int _units_stacks, 
@@ -61,6 +62,19 @@ namespace HotaMechanics {
 	void CombatPathfinder::initializeAdjacents() {
 		for (int16_t hex = 0; hex < FIELD_SIZE + 1; ++hex)
 			adjacents[hex] = findAdjacents(hex);
+	}
+
+	void CombatPathfinder::initializePathMoves() {
+		for( int16_t hex = 0; hex < FIELD_SIZE + 1; ++hex)
+			for (int16_t hex2 = 0; hex2 < FIELD_SIZE + 1; ++hex2) {
+				if (hex == hex2)
+					continue;
+				path_moves[hex][hex2] = nextPathMove(hex, hex2);
+			}
+	}
+
+	const int8_t CombatPathfinder::getNextPathMove(const int16_t _source_hex, const int16_t _target_hex) const {
+		return path_moves[_source_hex][_target_hex];
 	}
 
 	AdjacentArray CombatPathfinder::findAdjacents(const int16_t _source_hex) {
@@ -299,23 +313,19 @@ namespace HotaMechanics {
 		int dist = 0;
 		std::array<int16_t, 32> p; p.fill(INVALID_HEX_ID);
 		bool found = true;
+		bool ghost_target_hex = _field.isHexWalkable(_target_hex, _ghost_hex);
 
-		while (cur_hex != _target_hex) {
-			int next_move = nextPathMove(cur_hex, _target_hex);
-			auto adjacent = getAdjacentHexes(cur_hex);
+		while (found) {
+			int next_move = getNextPathMove(cur_hex, _target_hex);
+			auto& adjacent = getAdjacentHexes(cur_hex);
 
-			if(_field.isHexWalkable(adjacent[next_move]) || (adjacent[next_move] == _target_hex && _field.isHexWalkable(adjacent[next_move], _ghost_hex))) {
-				p[dist++] = adjacent[next_move];
-				cur_hex = adjacent[next_move];
-			}
-			else {
-
-				found = false;
-					break;
-			}
+			bool is_hex_walkable = _field.isHexWalkable(adjacent[next_move]) || (adjacent[next_move] == _target_hex && ghost_target_hex);
+			p[dist++] = adjacent[next_move];
+			cur_hex = adjacent[next_move];
+			found = !((cur_hex == _target_hex && ghost_target_hex) || !is_hex_walkable);
 		}
 
-		if (found ) {
+		if (cur_hex == _target_hex) {
 			path.clear();
 
 			for (int i = 0; i < dist; ++i)
@@ -355,45 +365,38 @@ namespace HotaMechanics {
 		std::array<int16_t, FIELD_SIZE + 1> paths; paths.fill(INVALID_HEX_ID);
 		std::array<int16_t, FIELD_SIZE + 1> distances; distances.fill(999);
 
-		bool found = false;
 		int dist = 1;
+		bool ghost_target_hex = _field.isHexWalkable(_target_hex, _ghost_hex);
 
 		while (to_check_cnt > 0) {
 			const int hex_id = to_check[--to_check_cnt];
-
-			if (hex_id == _target_hex) {
-				found = true;
-				break;
-			}
-
 			checked[hex_id] = true;
-			auto adjacent_hexes = getAdjacentHexesClockwise(hex_id);
 
-			for (auto hex : adjacent_hexes) {
-				const bool is_walkable_hex = _field.isHexWalkable(hex) || (hex == _target_hex && _field.isHexWalkable(hex, _ghost_hex));
-				hex = (is_walkable_hex * hex) + (!is_walkable_hex * INVALID_HEX_ID);
-				const bool has_path_to_hex = is_walkable_hex && paths[hex] != INVALID_HEX_ID;
-				const int distance_to_hex = (has_path_to_hex * distances[hex_id]) + (!has_path_to_hex * 999);
-				const bool is_closer = !has_path_to_hex || (dist < distance_to_hex);
+			auto& adjacent_hexes = getAdjacentHexesClockwise(hex_id);
 
-				paths[hex] = (hex_id * is_closer) + (paths[hex] * !is_closer);
-				distances[hex] = (dist * is_closer) + (distances[hex] * !is_closer);
+			for (auto adj_hex : adjacent_hexes) {
+				const bool is_walkable_hex = _field.isHexWalkable(adj_hex) || (adj_hex == _target_hex && ghost_target_hex);
+				adj_hex = (is_walkable_hex * adj_hex) + (!is_walkable_hex * INVALID_HEX_ID);
+				const bool has_path_to_hex = paths[adj_hex] != INVALID_HEX_ID;
+				const bool is_closer = !has_path_to_hex || (dist < distances[hex_id]);
 
-				next_to_check[next_to_check_cnt] = hex;
-				next_to_check_cnt += !checked[hex];
-				checked[hex] = true;
+				paths[adj_hex] = (hex_id * is_closer) + (paths[adj_hex] * !is_closer);
+				distances[adj_hex] = (dist * is_closer) + (distances[adj_hex] * !is_closer);
+
+				next_to_check[next_to_check_cnt] = adj_hex;
+				next_to_check_cnt += !checked[adj_hex];
+				checked[adj_hex] = true;
+
+				bool found = adj_hex == _target_hex;
+				to_check_cnt = -found + (!found * to_check_cnt);
 			}
 
-			const bool check_next = (to_check_cnt == 0 * next_to_check_cnt > 0);
-			to_check_cnt = (!check_next * to_check_cnt) + (check_next * next_to_check_cnt);
-			next_to_check_cnt = (!check_next * next_to_check_cnt);
-			dist = (!check_next * dist) + (check_next * (dist + 1));
-
-			for (int hex = 0; hex < (check_next * to_check_cnt); ++hex)
-				to_check[hex] = (check_next * next_to_check[to_check_cnt - hex - 1]); // reverse array
+			dist += (to_check_cnt == 0);
+			for (int hex = 0, end = (to_check_cnt == 0) * next_to_check_cnt; hex < end; ++hex)
+				to_check[to_check_cnt++] = next_to_check[--next_to_check_cnt]; // reverse array
 		}
 
-		if (found) {
+		if (to_check_cnt == -1) {
 			int16_t start = _target_hex;
 			path.clear();
 			path.push_back(start);

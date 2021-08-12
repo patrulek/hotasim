@@ -76,12 +76,14 @@ namespace HotaMechanics {
 		std::vector<int16_t>& findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide = false, const bool _ghost_hex = false, const int _range = 999);
 	private:
 		const int16_t nextPathMove(const int16_t _source_hex, const int16_t _target_hex);
+		const int8_t getNextPathMove(const int16_t _source_hex, const int16_t _target_hex) const;
 
 		std::vector<int16_t> getWalkableHexesFromList(std::vector<int16_t>&& _hexes, const CombatField& _field, const bool _ghost_hex = false);
 		std::vector<int16_t> getReachableHexesFromWalkableHexes(const int16_t _source_hex, const int _range, std::vector<int16_t>&& _hexes,
 																					 const CombatField& _field, const bool _can_fly, const bool _double_wide, const bool _ghost_hex = false);
 
 		void initializeAdjacents();
+		void initializePathMoves();
 		Constants::AdjacentArray findAdjacents(const int16_t _source_hex);
 
 		std::vector<int16_t> path;
@@ -89,5 +91,8 @@ namespace HotaMechanics {
 		//std::unordered_map<PathCache, int16_t> distance_cache;
 		std::unordered_map<int16_t, std::vector<int16_t>> range_cache;
 		std::array<Constants::AdjacentArray, Constants::FIELD_SIZE + 1> adjacents;
+		
+		using PathMoveArray = std::array<std::array<int8_t, Constants::FIELD_SIZE + 1>, Constants::FIELD_SIZE + 1>;
+		PathMoveArray path_moves;
 	};
 }; // HotaMechanics
