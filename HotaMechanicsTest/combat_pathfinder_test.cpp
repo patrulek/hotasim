@@ -174,6 +174,7 @@ namespace CombatPathfinderTest {
 		int unit_speed = 6;
 
 		field.fillHex(hex, CombatHexOccupation::UNIT);
+		pathfinder.clearPathCache();
 		auto walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
 		auto reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
 		EXPECT_EQ(walkable, reachable); // when no obstacles or units around, walkable hexes should equal reachable
@@ -182,6 +183,7 @@ namespace CombatPathfinderTest {
 		field.fillHex(getHexId(1, 1), CombatHexOccupation::UNIT);
 		field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
 		field.fillHex(getHexId(0, 2), CombatHexOccupation::SOLID_OBSTACLE);
+		pathfinder.clearPathCache();
 
 		walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
 		reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
@@ -198,6 +200,7 @@ namespace CombatPathfinderTest {
 		field.fillHex(getHexId(2, 3), CombatHexOccupation::SOLID_OBSTACLE);
 		field.fillHex(getHexId(3, 3), CombatHexOccupation::SOLID_OBSTACLE);
 		field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
+		pathfinder.clearPathCache();
 
 		walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
 		reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
@@ -213,25 +216,22 @@ namespace CombatPathfinderTest {
 	TEST(CombatPathfinder, shouldReturnCorrectDistanceBetweenHexes) {
 		CombatPathfinder pathfinder;
 
-		EXPECT_EQ(FIELD_SIZE, pathfinder.distanceBetweenHexes(150, INVALID_HEX_ID)); // invalid target hex
-		EXPECT_EQ(FIELD_SIZE, pathfinder.distanceBetweenHexes(INVALID_HEX_ID, 150)); // invalid source hex
+		EXPECT_EQ(999, pathfinder.distanceBetweenHexes(150, INVALID_HEX_ID)); // invalid target hex
+		EXPECT_EQ(999, pathfinder.distanceBetweenHexes(INVALID_HEX_ID, 150)); // invalid source hex
 
 		auto hex = getHexId(0, 0);
 		auto target_hex = getHexId(0, 0);
 		EXPECT_EQ(0, pathfinder.distanceBetweenHexes(hex, target_hex)); // equal hexes
 
-		for (auto adjacent_hex : pathfinder.getAdjacentHexes(hex)) {
-			if (adjacent_hex != INVALID_HEX_ID)
-				EXPECT_EQ(1, pathfinder.distanceBetweenHexes(hex, adjacent_hex)); // adjacent hexes
-			else
-				EXPECT_EQ(FIELD_SIZE, pathfinder.distanceBetweenHexes(hex, adjacent_hex));
-		}
-
 		target_hex = getHexId(0, 15);
-		EXPECT_EQ(15, pathfinder.distanceBetweenHexes(hex, target_hex));
+		EXPECT_EQ(999, pathfinder.distanceBetweenHexes(hex, target_hex));
 
 		target_hex = getHexId(10, 0);
-		EXPECT_EQ(10, pathfinder.distanceBetweenHexes(hex, target_hex));
+		EXPECT_EQ(999, pathfinder.distanceBetweenHexes(hex, target_hex));
+
+		hex = getHexId(5, 10);
+		for (auto adjacent_hex : pathfinder.getAdjacentHexes(hex))
+			EXPECT_EQ(1, pathfinder.distanceBetweenHexes(hex, adjacent_hex));
 
 		hex = getHexId(2, 1);
 		target_hex = getHexId(5, 15);
@@ -295,18 +295,21 @@ namespace CombatPathfinderTest {
 		auto expected = std::vector<int16_t>{ 53, 70, 88, 104, 121, to };
 		EXPECT_EQ(expected, path);
 
+		pathfinder.clearPathCache();
 		to = getHexId(2, 15);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(14, path.size());
 		expected = std::vector<int16_t>{ 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, to };
 		EXPECT_EQ(expected, path);
 
+		pathfinder.clearPathCache();
 		to = getHexId(2, 7);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(6, path.size());
 		expected = std::vector<int16_t>{ 36, 37, 38, 39, 40, to };
 		EXPECT_EQ(expected, path);
 
+		pathfinder.clearPathCache();
 		to = getHexId(5, 15);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(15, path.size());
@@ -314,11 +317,13 @@ namespace CombatPathfinderTest {
 		EXPECT_EQ(expected, path);
 
 		field.setTemplate(CombatFieldTemplate::IMPS_2x100);
+		pathfinder.clearPathCache();
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(15, path.size());
 		expected = std::vector<int16_t>{ 36, 37, 38, 39, 40, 41, 42, 43, 61, 78, 79, 80, 81, 82, to };
 		EXPECT_EQ(expected, path);
 
+		pathfinder.clearPathCache();
 		from = getHexId(2, 8);
 		to = getHexId(10, 8);
 		path = pathfinder.findPath(from, to, field);
@@ -326,12 +331,14 @@ namespace CombatPathfinderTest {
 		expected = std::vector<int16_t>{ 60, 76, 93, 109, 126, 142, 160, 177, to };
 		EXPECT_EQ(expected, path);
 
+		pathfinder.clearPathCache();
 		to = getHexId(6, 9);
 		path = pathfinder.findPath(from, to, field);
 		EXPECT_EQ(4, path.size());
 		expected = std::vector<int16_t>{ 60, 77, 95, to };
 		EXPECT_EQ(expected, path);
 
+		pathfinder.clearPathCache();
 		from = getHexId(6, 9);
 		field.fillHex(getHexId(3, 12), CombatHexOccupation::UNIT);
 		to = getHexId(2, 11);

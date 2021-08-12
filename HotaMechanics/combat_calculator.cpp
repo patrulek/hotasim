@@ -99,8 +99,10 @@ namespace HotaMechanics {
 			std::array<int, FIELD_SIZE> hexes_fight_value;
 			hexes_fight_value.fill(0);
 			int max_fight_value_gain = calculateStackUnitFightValue(activeStack);
+			const_cast<CombatPathfinder&>(_pathfinder).storePathCache();
 
 			for (auto unit : enemy_hero.getUnitsPtrs()) {
+				const_cast<CombatPathfinder&>(_pathfinder).clearPathCache();
 				int fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, activeStack);
 
 				if (fight_value_gain <= 0)
@@ -115,6 +117,7 @@ namespace HotaMechanics {
 				}
 			}
 
+			const_cast<CombatPathfinder&>(_pathfinder).restorePathCache();
 			std::for_each(std::begin(hexes_fight_value), std::end(hexes_fight_value), [](auto& obj) { obj = -obj; });
 			return hexes_fight_value;
 		}

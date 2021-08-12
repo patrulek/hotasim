@@ -142,6 +142,7 @@ namespace HotaMechanics {
 		for (auto unit : combat_manager.getCurrentState().attacker.getUnitsPtrs()) {
 			clearUnitAttackables(*unit);
 			setUnitAttackables(*unit);
+			pathfinder->clearPathCache();
 		}
 	}
 
@@ -164,18 +165,22 @@ namespace HotaMechanics {
 		for (auto unit : combat_manager.getCurrentState().defender.getUnitsPtrs()) {
 			clearUnitAttackables(*unit);
 			setUnitAttackables(*unit);
+			pathfinder->clearPathCache();
 		}
 	}
 
 	void CombatAI::processEvents() {
 		for (auto& ev : events_to_process) {
-			if (ev.type == CombatEventType::UNIT_POS_CHANGED)
+			if (ev.type == CombatEventType::UNIT_POS_CHANGED) {
+				pathfinder->clearPathCache();
 				processUnitPosChangedEvent(ev);
+			}
 			else if (ev.type == CombatEventType::UNIT_HEALTH_LOST)
 				processUnitHealthLostEvent(ev);
 		}
 
 		events_to_process.clear();
+		pathfinder->clearPathCache();
 	}
 
 	void CombatAI::processUnitPosChangedEvent(const CombatEvent& _ev) {
@@ -192,6 +197,7 @@ namespace HotaMechanics {
 			if (u == &unit)
 				continue;
 
+			pathfinder->clearPathCache();
 			auto unit_bit = (1 << u->getUnitId());
 			if (canUnitAttackHex(*u, _ev.param2) || canUnitReachHex(*u, _ev.param3)) {
 				clearUnitAttackables(*u);
@@ -209,6 +215,9 @@ namespace HotaMechanics {
 
 			//	// go through all hexes in range that we could not reach earlier, and check that we can reach it now
 			//	for (auto range_hex : pathfinder->getHexesInRange(u->getHex(), u->getCombatStats().spd)) {
+			//		if (range_hex == u->getHex())
+			//			continue;
+
 			//		if (!canUnitReachHex(*u, range_hex) && pathfinder->realDistanceBetweenHexes(u->getHex(), range_hex, field, false) <= u->getCombatStats().spd) {
 			//			reachables[range_hex] |= unit_bit;
 			//			attackables[range_hex] |= unit_bit;
@@ -226,6 +235,7 @@ namespace HotaMechanics {
 
 			//	// check recursively adjacent hexes to that pos to check if reachiness of adj hex changes
 			//	for (auto check_hex : to_check) {
+			//		int size = to_check.size();
 			//		reachables[_ev.param3] &= (~unit_bit);
 
 			//		for (auto adj_hex : pathfinder->getAdjacentHexes(check_hex)) {
@@ -242,16 +252,21 @@ namespace HotaMechanics {
 			//			reachables[range_hex] &= (~unit_bit);
 			//		}
 			//	}
+			//}
 
-			//	// now reset all attackables regarding new reachables
-			//	for (auto range_hex : pathfinder->getHexesInRange(u->getHex(), u->getCombatStats().spd + 1))
-			//		attackables[range_hex] &= (~unit_bit);
-			//	
-			//	for (auto range_hex : pathfinder->getHexesInRange(u->getHex(), u->getCombatStats().spd)) {
-			//		if (canUnitReachHex(*u, range_hex)) {
-			//			for (auto adj_hex : pathfinder->getAdjacentHexes(range_hex)) {
-			//				attackables[adj_hex] |= unit_bit;
-			//			}
+
+			//// now reset all attackables regarding new reachables
+			//for (auto range_hex : pathfinder->getHexesInRange(u->getHex(), u->getCombatStats().spd + 1))
+			//	attackables[range_hex] &= (~unit_bit);
+
+			//attackables[u->getHex()] |= unit_bit;
+			//for (auto adj_hex : pathfinder->getAdjacentHexes(u->getHex()))
+			//	attackables[adj_hex] |= unit_bit;
+
+			//for (auto range_hex : pathfinder->getHexesInRange(u->getHex(), u->getCombatStats().spd)) {
+			//	if (canUnitReachHex(*u, range_hex)) {
+			//		for (auto adj_hex : pathfinder->getAdjacentHexes(range_hex)) {
+			//			attackables[adj_hex] |= unit_bit;
 			//		}
 			//	}
 			//}
@@ -305,6 +320,7 @@ namespace HotaMechanics {
 			if (u == &unit)
 				continue;
 
+			pathfinder->clearPathCache();
 			// if died unit was in unit range and unit was attackable (so we could reach any adjacent hex to it)
 			if (isHexInUnitRange(*u, unit.getHex()) && canUnitAttackHex(*u, unit.getHex())) {
 				auto unit_bit = (1 << u->getUnitId());
@@ -318,7 +334,8 @@ namespace HotaMechanics {
 
 				// go through all hexes in range that we could not reach earlier, and check that we can reach it now
 				for (auto range_hex : pathfinder->getHexesInRange(u->getHex(), u->getCombatStats().spd)) {
-					if (!canUnitReachHex(*u, range_hex) && pathfinder->realDistanceBetweenHexes(u->getHex(), range_hex, field, false) <= u->getCombatStats().spd) {
+					if (!canUnitReachHex(*u, range_hex) 
+					&& pathfinder->realDistanceBetweenHexes(u->getHex(), range_hex, field, false, u->getCombatStats().spd) <= u->getCombatStats().spd) {
 						reachables[range_hex] |= unit_bit;
 						attackables[range_hex] |= unit_bit;
 
@@ -386,15 +403,19 @@ namespace HotaMechanics {
 			return false;
 
 		bool hex_access = false;
-		for (auto adj_hex : adjacent_hexes)
+		for (auto adj_hex : adjacent_hexes) {
 			if (combat_manager.getCurrentState().field.isHexWalkable(adj_hex))
 				hex_access = true;
+			if (hex_access)
+				break;
+		}
 
 		if (!hex_access)
 			return true;
 
 		// it should be better to check path from given hex to active stack than otherwise, because if hex is blocked it probably ends searching faster
-		const bool path_exists = !pathfinder->findPath(_target_hex, _active_stack.getHex(), combat_manager.getCurrentState().field, false, true).empty();
+		// const bool path_exists = !pathfinder->findPath(_target_hex, _active_stack.getHex(), combat_manager.getCurrentState().field, false, true).empty();
+		const bool path_exists = !pathfinder->findPath(_active_stack.getHex(), _target_hex, combat_manager.getCurrentState().field, false, true).empty();
 		return !path_exists;
 	}
 

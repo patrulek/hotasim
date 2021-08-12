@@ -25,6 +25,8 @@ namespace HotaMechanics {
 		range_cache.rehash(4096);
 		initializeAdjacents();
 		initializePathMoves();
+		initializeDistances();
+		clearPathCache();
 	}
 
 	const int CombatPathfinder::getUnitStartHex(const CombatSide _side, const int _unit_order, const int _units_stacks, 
@@ -73,6 +75,13 @@ namespace HotaMechanics {
 			}
 	}
 
+	void CombatPathfinder::initializeDistances() {
+		for (int16_t hex = 0; hex < FIELD_SIZE + 1; ++hex)
+			for (int16_t hex2 = 0; hex2 < FIELD_SIZE + 1; ++hex2) {
+				hex_distances[hex][hex2] = distanceBetweenHexes(hex, hex2);
+			}
+	}
+
 	const int8_t CombatPathfinder::getNextPathMove(const int16_t _source_hex, const int16_t _target_hex) const {
 		return path_moves[_source_hex][_target_hex];
 	}
@@ -106,6 +115,10 @@ namespace HotaMechanics {
 		hexes[5] = (invalid_right_lower * INVALID_HEX_ID) + (!invalid_right_lower * (_source_hex + FIELD_COLS + offset + 1));
 
 		return hexes;
+	}
+
+	const int16_t CombatPathfinder::getDistanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex) const {
+		return hex_distances[_source_hex][_target_hex];
 	}
 
 	const AdjacentArray& CombatPathfinder::getAdjacentHexes(const int16_t _source_hex) const {
@@ -218,7 +231,7 @@ namespace HotaMechanics {
 		int16_t idx = 0;
 
 		for (auto hex : _hexes) {
-			auto distance = realDistanceBetweenHexes(_source_hex, hex, _field, _ghost_hex);
+			auto distance = realDistanceBetweenHexes(_source_hex, hex, _field, _ghost_hex, _range);
 			_hexes[idx] = hex;// | (distance << 8);
 			idx += (distance > 0 && distance <= _range);
 		}
@@ -229,10 +242,14 @@ namespace HotaMechanics {
 
 	const int16_t CombatPathfinder::distanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex) const {
 		if (_source_hex == INVALID_HEX_ID || _target_hex == INVALID_HEX_ID)
-			return FIELD_SIZE;
+			return 999;
 
 		if (_target_hex == _source_hex)
 			return 0;
+
+		if ((_target_hex % FIELD_COLS == 0) || (_target_hex % FIELD_COLS == FIELD_COLS - 1) 
+			||( _source_hex % FIELD_COLS == 0) || (_source_hex % FIELD_COLS == FIELD_COLS - 1))
+			return 999;
 
 		if (areAdjacent(_source_hex, _target_hex)) {
 			return 1;
@@ -264,24 +281,29 @@ namespace HotaMechanics {
 		return row_dist + col_dist - (row_dist >= std::max(odd_rows, even_rows) ? std::max(odd_rows, even_rows) : row_dist);
 	}
 
-	const int16_t CombatPathfinder::realDistanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _ghost_hex) {
+	const int16_t CombatPathfinder::realDistanceBetweenHexes(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _ghost_hex, const int16_t _range) {
 		if (_target_hex == INVALID_HEX_ID)
 			return 999;
 
 		if (_source_hex == _target_hex)
 			return 0;
+
+		if (!checked[_target_hex])
+			pathMap(_source_hex, _field, false, _range);
 		
-	/*	if (distance_cache.find(PathCache(_field, _source_hex, _target_hex, false, _ghost_hex)) != std::end(distance_cache)) {
+		if (distances[_target_hex] != 999)
+			return distances[_target_hex];
 
-			++CombatPathfinder::cache_access;
-			return distance_cache[PathCache(_field, _source_hex, _target_hex, false, _ghost_hex)];
-		}*/
+		if (_ghost_hex) {
+			int dist = 999;
+			auto& adjacent = getAdjacentHexes(_target_hex);
+			for (auto adj_hex : adjacent)
+				if (distances[adj_hex] < dist)
+					dist = distances[adj_hex];
+			return std::min(dist + 1, 999);
+		}
 
-	/*	if (distance_cache.load_factor() > 0.98)
-			std::cout << "Bucket count: " << distance_cache.bucket_count() << " | Load factor: " << distance_cache.load_factor() << std::endl;*/
-		++CombatPathfinder::cache_misses;
-		auto dist = (int16_t)findPath(_source_hex, _target_hex, _field, false, _ghost_hex).size();
-		return dist;
+		return 999;
 	}
 
 	const int16_t CombatPathfinder::nextPathMove(const int16_t _source_hex, const int16_t _target_hex) {
@@ -313,7 +335,7 @@ namespace HotaMechanics {
 		int dist = 0;
 		std::array<int16_t, 32> p; p.fill(INVALID_HEX_ID);
 		bool found = true;
-		bool ghost_target_hex = _field.isHexWalkable(_target_hex, _ghost_hex);
+		bool ghost_target_hex = _field.isHexWalkable(_target_hex, true);
 
 		while (found) {
 			int next_move = getNextPathMove(cur_hex, _target_hex);
@@ -325,7 +347,7 @@ namespace HotaMechanics {
 			found = !((cur_hex == _target_hex && ghost_target_hex) || !is_hex_walkable);
 		}
 
-		if (cur_hex == _target_hex) {
+		if (cur_hex == _target_hex && _field.isHexWalkable(_target_hex, _ghost_hex)) {
 			path.clear();
 
 			for (int i = 0; i < dist; ++i)
@@ -337,45 +359,65 @@ namespace HotaMechanics {
 		return EMPTY_PATH;
 	}
 
+	void CombatPathfinder::clearPathCache() {
+		paths.fill(INVALID_HEX_ID);
+		distances.fill(999);
+		checked.fill(false);
+	}
 
-	std::vector<int16_t>& CombatPathfinder::findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide, const bool _ghost_hex, const int _range) {
-		if (_double_wide )
-			throw std::exception("Not implemented yet");
+	void CombatPathfinder::storePathCache() {
+		cache_buffer = std::make_tuple(paths, distances, checked);
+		clearPathCache();
+	}
 
-		if (_source_hex == INVALID_HEX_ID || _target_hex == INVALID_HEX_ID)
+	void CombatPathfinder::restorePathCache() {
+		paths = std::get<0>(cache_buffer);
+		distances = std::get<1>(cache_buffer);
+		checked = std::get<2>(cache_buffer);
+	}
+
+	std::vector<int16_t>& CombatPathfinder::getPathCache(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide, const bool _ghost_hex, const int _range) {
+		bool ghost_target_hex = _field.isHexWalkable(_target_hex, _ghost_hex); 
+		
+		// if path not found or we need real path, not distance to unit, and target hex is occupied
+		if (paths[_target_hex] == INVALID_HEX_ID || !ghost_target_hex)
 			return EMPTY_PATH;
 
-		if (_range != 999 && distanceBetweenHexes(_source_hex, _target_hex) > _range)
+		int16_t start = _target_hex;
+		path.clear();
+		path.push_back(start);
+
+		while (paths[start] != _source_hex) {
+			start = paths[start];
+			path.push_back(start);
+		}
+
+		if (path.size() > _range)
 			return EMPTY_PATH;
 
-		if (!_field.isHexWalkable(_target_hex, _ghost_hex) || _source_hex == _target_hex)
-			return EMPTY_PATH;
+		std::reverse(std::begin(path), std::end(path));
+		//distance_cache[PathCache(_field, _source_hex, _target_hex, _double_wide)] = (int16_t)path.size();
+		return path;
+	}
 
-		if (!findSimplePath(_source_hex, _target_hex, _field, _double_wide, _ghost_hex, _range).empty())
-			return path;
-
+	void CombatPathfinder::pathMap(const int16_t _source_hex, const CombatField& _field, const bool _double_wide, const int16_t _range) {
+		// just find path to all possible hexes
 		std::array<int16_t, FIELD_SIZE + 1> to_check; to_check.fill(0);
-		int to_check_cnt = 0;
-		to_check[to_check_cnt++] = _source_hex;
-
 		std::array<int16_t, FIELD_SIZE + 1> next_to_check; next_to_check.fill(0);
-		int next_to_check_cnt = 0;
-
-		std::array<bool, FIELD_SIZE + 1> checked; checked.fill(0);
-		std::array<int16_t, FIELD_SIZE + 1> paths; paths.fill(INVALID_HEX_ID);
-		std::array<int16_t, FIELD_SIZE + 1> distances; distances.fill(999);
+		int to_check_cnt = 1, next_to_check_cnt = 0;
+		to_check[0] = _source_hex;
 
 		int dist = 1;
-		bool ghost_target_hex = _field.isHexWalkable(_target_hex, _ghost_hex);
 
-		while (to_check_cnt > 0) {
+		while (to_check_cnt > 0 && dist <= _range) {
 			const int hex_id = to_check[--to_check_cnt];
 			checked[hex_id] = true;
 
 			auto& adjacent_hexes = getAdjacentHexesClockwise(hex_id);
 
 			for (auto adj_hex : adjacent_hexes) {
-				const bool is_walkable_hex = _field.isHexWalkable(adj_hex) || (adj_hex == _target_hex && ghost_target_hex);
+				// if target hex is occupied by unit set it also as walkable, but later (after search) check if we need real path to hex or only distance
+				const bool is_walkable_hex = _field.isHexWalkable(adj_hex, false);
 				adj_hex = (is_walkable_hex * adj_hex) + (!is_walkable_hex * INVALID_HEX_ID);
 				const bool has_path_to_hex = paths[adj_hex] != INVALID_HEX_ID;
 				const bool is_closer = !has_path_to_hex || (dist < distances[hex_id]);
@@ -386,34 +428,92 @@ namespace HotaMechanics {
 				next_to_check[next_to_check_cnt] = adj_hex;
 				next_to_check_cnt += !checked[adj_hex];
 				checked[adj_hex] = true;
-
-				bool found = adj_hex == _target_hex;
-				to_check_cnt = -found + (!found * to_check_cnt);
 			}
 
 			dist += (to_check_cnt == 0);
 			for (int hex = 0, end = (to_check_cnt == 0) * next_to_check_cnt; hex < end; ++hex)
 				to_check[to_check_cnt++] = next_to_check[--next_to_check_cnt]; // reverse array
 		}
+	}
 
-		if (to_check_cnt == -1) {
-			int16_t start = _target_hex;
-			path.clear();
-			path.push_back(start);
+	std::vector<int16_t>& CombatPathfinder::findPath(const int16_t _source_hex, const int16_t _target_hex, const CombatField& _field, const bool _double_wide, const bool _ghost_hex, const int _range) {
+		if (_double_wide )
+			throw std::exception("Not implemented yet");
 
-			while (paths[start] != _source_hex) {
-				start = paths[start];
-				path.push_back(start);
-			}
+		// if already searched for this hex, ant path not found
+		if (checked[_target_hex] && paths[_target_hex] == INVALID_HEX_ID)
+			return EMPTY_PATH;
 
-			if (path.size() > _range)
-				return EMPTY_PATH;
+		// if one of hexes invalid
+		if (_source_hex == INVALID_HEX_ID || _target_hex == INVALID_HEX_ID || _source_hex == _target_hex)
+			return EMPTY_PATH;
 
-			std::reverse(std::begin(path), std::end(path));
-			//distance_cache[PathCache(_field, _source_hex, _target_hex, _double_wide)] = (int16_t)path.size();
-			return path;
+		// if min distance to hex greater than unit range
+		if (_range != 999 && getDistanceBetweenHexes(_source_hex, _target_hex) > _range)
+			return EMPTY_PATH;
+
+		// if already found path to that hex, get it from cache
+		if (checked[_target_hex]) {
+			++CombatPathfinder::cache_access;
+			return getPathCache(_source_hex, _target_hex, _field, _double_wide, _ghost_hex, _range);
 		}
 
-		return EMPTY_PATH;
+		++CombatPathfinder::cache_misses;
+		pathMap(_source_hex, _field, _double_wide, _range);
+
+
+		// check if there is simple path, if so, return it
+		//if (!findSimplePath(_source_hex, _target_hex, _field, _double_wide, _ghost_hex, _range).empty())
+		//	return path;
+
+		// just find path
+
+		//std::array<int16_t, FIELD_SIZE + 1> to_check; to_check.fill(0);
+		//std::array<int16_t, FIELD_SIZE + 1> next_to_check; next_to_check.fill(0);
+		//int to_check_cnt = 0, next_to_check_cnt = 0;
+		//to_check[to_check_cnt++] = _source_hex;
+
+		//int dist = 1;
+		//bool ghost_target_hex = _field.isHexWalkable(_target_hex, true);
+
+		//FieldArray paths_; paths_.fill(INVALID_HEX_ID);
+		//FieldArray distances_; distances_.fill(999);
+		//FieldFlagArray checked_; checked_.fill(false);
+
+		//while (to_check_cnt > 0) {
+		//	const int hex_id = to_check[--to_check_cnt];
+		//	checked[hex_id] = true;
+
+		//	auto& adjacent_hexes = getAdjacentHexesClockwise(hex_id);
+
+		//	for (auto adj_hex : adjacent_hexes) {
+		//		// if target hex is occupied by unit set it also as walkable, but later (after search) check if we need real path to hex or only distance
+		//		const bool is_walkable_hex = _field.isHexWalkable(adj_hex) || (adj_hex == _target_hex && ghost_target_hex);
+		//		adj_hex = (is_walkable_hex * adj_hex) + (!is_walkable_hex * INVALID_HEX_ID);
+		//		const bool has_path_to_hex = paths_[adj_hex] != INVALID_HEX_ID;
+		//		const bool is_closer = !has_path_to_hex || (dist < distances_[hex_id]);
+
+		//		paths_[adj_hex] = (hex_id * is_closer) + (paths_[adj_hex] * !is_closer);
+		//		distances_[adj_hex] = (dist * is_closer) + (distances_[adj_hex] * !is_closer);
+
+		//		next_to_check[next_to_check_cnt] = adj_hex;
+		//		next_to_check_cnt += !checked_[adj_hex];
+		//		checked_[adj_hex] = true;
+
+		//		bool found = adj_hex == _target_hex;
+		//		to_check_cnt = -found + (!found * to_check_cnt);
+
+		//		checked[adj_hex] = checked_[adj_hex];
+		//		paths[adj_hex] = paths_[adj_hex];
+		//		distances[adj_hex] = distances_[adj_hex];
+		//	}
+
+		//	dist += (to_check_cnt == 0);
+		//	for (int hex = 0, end = (to_check_cnt == 0) * next_to_check_cnt; hex < end; ++hex)
+		//		to_check[to_check_cnt++] = next_to_check[--next_to_check_cnt]; // reverse array
+		//}
+
+		// if found, path will be stored in cache
+		return getPathCache(_source_hex, _target_hex, _field, _double_wide, _ghost_hex, _range);
 	}
 }; // HotaMechanics

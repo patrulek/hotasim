@@ -193,6 +193,7 @@ namespace CombatCalculatorTest {
 		CombatPathfinder pathfinder;
 		field.fillHex(unit->getHex(), CombatHexOccupation::UNIT);
 		field.fillHex(unit2->getHex(), CombatHexOccupation::UNIT);
+		pathfinder.clearPathCache();
 
 		int fv = -2538; // this is the imp fight value gain when they attack first
 		std::array<int, FIELD_SIZE> expected{

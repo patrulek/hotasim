@@ -105,6 +105,7 @@ namespace CombatAITest {
 	TEST(CombatAI, shouldChooseSecondUnitStackToChaseWhenEqualStacksAndCannotAttackBoth) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 100, "Imp", 100)), createHero(createArmy("Peasant", 500), CombatSide::DEFENDER));
 		auto& ai = combat_manager->getCombatAI();
+		auto& pathfinder = const_cast<CombatPathfinder&>(ai.getPathfinder());
 
 		// start battle
 		combat_manager->nextState();
@@ -117,6 +118,7 @@ namespace CombatAITest {
 
 		auto& field = combat_manager->getCurrentState().field;
 		field.setTemplate(CombatFieldTemplate::TMP1);
+		pathfinder.clearPathCache();
 		auto& active_stack = combat_manager->getActiveStack();
 		auto& attacker = combat_manager->getCurrentState().attacker;
 		auto unit = combat_manager->getCurrentState().attacker.getUnitsPtrs()[0];
@@ -126,22 +128,26 @@ namespace CombatAITest {
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
 
-		const_cast<CombatUnit&>(active_stack).moveTo(getHexId(7, 13)); 
+		const_cast<CombatUnit&>(active_stack).moveTo(getHexId(7, 13));
+		pathfinder.clearPathCache();
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
 
 		const_cast<CombatUnit&>(active_stack).moveTo(getHexId(7, 10));
+		pathfinder.clearPathCache();
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
 
 		const_cast<CombatUnit&>(active_stack).moveTo(getHexId(7, 7));
+		pathfinder.clearPathCache();
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
 
 		const_cast<CombatUnit&>(active_stack).moveTo(getHexId(7, 4));
+		pathfinder.clearPathCache();
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
@@ -151,9 +157,11 @@ namespace CombatAITest {
 	TEST(CombatAI, shouldChooseRandomlyFromTwoStacksIfEqualStacksAndCanAttackBoth) {
 		auto manager = createCombatManager();
 		auto& ai = manager->getCombatAI();
+		auto& pathfinder = const_cast<CombatPathfinder&>(ai.getPathfinder());
 
 		auto active_stack = manager->getCurrentState().defender.getUnitsPtrs()[0];
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(5, 15));
+		pathfinder.clearPathCache();
 
 		manager->getCurrentState().attacker = createHero(createArmy("Imp", 100, "Imp", 100));
 		const_cast<CombatUnit*>(manager->getCurrentState().attacker.getUnitsPtrs()[0])->moveTo(getHexId(2, 1));
@@ -165,12 +173,14 @@ namespace CombatAITest {
 
 		auto& field = manager->getCurrentState().field;
 		field.setTemplate(CombatFieldTemplate::TMP1);
+		pathfinder.clearPathCache();
 
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front());
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(7, 13));
+		pathfinder.clearPathCache();
 		const_cast<CombatUnit*>(manager->getCurrentState().attacker.getUnitsPtrs()[0])->moveTo(getHexId(7, 1));
 		const_cast<CombatUnit*>(manager->getCurrentState().attacker.getUnitsPtrs()[1])->moveTo(getHexId(6, 1));
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
@@ -178,16 +188,19 @@ namespace CombatAITest {
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front());
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(7, 10));
+		pathfinder.clearPathCache();
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front());
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(7, 7));
+		pathfinder.clearPathCache();
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front());
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(7, 4));
+		pathfinder.clearPathCache();
 		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(2, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
 	}
@@ -196,9 +209,11 @@ namespace CombatAITest {
 	TEST(CombatAI, shouldChooseCorrectHexWhichMeleeAttackWillBePerformedFrom) {
 		auto manager = createCombatManager();
 		auto& ai = manager->getCombatAI();
+		auto& pathfinder = const_cast<CombatPathfinder&>(ai.getPathfinder());
 
 		auto active_stack = manager->getCurrentState().defender.getUnitsPtrs()[0];
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(5, 15));
+		pathfinder.clearPathCache();
 
 		manager->getCurrentState().attacker = createHero(createArmy("Imp", 100));
 		const_cast<CombatUnit*>(manager->getCurrentState().attacker.getUnitsPtrs()[0])->moveTo(getHexId(5, 1));
@@ -206,16 +221,19 @@ namespace CombatAITest {
 
 		auto& field = manager->getCurrentState().field;
 		field.setTemplate(CombatFieldTemplate::TMP1);
+		pathfinder.clearPathCache();
 
 		const_cast<CombatAI&>(ai).calculateFightValueAdvantageOnHexes(*active_stack, manager->getCurrentState().attacker, field);
 
 		EXPECT_EQ(69, ai.chooseHexToMoveForAttack(*active_stack, *manager->getCurrentState().attacker.getUnitsPtrs()[0]));
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(4, 12));
+		pathfinder.clearPathCache();
 		const_cast<CombatUnit*>(manager->getCurrentState().attacker.getUnitsPtrs()[0])->moveTo(getHexId(7, 5));
 		EXPECT_EQ(107, ai.chooseHexToMoveForAttack(*active_stack, *manager->getCurrentState().attacker.getUnitsPtrs()[0]));
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(4, 10));
+		pathfinder.clearPathCache();
 		const_cast<CombatUnit*>(manager->getCurrentState().attacker.getUnitsPtrs()[0])->moveTo(getHexId(10, 8));
 		EXPECT_EQ(162, ai.chooseHexToMoveForAttack(*active_stack, *manager->getCurrentState().attacker.getUnitsPtrs()[0]));
 	}
