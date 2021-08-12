@@ -54,8 +54,8 @@ namespace HotaSim {
 				if (manager.isPlayerMove()) {
 					auto actions = manager.generateActionsForPlayer();
 
-					auto action_order = Estimator::shuffleActions(actions, manager, _seeds[i]);
-					auto action_idx = action_order[action_cnt];
+					//auto action_order = Estimator::shuffleActions(actions, manager, _seeds[i]);
+					auto action_idx = action_cnt; //action_order[action_cnt];
 					describeAction(actions[action_idx]);
 					manager.nextStateByAction(actions[action_idx]);
 				}

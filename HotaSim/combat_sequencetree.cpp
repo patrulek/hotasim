@@ -119,17 +119,17 @@ namespace HotaSim {
 		while (!branch->children.empty()) {
 			int best_depth = 999;
 			int best_idx = 0, idx = 0;
+			int best_score = 0x0000000000000000;
 
 			for (auto child : branch->children) {
-				if (child->best_branch_score == branch->best_branch_score && child->depth < best_depth) {
+				if (child->best_branch_score == branch->best_branch_score && child->score > best_score) {
 					best_idx = idx;
+					best_score = child->score;
 				}
 				++idx;
 			}
 
-			auto it = std::begin(branch->children);
-			std::advance(it, best_idx);
-			branch = (*it).get();
+			branch = branch->children[best_idx].get();
 		}
 
 		return branch;
