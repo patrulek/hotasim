@@ -136,4 +136,19 @@ namespace HotaMechanics {
 		return side == CombatSide::ATTACKER ? CombatSide::DEFENDER : CombatSide::ATTACKER;
 	}
 
+	int64_t CombatUnit::rehash() {
+		int64_t state_hash = (int16_t)state.defending | (state.done << 1) | (state.is_alive << 2) | (state.is_clone << 3) | (state.is_summon << 4)
+			| (state.morale << 5) | (state.retaliated << 6) | (state.sacrificed << 7) | (state.waiting << 8);
+		int64_t hash = (uid << static_cast<int8_t>(getCombatSide())) | (hex << 4) | (stack_number << 10) | (health_lost << 26)
+			| (state_hash << 36);
+		
+		hash = std::hash<int64_t>{}(hash);
+		hash ^= std::hash<int64_t>{}(state_hash);
+		hash ^= std::hash<int>{}(stats.base_stats.stats);
+		hash ^= std::hash<int>{}(stats.combat_stats.stats);
+		hash ^= std::hash<int16_t>{}(stats.primary_stats.stats);
+		
+		return hash;
+	}
+
 } // HotaMechanics

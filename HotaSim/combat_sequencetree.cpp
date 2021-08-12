@@ -14,6 +14,7 @@ namespace HotaSim {
 		root = std::make_shared<CombatSequenceNode>(packed_state, 0, 1, _initial_state_score, nullptr, 1);
 		current = root.get();
 		forgotten_paths.reserve(8096);
+		state_hashes.rehash(262144);
 		turns_occurence.fill(0);
 		level_occurence.fill(0);
 	}
@@ -42,13 +43,29 @@ namespace HotaSim {
 
 
 	void CombatSequenceTree::addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed) {
-		auto packed_state = const_cast<CombatManager&>(manager).packCombatState(_state);
+		circular_path_found = false;
 
-		current->addChild(packed_state, _action, _action_size, _state_score, _seed, size);
+
 		++level_occurence[current->level];
-		current = current->children.back().get();
 		++size;
 		++turns_occurence[_state.turn];
+
+		if (auto it = state_hashes.find(StateHash(const_cast<CombatState&>(_state))); it != std::end(state_hashes)
+			&& _state.turn >= it->second->turn && _state.order.empty()) {
+			auto it2 = node_hashes.find(StateHash(const_cast<CombatState&>(_state)));
+			auto hash = StateHash(const_cast<CombatState&>(_state));
+			circular_path_found = true;
+			++circular_occurence;
+			return;
+		} else {
+			//state_hashes.insert(StateHash(const_cast<CombatState&>(_state)));
+			state_hashes[StateHash(const_cast<CombatState&>(_state))] = new CombatState(_state);
+		}
+
+		auto packed_state = const_cast<CombatManager&>(manager).packCombatState(_state);
+		current->addChild(packed_state, _action, _action_size, _state_score, _seed, size);
+		node_hashes[StateHash(const_cast<CombatState&>(_state))] = current->children.back().get();
+		current = current->children.back().get();
 	}
 
 	void CombatSequenceTree::sortForgotten() {

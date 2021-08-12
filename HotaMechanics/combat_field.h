@@ -97,7 +97,7 @@ namespace HotaMechanics {
 
 		}
 		void setTemplate(const Constants::CombatFieldTemplate _field_template);
-		void rehash();
+		int64_t rehash();
 		// ----------------------------------
 
 		// check state ----------------------

@@ -155,6 +155,7 @@
     <ClCompile Include="combat_pathfinder.cpp" />
     <ClCompile Include="combat_field.cpp" />
     <ClCompile Include="combat_manager.cpp" />
+    <ClCompile Include="combat_state.cpp" />
     <ClCompile Include="combat_unit.cpp" />
     <ClCompile Include="unit_templates.cpp" />
     <ClCompile Include="utils.cpp" />

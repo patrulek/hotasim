@@ -85,6 +85,8 @@ namespace HotaMechanics {
 		const float getFightValuePerOneHp() const;
 		const float getFightValuePerUnitStack() const;
 		const int getUnitStackHP() const;
+
+		int64_t rehash();
 		// -------------------------------
 
 		//	hero getters ------------------
@@ -122,7 +124,7 @@ namespace HotaMechanics {
 	private:
 		int16_t uid{ -1 };
 		Unit unit_template;
-		const CombatHero* hero;
+		const CombatHero* hero{ nullptr };
 
 		UnitStats stats;
 		int16_t hex{ Constants::INVALID_HEX_ID };

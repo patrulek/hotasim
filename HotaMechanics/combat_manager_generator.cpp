@@ -17,23 +17,6 @@ namespace HotaMechanics {
 
 		actions.clear();
 
-		if (active_stack.canDefend())
-			actions.push_back(createDefendAction());
-
-		if (active_stack.canWait())
-			actions.push_back(createWaitAction());
-
-		// get reachable hexes;
-		auto reachable_hexes = ai->getReachableHexesForUnit(active_stack);
-		//reachable_hexes.erase(std::remove(std::begin(reachable_hexes), std::end(reachable_hexes), active_stack.getHex()), std::end(reachable_hexes));
-
-		//auto& field = current_state->field;
-		//auto reachable_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd, field, false, false);
-		
-		for (auto hex : reachable_hexes) {
-			actions.push_back(createWalkAction(hex));
-		}
-
 		// get attackable enemy units; 
 		// if can shoot then only get all enemy units
 		//auto range_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd + 1);
@@ -48,12 +31,29 @@ namespace HotaMechanics {
 			}
 		}
 
+		// get reachable hexes;
+		auto reachable_hexes = ai->getReachableHexesForUnit(active_stack);
+		//reachable_hexes.erase(std::remove(std::begin(reachable_hexes), std::end(reachable_hexes), active_stack.getHex()), std::end(reachable_hexes));
+
+		//auto& field = current_state->field;
+		//auto reachable_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd, field, false, false);
+
+		for (auto hex : reachable_hexes) {
+			actions.push_back(createWalkAction(hex));
+		}
+
 		// get castable spells;
 		if (active_stack.canCast())
 			throw std::exception("Not implemented yet");
 
 		if (active_stack.canHeroCast())
 			throw std::exception("Not implemented yet");
+
+		if (active_stack.canDefend())
+			actions.push_back(createDefendAction());
+
+		if (active_stack.canWait())
+			actions.push_back(createWaitAction());
 
 		return actions;
 	}
@@ -105,7 +105,8 @@ namespace HotaMechanics {
 				actions.push_back(createDefendAction());
 		}
 
-		return actions;
+		// TODO: for now return only 1 action for ai
+		return std::vector<CombatAction>(std::begin(actions), std::begin(actions) + 1);
 	}
 
 }; // HotaMechanics

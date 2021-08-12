@@ -10,9 +10,13 @@ namespace HotaMechanics {
 	using namespace Constants;
 	using namespace Utils;
 
-	void CombatField::rehash() {
+	int64_t CombatField::rehash() {
+		hash = 0;
 		for (auto& hex : hexes)
 			hash += (hex.isWalkable() * ((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
+
+		hash = std::hash<int64_t>{}(hash);
+		return hash;
 	}
 
 	const int64_t CombatField::getHash() const {

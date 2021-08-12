@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <iostream>
 
 namespace HotaMechanics {
 	using namespace Constants;
@@ -16,6 +17,10 @@ namespace HotaMechanics {
 		: hero_template(_hero_template), army_permutation(_army_permutation), side(_side) {
 		initialize();
 		generateUnitsFromArmy();
+	}
+
+	CombatHero::~CombatHero() {
+		//std::cout << "del hero: " << this << std::endl;
 	}
 
 	CombatHero::CombatHero(const CombatHero& _obj)
@@ -52,7 +57,7 @@ namespace HotaMechanics {
 
 	CombatHero::CombatHero(CombatHero&& _obj) noexcept
 		: hero_template(_obj.hero_template), army_permutation(_obj.army_permutation) {
-		//initialize();
+		initialize();
 		stats = std::move(_obj.stats);
 		side = std::move(_obj.side);
 
@@ -131,5 +136,16 @@ namespace HotaMechanics {
 
 	const bool CombatHero::isAlive() const {
 		return std::any_of(std::begin(units), std::end(units), [](const auto& _unit) { return _unit.isAlive(); });
+	}
+
+	int64_t CombatHero::rehash() {
+		int64_t hash = std::hash<int16_t>{}(stats.primary_stats.mana);
+
+		for (auto& unit : units) {
+			int64_t unit_hash = unit.rehash();
+			hash ^= unit_hash;
+		}
+
+		return hash;
 	}
 }; // HotaMechanics

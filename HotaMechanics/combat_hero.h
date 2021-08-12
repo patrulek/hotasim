@@ -19,11 +19,13 @@ namespace HotaMechanics {
 		CombatHero& operator=(const CombatHero& _obj); // TODO: remove, needed for tests
 		CombatHero& operator=(CombatHero&& _obj); // TODO: remove
 
+		~CombatHero();
 
 		// complex getters ---------------
 		const std::vector<const CombatUnit*>& getUnitsPtrs() const;
 		const int16_t getUnitId(const CombatUnit& _unit) const;
 		const int16_t getGlobalUnitId(const CombatUnit& _unit) const;
+		int64_t rehash();
 		// -------------------------------
 
 		// check hero state --------------

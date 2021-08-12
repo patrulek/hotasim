@@ -21,6 +21,10 @@ int main()
    HeroCreator attacker;
    attacker.setAttack(0); attacker.setDefense(0);
    attacker.addUnit(unit_templates()["Peasant"], 1);
+   attacker.addUnit(unit_templates()["Peasant"], 1);
+   /*attacker.addUnit(unit_templates()["Imp"], 50);
+   attacker.addUnit(unit_templates()["Imp"], 100);
+   attacker.addUnit(unit_templates()["Imp"], 50);*/
    //attacker.addUnit(unit_templates()["Imp"], 96);
    //attacker.addUnit(unit_templates()["Imp"], 50);
    //attacker.addUnit(unit_templates()["Imp"], 1);
@@ -31,7 +35,8 @@ int main()
    HeroCreator defender;
    defender.setAttack(0), defender.setDefense(0);
    defender.addUnit(unit_templates()["Peasant"], 1);
-   //defender.addUnit(unit_templates()["Peasant"], 250);
+   /*defender.addUnit(unit_templates()["Peasant"], 250);
+   defender.addUnit(unit_templates()["Peasant"], 250);*/
 
    CombatFieldType field_type = CombatFieldType::GRASS;
    CombatType combat_type = CombatType::NEUTRAL;

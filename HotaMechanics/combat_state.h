@@ -18,6 +18,7 @@ namespace HotaMechanics {
 		CombatState(const CombatHero& _attacker, const CombatHero& _defender, const CombatField& _field)
 			: attacker(_attacker), defender(_defender), field(_field) {}
 		CombatState() = delete;
+		~CombatState();
 
 		int16_t turn{ -1 };
 		int16_t last_unit{ -1 };
@@ -28,6 +29,8 @@ namespace HotaMechanics {
 		CombatField field;
 
 		std::list<int16_t> order;	// for attacker it will be 0-20; for defender it will be 21-41
+
+		int64_t rehash();
 	};
 
 	struct CombatUnitPacked {

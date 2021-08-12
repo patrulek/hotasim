@@ -106,7 +106,7 @@ namespace HotaSim {
 		return some_states_left_rule_violated || state_limit_reached_rule_violated;
 	}
 
-	const bool CombatSimulator::combatConstraintsViolated() {
+	const bool CombatSimulator::combatConstraintsViolated(const CombatSequenceTree& _tree) {
 		// turns rule
 		bool turns_rule_violated = manager->getCurrentState().turn >= estimated_turns;
 		turns_rule_violation_cnt += turns_rule_violated;
@@ -115,7 +115,10 @@ namespace HotaSim {
 		bool combat_finished_rule_violated = manager->isCombatFinished();
 		combat_finished_cnt += combat_finished_rule_violated;
 
-		return turns_rule_violated || combat_finished_rule_violated;
+		// circular path
+		bool circular_path_rule_violated = const_cast<CombatSequenceTree&>(_tree).circular_path_found;
+
+		return turns_rule_violated || combat_finished_rule_violated || circular_path_rule_violated;
 	}
 
 	void CombatSimulator::resetRulesCounters() {
@@ -145,8 +148,7 @@ namespace HotaSim {
 				while (!simulatorConstraintsViolated(tree)) {
 					int cb_finish_cnt = combat_finished_cnt;
 
-					while (!combatConstraintsViolated()) {
-						bool h1 = manager->getCombatAI().getPlayerReachables()[91] == 0 && manager->getCurrentState().attacker.getUnitsPtrs()[0]->getHex() == 88;
+					while (!combatConstraintsViolated(tree)) {
 						int tsize = tree.getSize();
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
@@ -155,12 +157,15 @@ namespace HotaSim {
 								
 								auto action_idx = action_cnt;//action_order[action_cnt];
 
+								//std::cout << "Player action (" << action_idx + 1 << " / " << actions.size() << "): " << (int)actions[action_idx].action
+								//	<< " - " << actions[action_idx].target << " ### Unit: " << manager->getActiveStack().getGlobalUnitId() << "\n";
+
 								manager->nextStateByAction(actions[action_idx]);
 								tree.addState(manager->getCurrentState(), action_cnt, actions.size(), 
 									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), seed);
+
 								//seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
 								//if (tree.current->level >= 2)
-								//	std::cout << "Processing pl level: (" << tree.current->level << ", " << action_cnt << ", " << (float)action_cnt / (actions.size() - 1) << ")\n";
 								seed = 42;
 								action_cnt = 0;
 							}
@@ -170,21 +175,22 @@ namespace HotaSim {
 								manager->nextStateByAction(actions[0]);
 								tree.addState(manager->getCurrentState(), 0, 1, 
 									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1);
-								//if (tree.current->level >= 2)
-								//	std::cout << "Processing ai level: (" << tree.current->level << ", " << 0 << ", " << 1 << ")\n";
+								//std::cout << "AI Action (size = " << actions.size() << ")\n";
 							}
 							continue;
 						}
 
-						//std::cout << "\n";
 						manager->nextState();
 						tree.addState(manager->getCurrentState(), 0, 1,
 							evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1);
+
+						//std::cout << "\n--- Start Turn " << manager->getCurrentState().turn << " --- \n\n";
 					}
 
 					if (tree.getSize() / 5000 > last_size) {
 						++last_size;
 						std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
+						std::cout << "Circular occurences: " << tree.circular_occurence << std::endl;
 						std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
 						std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 						std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
@@ -203,37 +209,30 @@ namespace HotaSim {
 					bool root_jump = false;
 					bool take_forgotten = false;
 
-					//if ((float)tree.forgotten_paths.size() / tree.getSize() > 0.01f 
-					//&& tree.getSize() % 12 == 0)
-					//	take_forgotten = true;
-
-					//if (tree.getSize() < 45000) {
-					//	++jump_root;
-					//	tree.goRoot(cb_finish_cnt != combat_finished_cnt);
-					//	root_jump = true;
-					//}
-					//else if ((float)tree.forgotten_paths.size() / tree.getSize() < 0.015f) {
-					//	if (tree.getSize() / 3 > jump_random_parent) {
-					//		++jump_random_parent;
-					//		tree.goRandomParent(cb_finish_cnt != combat_finished_cnt);
-					//		random_jump = true;
-					//	}
-					//	else if (tree.getSize() / 7 > jump_root) {
-					//		++jump_root;
-					//		tree.goRoot(cb_finish_cnt != combat_finished_cnt);
-					//		root_jump = true;
-					//	}
-					//}
-
-					//if (tree.current->parent == tree.root.get() && take_forgotten) {
-					//	tree.takeForgotten();
-					//}
-
 					// check if need to go up further
-					if (!root_jump && !random_jump) {
-						while (tree.current->parent != tree.root.get() && tree.current->action_size <= tree.current->action + 1)
+					if (tree.foundCircularPath()) {
+						//std::cout << " CIRCULAR PATH FOUND\n\n";
+						if (tree.unitStackLastAction()) {
+							//tree.goParent();
+							while (tree.hasParent() && tree.unitStackLastAction())
+								tree.goParent();
+
+							action_cnt = tree.current->action + 1;
+							tree.goParent();
+						}
+						else {
+							// if we found circular path, and it isnt last unit of action, just go back one more state
+							action_cnt = tree.current->action + 1;
+							tree.goParent();
+						}
+					}
+					else if (!root_jump && !random_jump) {
+						//std::cout << " LAST ACTION, JUMP\n\n";
+						while (tree.hasParent() && tree.unitStackLastAction())
 							tree.goParent();
 
+						// wasnt last action of this unit, so we need to go back one more state (before that unit acted)
+						action_cnt = tree.current->action + 1;
 						tree.goParent();
 						//tree.goParent();
 						/*while (tree.current->parent && tree.current->action + 1 >= tree.current->action_size)
@@ -243,11 +242,10 @@ namespace HotaSim {
 							tree.goParent();*/
 					}
 
-					action_cnt = tree.current->children.empty() ? 0 : tree.current->children.back()->action + 1;
+					//std::cout << " --- CURRENT TURN: " << tree.current->state->turn << " --- \n\n";
 					seed = tree.current->seed;
 					auto forgotten_state = manager->unpackCombatState(*tree.current->state);
 					manager->setCurrentState(*forgotten_state);
-					//std::cout << "\n\n ----------------- \n\n";
 
 					if (action_cnt == tree.current->children.back()->action_size) {
 						std::cout << "All states reached. End simulation\n";
@@ -270,7 +268,12 @@ namespace HotaSim {
 				std::reverse(std::begin(action_order), std::end(action_order));
 				std::reverse(std::begin(action_seeds), std::end(action_seeds));
 
+				for (auto act : action_order)
+					std::cout << "Actions in order: " << act << ",";
+				std::cout << std::endl;
+
 				std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
+				std::cout << "Circular occurences: " << tree.circular_occurence << std::endl;
 				std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
 				std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 				std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;

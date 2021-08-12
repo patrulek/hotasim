@@ -6,12 +6,6 @@
 
 #include "combat_field.h"
 
-PathCache::PathCache(const HotaMechanics::CombatField& _field, const int16_t _source_hex, const int16_t _target_hex, const bool _double_wide, const bool _ghost_hex)
-	: field_hash(_field.getHash()), source_hex(std::min(_source_hex, _target_hex)), target_hex(std::max(_source_hex, _target_hex)), double_wide(_double_wide), ghost_hex(_ghost_hex) {
-}
-
-int std::hash<PathCache>::some_val = 0;
-
 namespace HotaMechanics {
 	using namespace Constants;
 
@@ -21,7 +15,6 @@ namespace HotaMechanics {
 	CombatPathfinder::CombatPathfinder() {
 		path.reserve(64);
 		tmp_hexes.resize(128);
-		//distance_cache.rehash(131072);
 		range_cache.rehash(4096);
 		initializeAdjacents();
 		initializePathMoves();

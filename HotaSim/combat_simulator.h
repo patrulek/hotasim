@@ -50,7 +50,7 @@ namespace HotaSim {
 		void setDefenderPermutation();
 
 		const bool simulatorConstraintsViolated(const CombatSequenceTree& _tree);
-		const bool combatConstraintsViolated();
+		const bool combatConstraintsViolated(const CombatSequenceTree& _tree);
 		void resetRulesCounters();
 
 		void prepareCombat(const ArmyPermutation& _permutation, const CombatFieldTemplate _field_template = CombatFieldTemplate::IMPS_2x100);

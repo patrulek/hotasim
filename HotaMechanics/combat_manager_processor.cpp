@@ -45,7 +45,7 @@ namespace HotaMechanics {
 			// decrease spell active on units
 		++current_state->turn;
 		orderUnitsInTurn();
-
+		current_state->last_unit = -1;
 		//std::cout << "Processed action: PRE_TURN (" << current_state->turn << ")\n\n-----------------\n\n";
 	}
 
