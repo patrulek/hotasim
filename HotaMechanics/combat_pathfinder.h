@@ -20,7 +20,7 @@ namespace HotaMechanics {
 	public:
 		CombatPathfinder();
 		void clearPathCache();
-		void storePathCache();
+		void storePathCache(const bool _clear = true);
 		void restorePathCache();
 		static uint64_t cache_access;
 		static uint64_t cache_misses;

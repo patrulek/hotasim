@@ -358,9 +358,11 @@ namespace HotaMechanics {
 		checked.fill(false);
 	}
 
-	void CombatPathfinder::storePathCache() {
+	void CombatPathfinder::storePathCache(const bool _clear) {
 		cache_buffer = std::make_tuple(paths, distances, checked);
-		clearPathCache();
+
+		if( _clear)
+			clearPathCache();
 	}
 
 	void CombatPathfinder::restorePathCache() {

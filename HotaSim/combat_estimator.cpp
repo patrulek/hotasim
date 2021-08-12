@@ -16,16 +16,17 @@ namespace HotaSim {
 	namespace Estimator
 	{
 		const int estimateTurnsNumber(const CombatState& _initial_state) {
-			return 2; // TODO: implement
+			return 3; // TODO: implement
 		}
 
 		const int estimateTotalStatesNumber(const CombatState& _initial_state) {
-			return 2000000; // TODO: implement
+			return 500000; // TODO: implement
 		}
 
 		const int estimateActionEffectivness(const CombatAction& _action, const CombatManager& _mgr) {
 			//return 1; // TODO: remove after optimization
 
+			const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).storePathCache(false);
 			auto& state = _mgr.getCurrentState();
 			auto& active_stack = _mgr.getActiveStack();
 			auto& ai = _mgr.getCombatAI();
@@ -88,16 +89,19 @@ namespace HotaSim {
 					}
 				}
 
+
+				const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).clearPathCache();
 				if (state.defender.getUnitsPtrs().size() > 1) {
 					auto units = state.defender.getUnitsPtrs();
 					for (auto it = std::begin(units), it2 = std::begin(units) + 1; it2 != std::end(units); ++it2)
 					{
-						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true);
+						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true, 998);
 						int turns = std::ceil((float)(dist) / std::max((*it)->getCombatStats().spd, (*it2)->getCombatStats().spd));
 
 						additional_score += (turns - 1) * 50000;
 					}
 				}
+				const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).restorePathCache();
 
 				return score + additional_score;
 			}
@@ -107,46 +111,50 @@ namespace HotaSim {
 				int len = 999;
 				const CombatUnit* u{ nullptr };
 				for (auto unit : state.defender.getUnitsPtrs()) {
-					auto path = const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).realDistanceBetweenHexes(active_stack.getHex(), unit->getHex(), state.field, true);
+					auto path = const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).realDistanceBetweenHexes(active_stack.getHex(), unit->getHex(), state.field, true, active_stack.getCombatStats().spd);
 					if (path < len) {
 						len = path;
 						u = unit;
 					}
 				}
 
-				auto u_it = std::find(std::begin(state.order), std::end(state.order), u->getGlobalUnitId());
-				if(u_it != std::end(state.order))
-					score += 20000;
+				if (u) {
+					auto u_it = std::find(std::begin(state.order), std::end(state.order), u->getGlobalUnitId());
+					if (u_it != std::end(state.order))
+						score += 20000;
 
-				for (auto unit : state.attacker.getUnitsPtrs()) {
-					if (unit == &active_stack)
-						continue;
+					for (auto unit : state.attacker.getUnitsPtrs()) {
+						if (unit == &active_stack)
+							continue;
 
-					auto unit_it = std::find(std::begin(state.order), std::end(state.order), unit->getGlobalUnitId());
-					if (unit_it != std::end(state.order)) {
-						if( std::distance(std::begin(state.order), unit_it) < std::distance(std::begin(state.order), u_it) || !unit->canWait())
-							score += 20000;
+						auto unit_it = std::find(std::begin(state.order), std::end(state.order), unit->getGlobalUnitId());
+						if (unit_it != std::end(state.order)) {
+							if (std::distance(std::begin(state.order), unit_it) < std::distance(std::begin(state.order), u_it) || !unit->canWait())
+								score += 20000;
+						}
+					}
+
+					if (len > active_stack.getCombatStats().spd + 1) {
+						if (len <= active_stack.getCombatStats().spd + u->getCombatStats().spd + 1)
+							score += 129000;
+						else
+							score = additional_score;
 					}
 				}
 
-				if (len > active_stack.getCombatStats().spd + 1) {
-					if (len <= active_stack.getCombatStats().spd + u->getCombatStats().spd + 1)
-						score += 129000;
-					else
-						score = additional_score;
-				}
 
-
+				const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).clearPathCache();
 				if (state.defender.getUnitsPtrs().size() > 1) {
 					auto units = state.defender.getUnitsPtrs();
 					for (auto it = std::begin(units), it2 = std::begin(units) + 1; it2 != std::end(units); ++it2)
 					{
-						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true);
+						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true, 998);
 						int turns = std::ceil((float)(dist) / std::max((*it)->getCombatStats().spd, (*it2)->getCombatStats().spd));
 
 						additional_score += (turns - 1) * 50000;
 					}
 				}
+				const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).restorePathCache();
 
 				
 				return score + additional_score;
@@ -185,10 +193,11 @@ namespace HotaSim {
 			std::iota(std::begin(action_order), std::end(action_order), 0);
 			std::vector<int> action_effectivness;
 
-			for (int i = 0; i < _actions.size(); ++i)
-				action_effectivness.push_back(estimateActionEffectivness(_actions[i], _manager));
 
 			if (_seed == 42) {
+				for (int i = 0; i < _actions.size(); ++i)
+					action_effectivness.push_back(estimateActionEffectivness(_actions[i], _manager));
+
 				std::sort(std::begin(action_order), std::end(action_order), [&action_effectivness](auto idx, auto idx2) {
 					return action_effectivness[idx] > action_effectivness[idx2];
 				});

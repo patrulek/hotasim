@@ -143,7 +143,7 @@ namespace HotaSim {
 				manager->nextState();
 				tree.addState(manager->getCurrentState(), 0, 1, 0x0000800080008000, 1);
 				int action_cnt = 0;
-				int seed = 42;// std::random_device()();
+				int seed =  std::random_device()();
 
 				while (!simulatorConstraintsViolated(tree)) {
 					int cb_finish_cnt = combat_finished_cnt;
@@ -153,9 +153,9 @@ namespace HotaSim {
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
 								auto actions = manager->generateActionsForPlayer();
-								//auto action_order = Estimator::shuffleActions(actions, *manager, seed);
+								auto action_order = Estimator::shuffleActions(actions, *manager, seed);
 								
-								auto action_idx = action_cnt;//action_order[action_cnt];
+								auto action_idx = action_order[action_cnt];
 
 								//std::cout << "Player action (" << action_idx + 1 << " / " << actions.size() << "): " << (int)actions[action_idx].action
 								//	<< " - " << actions[action_idx].target << " ### Unit: " << manager->getActiveStack().getGlobalUnitId() << "\n";
@@ -164,9 +164,8 @@ namespace HotaSim {
 								tree.addState(manager->getCurrentState(), action_cnt, actions.size(), 
 									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), seed);
 
-								//seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
-								//if (tree.current->level >= 2)
-								seed = 42;
+								seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
+								//seed = 42;
 								action_cnt = 0;
 							}
 							else {
@@ -267,9 +266,9 @@ namespace HotaSim {
 				action_seeds.pop_back();
 				std::reverse(std::begin(action_order), std::end(action_order));
 				std::reverse(std::begin(action_seeds), std::end(action_seeds));
-
+				std::cout << "Actions in order: ";
 				for (auto act : action_order)
-					std::cout << "Actions in order: " << act << ",";
+					std::cout << act << ",";
 				std::cout << std::endl;
 
 				std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
