@@ -5,12 +5,17 @@
 
 #include "utils.h"
 #include <memory>
+#include <iostream>
+#include <utility>
 
 namespace HotaMechanics {
 	class CombatAI;
 
 	struct CombatState {
-		explicit CombatState(const CombatHero& _attacker, const CombatHero& _defender, const CombatField& _field)
+		CombatState(CombatHero&& _attacker, CombatHero&& _defender, CombatField&& _field) noexcept
+			: attacker(std::move(_attacker)), defender(std::move(_defender)), field(std::move(_field)) {
+		}
+		CombatState(const CombatHero& _attacker, const CombatHero& _defender, const CombatField& _field)
 			: attacker(_attacker), defender(_defender), field(_field) {}
 		CombatState() = delete;
 

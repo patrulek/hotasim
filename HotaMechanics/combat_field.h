@@ -8,6 +8,7 @@
 
 #include "structures.h"
 #include <iostream>
+#include <unordered_map>
 
 namespace HotaMechanics {
 	class CombatHex {
@@ -66,7 +67,10 @@ namespace HotaMechanics {
 	public:
 		CombatField() = delete;
 		explicit CombatField(const Constants::CombatFieldType _field_type, const Constants::CombatFieldTemplate _field_template = Constants::CombatFieldTemplate::EMPTY);
-		CombatField(const CombatField& _obj) = default; /*{
+		CombatField(const CombatField& _obj) = default; 
+		CombatField(CombatField&& _obj) = default;
+		/*{
+
 
 			std::cout << "copy " << std::endl;
 		}*/
@@ -108,10 +112,16 @@ namespace HotaMechanics {
 		const Constants::CombatFieldType getType() { return combatFieldId; }
 		const Constants::CombatFieldTemplate getTemplate() { return combatFieldTemplate; }
 		// ----------------------------------
+
+		// static creator -------------------
+		static CombatField retrieveCombatField(Constants::CombatFieldType _field_type, Constants::CombatFieldTemplate _field_template);
+		// ----------------------------------
 	private:
 		Constants::CombatFieldType combatFieldId{ Constants::CombatFieldType::GRASS };
 		Constants::CombatFieldTemplate combatFieldTemplate{ Constants::CombatFieldTemplate::EMPTY };
 		HexArray hexes;
 		int64_t hash{ 0 };
+
+		static std::unordered_map<Constants::CombatFieldTemplate, CombatField*> fields;
 	};
 }; // HotaMechanics

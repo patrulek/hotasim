@@ -73,7 +73,7 @@ namespace HotaMechanics {
 
 		// attacker hero
 		CombatHero attacker_(attacker->getTemplate(), attacker->getArmyPermutation(), CombatSide::ATTACKER);
-		auto units = attacker_.getUnitsPtrs();
+		auto& units = attacker_.getUnitsPtrs();
 		for (int i = 0; i < _packed_state.attacker_units_size; ++i) {
 			const_cast<CombatUnit*>(units[i])->setStats(_packed_state.attacker_units[i].stats);
 			const_cast<CombatUnit*>(units[i])->setHex(_packed_state.attacker_units[i].hex);
@@ -84,25 +84,23 @@ namespace HotaMechanics {
 
 		// defender hero
 		CombatHero defender_(defender->getTemplate(), defender->getArmyPermutation(), CombatSide::DEFENDER);
-		units = defender_.getUnitsPtrs();
+		auto& def_units = defender_.getUnitsPtrs();
 		for (int i = 0; i < _packed_state.defender_units_size; ++i) {
-			const_cast<CombatUnit*>(units[i])->setStats(_packed_state.defender_units[i].stats);
-			const_cast<CombatUnit*>(units[i])->setHex(_packed_state.defender_units[i].hex);
-			const_cast<CombatUnit*>(units[i])->setStackNumber(_packed_state.defender_units[i].stack_number);
-			const_cast<CombatUnit*>(units[i])->setHealthLost(_packed_state.defender_units[i].health_lost);
-			const_cast<CombatUnit*>(units[i])->setUnitState(_packed_state.defender_units[i].state);
+			const_cast<CombatUnit*>(def_units[i])->setStats(_packed_state.defender_units[i].stats);
+			const_cast<CombatUnit*>(def_units[i])->setHex(_packed_state.defender_units[i].hex);
+			const_cast<CombatUnit*>(def_units[i])->setStackNumber(_packed_state.defender_units[i].stack_number);
+			const_cast<CombatUnit*>(def_units[i])->setHealthLost(_packed_state.defender_units[i].health_lost);
+			const_cast<CombatUnit*>(def_units[i])->setUnitState(_packed_state.defender_units[i].state);
 		}
 
 		// field state info
-		CombatField field_(field->getType(), field->getTemplate());
+		CombatField field_ = CombatField::retrieveCombatField(field->getType(), field->getTemplate());
 		int i = 0;
 		for ( auto hex_occupation : _packed_state.hex_occupations) {
 			const_cast<CombatHex&>(field_.getById(i++)).occupyHex(static_cast<CombatHexOccupation>(hex_occupation & 0x0F));
 			const_cast<CombatHex&>(field_.getById(i++)).occupyHex(static_cast<CombatHexOccupation>((hex_occupation & 0xF0) >> 4));
 		}
 
-		bool h1 = field_.getById(88).getOccupation() == CombatHexOccupation::UNIT;
-		bool h2 = field_.getById(94).getOccupation() == CombatHexOccupation::UNIT;
 		// ai state info
 		FieldArray player_reachables, player_attackables, ai_reachables, ai_attackables;
 		for (int i = 0; i < FIELD_SIZE + 1; ++i) {
@@ -115,7 +113,7 @@ namespace HotaMechanics {
 		ai->initializeBattle(&player_reachables, &player_attackables, &ai_reachables, &ai_attackables);
 
 		// combat state info
-		auto state = std::make_shared<CombatState>(attacker_, defender_, field_);
+		auto state = std::make_shared<CombatState>(std::move(attacker_), std::move(defender_), std::move(field_));
 		state->last_unit = _packed_state.last_unit;
 		state->turn = _packed_state.turn;
 		state->result = static_cast<CombatResult>(_packed_state.result);

@@ -72,7 +72,7 @@ namespace HotaMechanics {
 		const int calculateHeroFightValue(const CombatHero& hero) {
 			int hero_fight_value = 0;
 
-			for (const auto unit : const_cast<CombatHero&>(hero).getUnitsPtrs())
+			for (auto unit : hero.getUnitsPtrs())
 				hero_fight_value += calculateStackUnitFightValue(*unit);
 
 			return hero_fight_value;

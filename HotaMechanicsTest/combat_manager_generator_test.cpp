@@ -108,7 +108,7 @@ namespace CombatManagerTest {
 	TEST(CombatManager_Generator, shouldNotGenerateAttackActionsForFriendlyUnits) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 50, "Imp", 50)),
 			createHero(createArmy("Peasant", 250), CombatSide::DEFENDER));
-
+		combat_manager->setAllUnitStacks();
 		// start battle
 		combat_manager->nextState();
 
@@ -251,6 +251,7 @@ namespace CombatManagerTest {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 50, "Imp", 100, "Imp", 50)), 
 																createHero(createArmy("Peasant", 250, "Peasant", 250), CombatSide::DEFENDER));
 		combat_manager->getCurrentState().field.setTemplate(CombatFieldTemplate::IMPS_2x100);
+		combat_manager->setAllUnitStacks();
 		// start battle
 		combat_manager->nextState();
 
@@ -307,6 +308,7 @@ namespace CombatManagerTest {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 50, "Imp", 100, "Imp", 50)),
 			createHero(createArmy("Peasant", 250, "Peasant", 250), CombatSide::DEFENDER));
 		combat_manager->getCurrentState().field.setTemplate(CombatFieldTemplate::IMPS_2x100);
+		combat_manager->setAllUnitStacks();
 		// start battle
 		combat_manager->nextState();
 
@@ -364,6 +366,7 @@ namespace CombatManagerTest {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 50, "Imp", 100, "Imp", 50)),
 			createHero(createArmy("Peasant", 250, "Peasant", 250), CombatSide::DEFENDER));
 		combat_manager->getCurrentState().field.setTemplate(CombatFieldTemplate::IMPS_2x100);
+		combat_manager->setAllUnitStacks();
 		// start battle
 		combat_manager->nextState();
 

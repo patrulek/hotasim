@@ -64,8 +64,6 @@ namespace HotaSim {
 		uint64_t evaluateCombatStateManaScore(const CombatState& _initial_state, const CombatState& _state) const;
 
 		// during combat
-		std::list<CombatState> states_timeline;
-		std::list<CombatAction> actions_timeline;
 		std::unique_ptr<CombatState> best_state;
 
 		// before combat start

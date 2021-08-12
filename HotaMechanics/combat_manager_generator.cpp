@@ -15,8 +15,7 @@ namespace HotaMechanics {
 		if (!active_stack.canMakeAction())
 			return std::vector<CombatAction>();
 
-		std::vector<CombatAction> actions;
-		actions.reserve(128);
+		actions.clear();
 
 		if (active_stack.canDefend())
 			actions.push_back(createDefendAction());
@@ -69,10 +68,8 @@ namespace HotaMechanics {
 
 		ai->calculateFightValueAdvantageOnHexes(active_stack, current_state->attacker, current_state->field);
 
-		std::vector<CombatAction> actions;
-		actions.reserve(8);
-		std::vector<int16_t> hexes_to_attack;
-		hexes_to_attack.reserve(16);
+		actions.clear();
+		hexes_to_attack.clear();
 
 		for (auto unit : current_state->attacker.getUnitsPtrs()) {
 			const int hex = ai->chooseHexToMoveForAttack(active_stack, *unit);

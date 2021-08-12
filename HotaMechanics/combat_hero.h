@@ -10,14 +10,14 @@ namespace HotaMechanics {
 	class CombatHero {
 	public:
 		CombatHero() = delete;
-		explicit CombatHero(const Hero& hero_template, const Constants::CombatSide _side);
+		explicit CombatHero(const Hero& _hero_template, const Constants::CombatSide _side);
 		explicit CombatHero(const Hero& _hero_template, const ArmyPermutation& _army_permutation, const Constants::CombatSide _side);
 
 		CombatHero(const CombatHero& _obj);
 		CombatHero(CombatHero&& _obj) noexcept;
 
-		CombatHero& operator=(const CombatHero& _obj);
-		CombatHero& operator=(CombatHero&& _obj);
+		CombatHero& operator=(const CombatHero& _obj); // TODO: remove, needed for tests
+		CombatHero& operator=(CombatHero&& _obj); // TODO: remove
 
 
 		// complex getters ---------------
@@ -44,10 +44,10 @@ namespace HotaMechanics {
 		ArmyPermutation generateBaseArmyPermutation() const;
 		void generateUnitsFromArmy();
 
-		Hero hero_template;
+		const Hero& hero_template;
+		const ArmyPermutation& army_permutation;
 
 		HeroStats stats;
-		ArmyPermutation army_permutation;
 		Constants::CombatSide side;
 
 		std::vector<CombatUnit> units;

@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <initializer_list>
+#include <unordered_map>
 
 namespace HotaMechanics {
 	using namespace Constants;
@@ -42,6 +43,13 @@ namespace HotaMechanics {
 
 	CombatField::CombatField(const CombatFieldType _field_type, const CombatFieldTemplate _field_template)
 		: combatFieldId(_field_type), combatFieldTemplate(_field_template) {
+		if (fields.find(_field_template) != std::end(fields)) {
+			combatFieldTemplate = _field_template;
+			combatFieldId = _field_type;
+			hexes = fields[_field_template]->hexes;
+			return;
+		}
+
 		setTemplate(_field_template);
 	}
 
@@ -59,6 +67,17 @@ namespace HotaMechanics {
 		}
 
 		hexes[INVALID_HEX_ID] = CombatHex(INVALID_HEX_ID);
+
+		if (fields.find(_field_template) == std::end(fields))
+			fields[_field_template] = new CombatField(*this);
 		//rehash();
 	}
+
+	CombatField CombatField::retrieveCombatField(CombatFieldType _field_type, CombatFieldTemplate _field_template) {
+		if (fields.find(_field_template) != std::end(fields))
+			return *fields[_field_template];
+		return CombatField(_field_type, _field_template);
+	}
+
+	std::unordered_map<CombatFieldTemplate, CombatField*> CombatField::fields;
 }; // HotaMechanics

@@ -20,7 +20,21 @@ namespace HotaMechanics {
 		ai = std::make_unique<CombatAI>(*this);
 
 		action_events.reserve(32);
-		hero_units.reserve(32);
+		all_units.reserve(32);
+	}
+
+	CombatManager::CombatManager(CombatHero&& _attacker, CombatHero&& _defender, CombatField&& _field, const CombatType _combat_type)
+		: combat_type(_combat_type)
+	{
+		attacker = std::make_unique<CombatHero>(std::move(_attacker));
+		defender = std::make_unique<CombatHero>(std::move(_defender));
+		field = std::make_unique<CombatField>(std::move(_field));
+		ai = std::make_unique<CombatAI>(*this);
+
+		actions.reserve(128);
+		hexes_to_attack.reserve(32);
+		action_events.reserve(32);
+		all_units.reserve(32);
 	}
 
 	CombatManager::~CombatManager() {}
@@ -61,10 +75,22 @@ namespace HotaMechanics {
 			const int16_t hex = (int16_t)ai->getPathfinder().getUnitStartHex(CombatSide::DEFENDER, unit_order++, (int16_t)current_state->defender.getUnitsPtrs().size(), unit->isDoubleWide(), combat_type);
 			moveUnit(const_cast<CombatUnit&>(*unit), hex);
 		}
+
+		setAllUnitStacks();
+	}
+
+	void CombatManager::setAllUnitStacks() {
+		all_units.clear();
+		auto attacker_units = current_state->attacker.getUnitsPtrs();
+		auto defender_units = current_state->defender.getUnitsPtrs();
+
+		std::move(std::begin(attacker_units), std::end(attacker_units), std::back_inserter(all_units));
+		std::move(std::begin(defender_units), std::end(defender_units), std::back_inserter(all_units));
 	}
 
 	void CombatManager::setCurrentState(const CombatState& _state) {
 		current_state = std::make_unique<CombatState>(std::move(_state));
+		setAllUnitStacks();
 		//const_cast<CombatField&>(current_state->field).rehash();
 		ai->initializeBattle(nullptr, nullptr, nullptr, nullptr, true);
 		//const_cast<CombatPathfinder&>(ai->getPathfinder()).clearCache();
@@ -89,12 +115,11 @@ namespace HotaMechanics {
 	}
 
 
-	const std::vector<const CombatUnit*> CombatManager::getAllUnitStacks() const {
-		auto attacker_units = current_state->attacker.getUnitsPtrs();
-		auto defender_units = current_state->defender.getUnitsPtrs();
-		std::move(std::begin(defender_units), std::end(defender_units), std::back_inserter(attacker_units));
+	const std::vector<const CombatUnit*>& CombatManager::getAllUnitStacks() const {
+		if (!all_units.empty()) // TODO: change when new mechanics added (summon/clone)
+			return all_units;
 
-		return attacker_units;
+		throw std::exception("should never happen");
 	}
 
 	void CombatManager::nextStateByAction(const CombatAction& action) {

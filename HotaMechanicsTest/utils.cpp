@@ -62,12 +62,12 @@ namespace TestUtils {
 	}
 
 	CombatHero createHero(const std::vector<UnitStack>& _army, const CombatSide _side, const int _atk, const int _def) {
-		Hero tmp;
-		tmp.stats.base_stats.atk = _atk;
-		tmp.stats.base_stats.def = _def;
-		tmp.army = _army;
+		Hero *tmp = new Hero();
+		tmp->stats.base_stats.atk = _atk;
+		tmp->stats.base_stats.def = _def;
+		tmp->army = _army;
 
-		return CombatHero(tmp, _side);
+		return CombatHero(*tmp, _side);
 	}
 
 	CombatField createField(const CombatFieldType _field_type, const CombatFieldTemplate _field_template) {

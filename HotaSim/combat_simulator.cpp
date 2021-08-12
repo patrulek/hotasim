@@ -36,8 +36,6 @@ namespace HotaSim {
 			return;
 
 		best_state = std::make_unique<CombatState>(_state);
-		states_timeline = _states;
-		actions_timeline = _actions;
 	}
 
 	void CombatSimulator::setCombatManager(const CombatManager& _mgr) {

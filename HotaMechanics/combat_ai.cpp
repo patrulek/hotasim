@@ -108,13 +108,13 @@ namespace HotaMechanics {
 
 		if (_only_ranges) {
 			// temp - check correctness
-			FieldArray current_reachables = player_unit_reachables;
+			/*FieldArray current_reachables = player_unit_reachables;
 			initializePlayerUnitAttackables();
 			for (int i = 0; i < FIELD_SIZE + 1; ++i) {
 				if (current_reachables[i] != player_unit_reachables[i]) {
 					throw std::exception("xxx, never happen");
 				}
-			}
+			}*/
 			//
 			return;
 		}
@@ -194,7 +194,7 @@ namespace HotaMechanics {
 		setUnitAttackables(unit);
 
 		for (auto u : combat_manager.getAllUnitStacks()) {
-			if (u == &unit)
+			if (u == &unit || !u->isAlive())
 				continue;
 
 			pathfinder->clearPathCache();
@@ -317,7 +317,7 @@ namespace HotaMechanics {
 		//std::vector<int16_t> to_check(64);
 
 		for (auto u : combat_manager.getAllUnitStacks()) {
-			if (u == &unit)
+			if (u == &unit || !u->isAlive())
 				continue;
 
 			pathfinder->clearPathCache();
@@ -369,7 +369,7 @@ namespace HotaMechanics {
 		int max_fight_value_gain = calculateStackUnitFightValue(_active_stack);
 		hexes_fight_value_gain.fill(0);
 
-		for (auto unit : const_cast<CombatHero&>(_enemy_hero).getUnitsPtrs()) {
+		for (auto unit : _enemy_hero.getUnitsPtrs()) {
 			bool can_reach_any_unit = false;
 
 			for (auto friendly_unit : _active_stack.getHero()->getUnitsPtrs()) { // h3hota hd.exe + 2055D

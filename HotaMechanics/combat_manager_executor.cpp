@@ -25,14 +25,14 @@ namespace HotaMechanics {
 
 	void CombatManager::makeUnitWalk(int _target_hex, int _walk_distance) {
 		auto& active_stack = getActiveStack();
-		auto path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
+		auto& path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
 
-		if (path.empty()) {
-			path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
-			//this->generateActionsForPlayer();
-			this->generateActionsForPlayer();
-			throw std::exception("Should never happen (we already found that path earlier or target hex is invalid)");
-		}
+		//if (path.empty()) {
+		//	path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
+		//	//this->generateActionsForPlayer();
+		//	this->generateActionsForPlayer();
+		//	throw std::exception("Should never happen (we already found that path earlier or target hex is invalid)");
+		//}
 
 		auto new_event = createUnitPosChangedEvent(active_stack.getGlobalUnitId(), active_stack.getHex(), active_stack.getHex());
 		int walk_distance = _walk_distance == -1 ? active_stack.getCombatStats().spd : _walk_distance;

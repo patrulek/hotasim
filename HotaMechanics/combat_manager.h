@@ -15,6 +15,7 @@ namespace HotaMechanics {
 
 	public:
 		explicit CombatManager(const CombatHero& attacker, const CombatHero& defender, const CombatField& field, const Constants::CombatType _combat_type);
+		explicit CombatManager(CombatHero&& attacker, CombatHero&& defender, CombatField&& field, const Constants::CombatType _combat_type);
 		CombatManager(CombatManager&& _obj) = delete;
 		CombatManager(const CombatManager& _obj) = delete;
 		CombatManager() = delete;
@@ -47,7 +48,8 @@ namespace HotaMechanics {
 		CombatUnit& getActiveStack() const;
 		CombatUnit& getStackByGlobalId(const int _guid) const;
 		CombatUnit& getStackByLocalId(const int _uid, const Constants::CombatSide _side) const;
-		const std::vector<const CombatUnit*> getAllUnitStacks() const;
+		const std::vector<const CombatUnit*>& getAllUnitStacks() const;
+		void setAllUnitStacks();
 		// ------------------------------
 
 		// simple getters ---------------
@@ -119,8 +121,10 @@ namespace HotaMechanics {
 
 		// during battle
 		std::vector<CombatEvent> action_events;
-		std::vector<const CombatUnit*> hero_units;
+		std::vector<const CombatUnit*> all_units;
 		const CombatUnit* active_stack{ nullptr };
+		std::vector<CombatAction> actions;
+		std::vector<int16_t> hexes_to_attack;
 		
 
 		// post-initialization

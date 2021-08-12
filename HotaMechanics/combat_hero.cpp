@@ -7,7 +7,7 @@ namespace HotaMechanics {
 	using namespace Constants;
 
 	CombatHero::CombatHero(const Hero& hero_template, const CombatSide _side)
-		: hero_template(hero_template), side(_side) {
+		: hero_template(hero_template), army_permutation(*(new ArmyPermutation(generateBaseArmyPermutation()))), side(_side) {
 		initialize();
 		generateUnitsFromArmy();
 	}
@@ -19,11 +19,9 @@ namespace HotaMechanics {
 	}
 
 	CombatHero::CombatHero(const CombatHero& _obj)
-		: hero_template(_obj.hero_template) {
-		army_permutation = _obj.army_permutation;
+		: hero_template(_obj.hero_template), army_permutation(_obj.army_permutation) {
 
 		initialize();
-
 		stats = _obj.stats;
 		side = _obj.side;
 
@@ -40,12 +38,10 @@ namespace HotaMechanics {
 			return *this;
 
 		//initialize();
-		hero_template = _obj.hero_template;
 		stats = _obj.stats;
 		side = _obj.side;
-		army_permutation = _obj.army_permutation;
 
-		//units.clear();
+		units.clear();
 		unit_ptrs.clear();
 		for (auto unit : _obj.getUnitsPtrs()) {
 			units.emplace_back(CombatUnit(*unit, *this));
@@ -55,11 +51,10 @@ namespace HotaMechanics {
 	}
 
 	CombatHero::CombatHero(CombatHero&& _obj) noexcept
-		: hero_template(_obj.hero_template) {
+		: hero_template(_obj.hero_template), army_permutation(_obj.army_permutation) {
 		//initialize();
 		stats = std::move(_obj.stats);
 		side = std::move(_obj.side);
-		army_permutation = std::move(_obj.army_permutation);
 
 		unit_ptrs.clear();
 		for (auto unit : _obj.getUnitsPtrs()) {
@@ -67,6 +62,7 @@ namespace HotaMechanics {
 			unit_ptrs.push_back(&(units.back()));
 		}
 		_obj.units.clear();
+		_obj.unit_ptrs.clear();
 	}
 
 	// TODO: fix it
@@ -75,12 +71,10 @@ namespace HotaMechanics {
 			return *this;
 
 		//initialize();
-		hero_template = std::move(_obj.hero_template);
 		stats = std::move(_obj.stats);
 		side = std::move(_obj.side);
-		army_permutation = std::move(_obj.army_permutation);
 
-		//units.clear();
+		units.clear();
 		unit_ptrs.clear();
 		for (auto unit : _obj.getUnitsPtrs()) {
 			units.emplace_back(CombatUnit(*unit, *this));
@@ -94,9 +88,6 @@ namespace HotaMechanics {
 		units.reserve(7);
 		unit_ptrs.reserve(7);
 		stats = hero_template.stats;
-
-		if (army_permutation.permutations.empty())
-			army_permutation = generateBaseArmyPermutation();
 
 		// if have artifacts modify stats
 		// if have secondary skills modify stats
