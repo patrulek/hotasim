@@ -153,9 +153,9 @@ namespace HotaSim {
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
 								auto actions = manager->generateActionsForPlayer();
-								auto action_order = Estimator::shuffleActions(actions, *manager, seed);
+								//auto action_order = Estimator::shuffleActions(actions, *manager, seed);
 								
-								auto action_idx = action_order[action_cnt];
+								auto action_idx = action_cnt;// action_order[action_cnt];
 
 								//std::cout << "Player action (" << action_idx + 1 << " / " << actions.size() << "): " << (int)actions[action_idx].action
 								//	<< " - " << actions[action_idx].target << " ### Unit: " << manager->getActiveStack().getGlobalUnitId() << "\n";
@@ -164,7 +164,7 @@ namespace HotaSim {
 								tree.addState(manager->getCurrentState(), action_cnt, actions.size(), 
 									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), seed);
 
-								seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
+								//seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
 								//seed = 42;
 								action_cnt = 0;
 							}

@@ -88,7 +88,7 @@ namespace HotaSim {
 		std::vector<CombatSequenceNode*> forgotten_paths;
 		std::vector<CombatSequenceNode*> circular_paths;
 		//std::unordered_set<StateHash> state_hashes;
-		std::unordered_map<StateHash, CombatState*> state_hashes;
+		std::unordered_map<StateHash, int16_t> state_hashes;
 		std::unordered_map<StateHash, CombatSequenceNode*> node_hashes;
 		int circular_occurence{ 0 };
 		std::array<int, 32> turns_occurence;

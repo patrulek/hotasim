@@ -13,7 +13,7 @@ namespace HotaMechanics {
 	int64_t CombatField::rehash() {
 		hash = 0;
 		for (auto& hex : hexes)
-			hash += (hex.isWalkable() * ((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
+			hash ^= (hex.isWalkable() * std::hash<int16_t>{}(hex.getId()));//((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
 
 		hash = std::hash<int64_t>{}(hash);
 		return hash;
@@ -41,7 +41,7 @@ namespace HotaMechanics {
 		return "Hex(" + std::to_string(id / FIELD_COLS) + ", " + std::to_string(id % FIELD_COLS) + ")";
 	}
 
-	const bool CombatHex::isWalkable() const {
+	const bool CombatHex::isWalkable() const noexcept {
 		return walkable && (occupied_by == CombatHexOccupation::SOFT_OBSTACLE || occupied_by == CombatHexOccupation::EMPTY);
 	}
 

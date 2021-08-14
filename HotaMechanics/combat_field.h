@@ -26,7 +26,7 @@ namespace HotaMechanics {
 		// ------------------------------
 
 		// check state ------------------
-		const bool isWalkable() const;
+		inline const bool isWalkable() const noexcept;
 		// ------------------------------
 
 		// simple getters ---------------
@@ -93,8 +93,6 @@ namespace HotaMechanics {
 		}
 		void clearHex(const int16_t _target_hex) {
 			fillHex(_target_hex, Constants::CombatHexOccupation::EMPTY);
-
-
 		}
 		void setTemplate(const Constants::CombatFieldTemplate _field_template);
 		int64_t rehash();

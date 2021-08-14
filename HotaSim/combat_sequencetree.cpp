@@ -51,7 +51,7 @@ namespace HotaSim {
 		++turns_occurence[_state.turn];
 
 		if (auto it = state_hashes.find(StateHash(const_cast<CombatState&>(_state))); it != std::end(state_hashes)
-			&& _state.turn >= it->second->turn && _state.order.empty()) {
+			&& _state.turn >= it->second && _state.order.empty()) {
 			auto it2 = node_hashes.find(StateHash(const_cast<CombatState&>(_state)));
 			auto hash = StateHash(const_cast<CombatState&>(_state));
 			circular_path_found = true;
@@ -59,7 +59,7 @@ namespace HotaSim {
 			return;
 		} else {
 			//state_hashes.insert(StateHash(const_cast<CombatState&>(_state)));
-			state_hashes[StateHash(const_cast<CombatState&>(_state))] = new CombatState(_state);
+			state_hashes[StateHash(const_cast<CombatState&>(_state))] = _state.turn;
 		}
 
 		auto packed_state = const_cast<CombatManager&>(manager).packCombatState(_state);

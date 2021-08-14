@@ -140,11 +140,11 @@ namespace HotaMechanics {
 		if (range_cache.find(_source_hex | (_range << 8)) != std::end(range_cache))
 			return range_cache[_source_hex | (_range << 8)];
 
-		FieldArray to_check; to_check.fill(0);
+		std::array<int16_t, 32> to_check; to_check.fill(0);
 		int to_check_cnt = 0;
 		to_check[to_check_cnt++] = _source_hex;
 
-		FieldArray next_to_check; next_to_check.fill(0);
+		std::array<int16_t, 32> next_to_check; next_to_check.fill(0);
 		int next_to_check_cnt = 0;
 
 		FieldFlagArray checked; checked.fill(0);
@@ -397,32 +397,26 @@ namespace HotaMechanics {
 
 	void CombatPathfinder::pathMap(const int16_t _source_hex, const CombatField& _field, const bool _double_wide, const int16_t _range) {
 		// just find path to all possible hexes
-		std::array<int16_t, FIELD_SIZE + 1> to_check; to_check.fill(0);
-		std::array<int16_t, FIELD_SIZE + 1> next_to_check; next_to_check.fill(0);
-		int to_check_cnt = 1, next_to_check_cnt = 0;
-		to_check[0] = _source_hex;
-
-		int dist = 1;
+		std::array<int16_t, 32> to_check{ _source_hex, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+																  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		std::array<int16_t, 32> next_to_check{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+															0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		int to_check_cnt = 1, next_to_check_cnt = 0, dist = 1;
+		checked[_source_hex] = true;
 
 		while (to_check_cnt > 0 && dist <= _range) {
 			const int hex_id = to_check[--to_check_cnt];
-			checked[hex_id] = true;
 
-			auto& adjacent_hexes = getAdjacentHexesClockwise(hex_id);
-
-			for (auto adj_hex : adjacent_hexes) {
+			for (auto adj_hex : getAdjacentHexesClockwise(hex_id)) {
 				// if target hex is occupied by unit set it also as walkable, but later (after search) check if we need real path to hex or only distance
-				const bool is_walkable_hex = _field.isHexWalkable(adj_hex, false);
-				adj_hex = (is_walkable_hex * adj_hex) + (!is_walkable_hex * INVALID_HEX_ID);
-				const bool has_path_to_hex = paths[adj_hex] != INVALID_HEX_ID;
-				const bool is_closer = !has_path_to_hex || (dist < distances[hex_id]);
-
-				paths[adj_hex] = (hex_id * is_closer) + (paths[adj_hex] * !is_closer);
-				distances[adj_hex] = (dist * is_closer) + (distances[adj_hex] * !is_closer);
-
+				const bool is_walkable_hex = _field.getById(adj_hex).isWalkable();
 				next_to_check[next_to_check_cnt] = adj_hex;
-				next_to_check_cnt += !checked[adj_hex];
+				next_to_check_cnt += !checked[adj_hex] && is_walkable_hex;
 				checked[adj_hex] = true;
+
+				const bool is_closer = is_walkable_hex && (dist < distances[adj_hex]);
+				distances[adj_hex] = (dist * is_closer) + (distances[adj_hex] * !is_closer);
+				paths[adj_hex] = (hex_id * is_closer) + (paths[adj_hex] * !is_closer);
 			}
 
 			dist += (to_check_cnt == 0);
