@@ -108,10 +108,10 @@ namespace HotaMechanics {
 				if (fight_value_gain <= 0)
 					continue;
 
-				auto reachable_hexes = const_cast<CombatPathfinder&>(_pathfinder).getReachableHexesInRange(unit->getHex(), unit->getCombatStats().spd + 1, _field, false, false);
-				reachable_hexes.push_back(unit->getHex()); // add also unit position
+				auto attackable_hexes = const_cast<CombatPathfinder&>(_pathfinder).getReachableHexesInRange(unit->getHex(), unit->getCombatStats().spd + 1, _field, false, false);
+				//reachable_hexes.push_back(unit->getHex()); // add also unit position
 
-				for (auto hex : reachable_hexes) {
+				for (auto hex : attackable_hexes) {
 					int hex_fight_value_gain = std::min(max_fight_value_gain, fight_value_gain);
 					hexes_fight_value[hex] = std::max(hexes_fight_value[hex], hex_fight_value_gain);
 				}

@@ -39,6 +39,8 @@ namespace HotaMechanics {
 		//auto reachable_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(activeStack.getHex(), activeStack.getCombatStats().spd, field, false, false);
 
 		for (auto hex : reachable_hexes) {
+			if (hex == active_stack.getHex())
+				continue;
 			actions.push_back(createWalkAction(hex));
 		}
 

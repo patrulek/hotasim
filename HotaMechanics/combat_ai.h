@@ -51,7 +51,6 @@ namespace HotaMechanics {
 		
 		const bool canUnitReachHex(const CombatUnit& _unit, const int16_t _hex) const;
 		const bool canUnitAttackHex(const CombatUnit& _unit, const int16_t _hex) const;
-		const bool isHexInUnitRange(const CombatUnit& _unit, const int16_t _hex) const;
 
 		std::vector<const CombatUnit*> getEnemyUnitsInAttackRange(const CombatUnit& _unit) const;
 		const bool isHexBlockedFor(const int16_t _target_hex, const CombatUnit& _active_stack) const;
@@ -74,11 +73,8 @@ namespace HotaMechanics {
 		// AI state ----------------------
 		void initializePlayerUnitAttackables(const Constants::FieldArray* _player_unit_reachables = nullptr, const Constants::FieldArray* _player_unit_attackables = nullptr);
 		void initializeAIUnitAttackables(const Constants::FieldArray* _ai_unit_reachables = nullptr, const Constants::FieldArray* _ai_unit_attackables = nullptr);
-		void initializePlayerUnitRanges();
-		void initializeAIUnitRanges();
-		void clearUnitRanges(const CombatUnit& _unit);
+
 		void clearUnitAttackables(const CombatUnit& _unit);
-		void setUnitRanges(const CombatUnit& _unit);
 		void setUnitAttackables(const CombatUnit& _unit);
 		// -------------------------------
 
@@ -92,11 +88,9 @@ namespace HotaMechanics {
 
 		std::vector<CombatEvent> events_to_process;
 
-		Constants::FieldArray player_unit_ranges;
 		Constants::FieldArray player_unit_reachables;
 		Constants::FieldArray player_unit_attackables;
 
-		Constants::FieldArray ai_unit_ranges;
 		Constants::FieldArray ai_unit_reachables;
 		Constants::FieldArray ai_unit_attackables;
 	};

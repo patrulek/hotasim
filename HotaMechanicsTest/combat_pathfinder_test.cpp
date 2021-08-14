@@ -89,128 +89,128 @@ namespace CombatPathfinderTest {
 	}
 
 	// CombatPathfinder::getHexesInRange(_source_hex, _range)
-	TEST(CombatPathfinder, shouldReturnHexesInRangeToGivenHex) {
-		CombatPathfinder pathfinder;
+	//TEST(CombatPathfinder, shouldReturnHexesInRangeToGivenHex) {
+	//	CombatPathfinder pathfinder;
 
-		EXPECT_TRUE(pathfinder.getHexesInRange(INVALID_HEX_ID, 5).empty()); // invalid source hex
-		EXPECT_TRUE(pathfinder.getHexesInRange(150, 0).empty()); // invalid range == 0
-		EXPECT_TRUE(pathfinder.getHexesInRange(150, -1).empty()); // invalid range < 0
+	//	EXPECT_TRUE(pathfinder.getHexesInRange(INVALID_HEX_ID, 5).empty()); // invalid source hex
+	//	EXPECT_TRUE(pathfinder.getHexesInRange(150, 0).empty()); // invalid range == 0
+	//	EXPECT_TRUE(pathfinder.getHexesInRange(150, -1).empty()); // invalid range < 0
 
-		int hex = getHexId(2, 1);
-		int unit_speed = 6;
-		std::vector<int16_t> expected{ 0, 1, 2, 3, 4, 5, 6, 17, 18, 19, 20, 21, 22, 23, 24, 34, 35, 36, 37, 38, 39, 40, 41, 51, 52, 53, 54, 55, 56, 57, 58,
-											68, 69, 70, 71, 72, 73, 74, 85, 86, 87, 88, 89, 90, 91, 102, 103, 104, 105, 106, 107, 119, 120, 121, 122, 123, 124,
-											136, 137, 138, 139, 140 };
-		auto value = pathfinder.getHexesInRange(hex, unit_speed);
-		EXPECT_EQ(expected, value);
+	//	int hex = getHexId(2, 1);
+	//	int unit_speed = 6;
+	//	std::vector<int16_t> expected{ 0, 1, 2, 3, 4, 5, 6, 17, 18, 19, 20, 21, 22, 23, 24, 34, 35, 36, 37, 38, 39, 40, 41, 51, 52, 53, 54, 55, 56, 57, 58,
+	//										68, 69, 70, 71, 72, 73, 74, 85, 86, 87, 88, 89, 90, 91, 102, 103, 104, 105, 106, 107, 119, 120, 121, 122, 123, 124,
+	//										136, 137, 138, 139, 140 };
+	//	auto value = pathfinder.getHexesInRange(hex, unit_speed);
+	//	EXPECT_EQ(expected, value);
 
-		hex = getHexId(5, 15);
-		unit_speed = 3;
-		expected = std::vector<int16_t>{ 47, 48, 49, 50, 64, 65, 66, 67, 80, 81, 82, 83, 84, 97, 98, 99, 100, 101, 114, 115, 116, 117, 118,
-												132, 133, 134, 135, 149, 150, 151, 152 };
-		value = pathfinder.getHexesInRange(hex, unit_speed);
-		EXPECT_EQ(expected, value);
-
-
-		hex = getHexId(8, 1);
-		unit_speed = 3;
-		expected = std::vector<int16_t>{ 85, 86, 87, 88, 102, 103, 104, 105, 119, 120, 121, 122, 123, 136, 137, 138, 139, 140,
-												153, 154, 155, 156, 157, 170, 171, 172, 173 };
-		value = pathfinder.getHexesInRange(hex, unit_speed);
-		EXPECT_EQ(expected, value);
-	}
-
-	// CombatPathfinder::getWalkableHexesInRange(_source_hex, _range, _field)
-	TEST(CombatPathfinder, shouldReturnWalkableHexesInRange) {
-		CombatPathfinder pathfinder;
-		CombatField field(createField());
-
-		EXPECT_TRUE(pathfinder.getWalkableHexesInRange(INVALID_HEX_ID, 5, field).empty()); // invalid source hex
-		EXPECT_TRUE(pathfinder.getWalkableHexesInRange(150, 0, field).empty()); // invalid range == 0
-		EXPECT_TRUE(pathfinder.getWalkableHexesInRange(150, -1, field).empty()); // invalid range < 0
-
-		int hex = getHexId(2, 1);
-		int unit_speed = 6;
-		std::vector<int16_t> expected{ 1, 2, 3, 4, 5, 6, 18, 19, 20, 21, 22, 23, 24, 35, 36, 37, 38, 39, 40, 41, 52, 53, 54, 55, 56, 57, 58,
-											69, 70, 71, 72, 73, 74, 86, 87, 88, 89, 90, 91, 103, 104, 105, 106, 107, 120, 121, 122, 123, 124,
-											137, 138, 139, 140 };
-		auto value = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
-		EXPECT_EQ(expected, value); // no obstacles in given range
-
-		field.fillHex(getHexId(2, 2), CombatHexOccupation::SOFT_OBSTACLE);
-		field.fillHex(getHexId(2, 3), CombatHexOccupation::SOLID_OBSTACLE);
-		field.fillHex(getHexId(3, 3), CombatHexOccupation::SOLID_OBSTACLE);
-		field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
-
-		expected = std::vector<int16_t>{ 1, 2, 3, 4, 5, 6, 18, 20, 21, 22, 23, 24, 35, 36, 38, 39, 40, 41, 52, 53, 55, 56, 57, 58,
-											69, 70, 71, 72, 73, 74, 86, 87, 88, 89, 90, 91, 103, 104, 105, 106, 107, 120, 121, 122, 123, 124,
-											137, 138, 139, 140 };
-		value = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
-		EXPECT_EQ(expected, value); // filled with some obstacles at field
+	//	hex = getHexId(5, 15);
+	//	unit_speed = 3;
+	//	expected = std::vector<int16_t>{ 47, 48, 49, 50, 64, 65, 66, 67, 80, 81, 82, 83, 84, 97, 98, 99, 100, 101, 114, 115, 116, 117, 118,
+	//											132, 133, 134, 135, 149, 150, 151, 152 };
+	//	value = pathfinder.getHexesInRange(hex, unit_speed);
+	//	EXPECT_EQ(expected, value);
 
 
-		field.setTemplate(CombatFieldTemplate::EMPTY);
-		hex = getHexId(5, 15);
-		unit_speed = 3;
-		expected = std::vector<int16_t>{ 47, 48, 49, 64, 65, 66, 80, 81, 82, 83, 97, 98, 99, 100, 114, 115, 116, 117,
-												132, 133, 134, 149, 150, 151 };
-		value = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
-		EXPECT_EQ(expected, value); // no obstacles in range
-	}
+	//	hex = getHexId(8, 1);
+	//	unit_speed = 3;
+	//	expected = std::vector<int16_t>{ 85, 86, 87, 88, 102, 103, 104, 105, 119, 120, 121, 122, 123, 136, 137, 138, 139, 140,
+	//											153, 154, 155, 156, 157, 170, 171, 172, 173 };
+	//	value = pathfinder.getHexesInRange(hex, unit_speed);
+	//	EXPECT_EQ(expected, value);
+	//}
+
+	//// CombatPathfinder::getWalkableHexesInRange(_source_hex, _range, _field)
+	//TEST(CombatPathfinder, shouldReturnWalkableHexesInRange) {
+	//	CombatPathfinder pathfinder;
+	//	CombatField field(createField());
+
+	//	EXPECT_TRUE(pathfinder.getWalkableHexesInRange(INVALID_HEX_ID, 5, field).empty()); // invalid source hex
+	//	EXPECT_TRUE(pathfinder.getWalkableHexesInRange(150, 0, field).empty()); // invalid range == 0
+	//	EXPECT_TRUE(pathfinder.getWalkableHexesInRange(150, -1, field).empty()); // invalid range < 0
+
+	//	int hex = getHexId(2, 1);
+	//	int unit_speed = 6;
+	//	std::vector<int16_t> expected{ 1, 2, 3, 4, 5, 6, 18, 19, 20, 21, 22, 23, 24, 35, 36, 37, 38, 39, 40, 41, 52, 53, 54, 55, 56, 57, 58,
+	//										69, 70, 71, 72, 73, 74, 86, 87, 88, 89, 90, 91, 103, 104, 105, 106, 107, 120, 121, 122, 123, 124,
+	//										137, 138, 139, 140 };
+	//	auto value = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
+	//	EXPECT_EQ(expected, value); // no obstacles in given range
+
+	//	field.fillHex(getHexId(2, 2), CombatHexOccupation::SOFT_OBSTACLE);
+	//	field.fillHex(getHexId(2, 3), CombatHexOccupation::SOLID_OBSTACLE);
+	//	field.fillHex(getHexId(3, 3), CombatHexOccupation::SOLID_OBSTACLE);
+	//	field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
+
+	//	expected = std::vector<int16_t>{ 1, 2, 3, 4, 5, 6, 18, 20, 21, 22, 23, 24, 35, 36, 38, 39, 40, 41, 52, 53, 55, 56, 57, 58,
+	//										69, 70, 71, 72, 73, 74, 86, 87, 88, 89, 90, 91, 103, 104, 105, 106, 107, 120, 121, 122, 123, 124,
+	//										137, 138, 139, 140 };
+	//	value = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
+	//	EXPECT_EQ(expected, value); // filled with some obstacles at field
 
 
-	// CombatPathfinder::getReachableHexesInRange(source_hex, range, field, can_fly, double_wide) 
-	TEST(CombatPathfinder, shouldReachableHexesEqualWalkableHexesWhenNoObstaclesAroundAndLessHexesOtherwise) {
-		CombatPathfinder pathfinder;
-		CombatField field(createField());
+	//	field.setTemplate(CombatFieldTemplate::EMPTY);
+	//	hex = getHexId(5, 15);
+	//	unit_speed = 3;
+	//	expected = std::vector<int16_t>{ 47, 48, 49, 64, 65, 66, 80, 81, 82, 83, 97, 98, 99, 100, 114, 115, 116, 117,
+	//											132, 133, 134, 149, 150, 151 };
+	//	value = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
+	//	EXPECT_EQ(expected, value); // no obstacles in range
+	//}
 
-		EXPECT_TRUE(pathfinder.getReachableHexesInRange(INVALID_HEX_ID, 5, field, false, false).empty()); // invalid source hex
-		EXPECT_TRUE(pathfinder.getReachableHexesInRange(150, 0, field, false, false).empty()); // invalid range == 0
-		EXPECT_TRUE(pathfinder.getReachableHexesInRange(150, -1, field, false, false).empty()); // invalid range < 0
-		EXPECT_ANY_THROW(pathfinder.getReachableHexesInRange(150, 5, field, true, false)); // invalid can_fly (not implemented yet)
-		EXPECT_ANY_THROW(pathfinder.getReachableHexesInRange(150, 5, field, false, true)); // invalid double_wide (not implemented yet)
 
-		int hex = getHexId(2, 1);
-		int unit_speed = 6;
+	//// CombatPathfinder::getReachableHexesInRange(source_hex, range, field, can_fly, double_wide) 
+	//TEST(CombatPathfinder, shouldReachableHexesEqualWalkableHexesWhenNoObstaclesAroundAndLessHexesOtherwise) {
+	//	CombatPathfinder pathfinder;
+	//	CombatField field(createField());
 
-		field.fillHex(hex, CombatHexOccupation::UNIT);
-		pathfinder.clearPathCache();
-		auto walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
-		auto reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
-		EXPECT_EQ(walkable, reachable); // when no obstacles or units around, walkable hexes should equal reachable
+	//	EXPECT_TRUE(pathfinder.getReachableHexesInRange(INVALID_HEX_ID, 5, field, false, false).empty()); // invalid source hex
+	//	EXPECT_TRUE(pathfinder.getReachableHexesInRange(150, 0, field, false, false).empty()); // invalid range == 0
+	//	EXPECT_TRUE(pathfinder.getReachableHexesInRange(150, -1, field, false, false).empty()); // invalid range < 0
+	//	EXPECT_ANY_THROW(pathfinder.getReachableHexesInRange(150, 5, field, true, false)); // invalid can_fly (not implemented yet)
+	//	EXPECT_ANY_THROW(pathfinder.getReachableHexesInRange(150, 5, field, false, true)); // invalid double_wide (not implemented yet)
 
-		field.fillHex(getHexId(2, 2), CombatHexOccupation::SOFT_OBSTACLE);
-		field.fillHex(getHexId(1, 1), CombatHexOccupation::UNIT);
-		field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
-		field.fillHex(getHexId(0, 2), CombatHexOccupation::SOLID_OBSTACLE);
-		pathfinder.clearPathCache();
+	//	int hex = getHexId(2, 1);
+	//	int unit_speed = 6;
 
-		walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
-		reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
+	//	field.fillHex(hex, CombatHexOccupation::UNIT);
+	//	pathfinder.clearPathCache();
+	//	auto walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
+	//	auto reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
+	//	EXPECT_EQ(walkable, reachable); // when no obstacles or units around, walkable hexes should equal reachable
 
-		std::vector<int16_t> expected(walkable);
-		std::vector<int16_t> excluded{ getHexId(0, 1) }; // this one field is not reachable anymore, and path to other walkable field is not distorted
-		for (auto ex : excluded)
-			expected.erase(std::remove(std::begin(expected), std::end(expected), ex), std::end(expected));
-		EXPECT_EQ(expected, reachable);
+	//	field.fillHex(getHexId(2, 2), CombatHexOccupation::SOFT_OBSTACLE);
+	//	field.fillHex(getHexId(1, 1), CombatHexOccupation::UNIT);
+	//	field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
+	//	field.fillHex(getHexId(0, 2), CombatHexOccupation::SOLID_OBSTACLE);
+	//	pathfinder.clearPathCache();
 
-		field.clearHex(getHexId(1, 1));
-		field.clearHex(getHexId(0, 2));
-		field.fillHex(getHexId(2, 2), CombatHexOccupation::SOFT_OBSTACLE);
-		field.fillHex(getHexId(2, 3), CombatHexOccupation::SOLID_OBSTACLE);
-		field.fillHex(getHexId(3, 3), CombatHexOccupation::SOLID_OBSTACLE);
-		field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
-		pathfinder.clearPathCache();
+	//	walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
+	//	reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
 
-		walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
-		reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
+	//	std::vector<int16_t> expected(walkable);
+	//	std::vector<int16_t> excluded{ getHexId(0, 1) }; // this one field is not reachable anymore, and path to other walkable field is not distorted
+	//	for (auto ex : excluded)
+	//		expected.erase(std::remove(std::begin(expected), std::end(expected), ex), std::end(expected));
+	//	EXPECT_EQ(expected, reachable);
 
-		expected = std::vector<int16_t>(walkable);
-		excluded = std::vector<int16_t>{ getHexId(2, 7), getHexId(3, 7) }; // these fields are beyond unit range (distorted path by obstacles)
-		for (auto ex : excluded)
-			expected.erase(std::remove(std::begin(expected), std::end(expected), ex), std::end(expected));
-		EXPECT_EQ(expected, reachable);
-	}
+	//	field.clearHex(getHexId(1, 1));
+	//	field.clearHex(getHexId(0, 2));
+	//	field.fillHex(getHexId(2, 2), CombatHexOccupation::SOFT_OBSTACLE);
+	//	field.fillHex(getHexId(2, 3), CombatHexOccupation::SOLID_OBSTACLE);
+	//	field.fillHex(getHexId(3, 3), CombatHexOccupation::SOLID_OBSTACLE);
+	//	field.fillHex(getHexId(1, 2), CombatHexOccupation::UNIT);
+	//	pathfinder.clearPathCache();
+
+	//	walkable = pathfinder.getWalkableHexesInRange(hex, unit_speed, field);
+	//	reachable = pathfinder.getReachableHexesInRange(hex, unit_speed, field, false, false);
+
+	//	expected = std::vector<int16_t>(walkable);
+	//	excluded = std::vector<int16_t>{ getHexId(2, 7), getHexId(3, 7) }; // these fields are beyond unit range (distorted path by obstacles)
+	//	for (auto ex : excluded)
+	//		expected.erase(std::remove(std::begin(expected), std::end(expected), ex), std::end(expected));
+	//	EXPECT_EQ(expected, reachable);
+	//}
 
 	// CombatPathfinder::distanceBetweenHexes(_source_hex, _target_hex)
 	TEST(CombatPathfinder, shouldReturnCorrectDistanceBetweenHexes) {
