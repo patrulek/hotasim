@@ -11,9 +11,12 @@ namespace HotaMechanics {
 	using namespace Utils;
 
 	int64_t CombatField::rehash() {
+		//__debugbreak();
 		hash = 0;
-		for (auto& hex : hexes)
-			hash ^= (hex.isWalkable() * std::hash<int16_t>{}(hex.getId()));//((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
+		for (auto& hex : occupied)
+			hash ^= std::hash<uint8_t>{}(hex);//((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
+		//for (auto& hex : hexes)
+		//	hash ^= (hex.isWalkable() * std::hash<int16_t>{}(hex.getId()));//((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
 
 		hash = std::hash<int64_t>{}(hash);
 		return hash;
@@ -41,10 +44,6 @@ namespace HotaMechanics {
 		return "Hex(" + std::to_string(id / FIELD_COLS) + ", " + std::to_string(id % FIELD_COLS) + ")";
 	}
 
-	const bool CombatHex::isWalkable() const noexcept {
-		return walkable && (occupied_by == CombatHexOccupation::SOFT_OBSTACLE || occupied_by == CombatHexOccupation::EMPTY);
-	}
-
 	CombatField::CombatField(const CombatFieldType _field_type, const CombatFieldTemplate _field_template)
 		: combatFieldId(_field_type), combatFieldTemplate(_field_template) {
 		if (fields.find(_field_template) != std::end(fields)) {
@@ -54,6 +53,7 @@ namespace HotaMechanics {
 			return;
 		}
 
+		occupied.resize(16);
 		setTemplate(_field_template);
 	}
 
@@ -65,9 +65,11 @@ namespace HotaMechanics {
 
 		combatFieldTemplate = _field_template;
 
-		for (int hex = 0; hex < FIELD_SIZE; ++hex) {
+		for (uint8_t hex = 0; hex < FIELD_SIZE; ++hex) {
 			const auto occupation = _template[hex] == 1 ? CombatHexOccupation::SOLID_OBSTACLE : CombatHexOccupation::EMPTY;
 			hexes[hex] = CombatHex(hex, occupation);
+			if (_template[hex] == 1)
+				fillHex(hex, CombatHexOccupation::SOLID_OBSTACLE);
 		}
 
 		hexes[INVALID_HEX_ID] = CombatHex(INVALID_HEX_ID);

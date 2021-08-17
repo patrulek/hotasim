@@ -4,7 +4,7 @@
 
 namespace HotaMechanics {
 	class CombatManager;
-	class CombatAction;
+	struct CombatAction;
 }
 
 namespace HotaSim {

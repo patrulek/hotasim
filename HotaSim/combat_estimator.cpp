@@ -3,6 +3,7 @@
 #include "../HotaMechanics/structures.h"
 #include "../HotaMechanics/combat_manager.h"
 #include "../HotaMechanics/combat_calculator.h"
+#include "../HotaMechanics/combat_field.h"
 
 #include <numeric>
 #include <random>
@@ -148,8 +149,8 @@ namespace HotaSim {
 					auto units = state.defender.getUnitsPtrs();
 					for (auto it = std::begin(units), it2 = std::begin(units) + 1; it2 != std::end(units); ++it2)
 					{
-						int dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true, 998);
-						int turns = std::ceil((float)(dist) / std::max((*it)->getCombatStats().spd, (*it2)->getCombatStats().spd));
+						const auto dist = const_cast<CombatPathfinder&>(ai.getPathfinder()).realDistanceBetweenHexes((*it)->getHex(), (*it2)->getHex(), state.field, true, 998);
+						const auto turns = std::ceil((float)(dist) / std::max((*it)->getCombatStats().spd, (*it2)->getCombatStats().spd));
 
 						additional_score += (turns - 1) * 50000;
 					}

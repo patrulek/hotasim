@@ -43,8 +43,8 @@ namespace HotaMechanics {
 		void addEventsToProcess(const std::vector<CombatEvent>& _events) { events_to_process.insert(std::end(events_to_process), std::begin(_events), std::end(_events)); }
 		void processEvents();
 
-		const std::array<int, Constants::FIELD_SIZE + 1>& getAttackablesForUnit(const CombatUnit& _unit) const;
-		const std::array<int, Constants::FIELD_SIZE + 1>& getReachablesForUnit(const CombatUnit& _unit) const;
+		const Constants::FieldArray& getAttackablesForUnit(const CombatUnit& _unit) const;
+		const Constants::FieldArray& getReachablesForUnit(const CombatUnit& _unit) const;
 		std::vector<int16_t> getAttackableHexesForUnit(const CombatUnit& _unit) const;
 		std::vector<int16_t> getReachableHexesForUnit(const CombatUnit& _unit) const;
 		std::vector<int16_t> getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const;

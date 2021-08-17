@@ -19,11 +19,11 @@ namespace HotaMechanics {
 		reorderUnits();
 	}
 
-	void CombatManager::makeUnitFly(int _target_hex) {
+	void CombatManager::makeUnitFly(uint8_t _target_hex) {
 		throw std::exception("Not implemented yet");
 	}
 
-	void CombatManager::makeUnitWalk(int _target_hex, int _walk_distance) {
+	void CombatManager::makeUnitWalk(uint8_t _target_hex, int _walk_distance) {
 		auto& active_stack = getActiveStack();
 		auto& path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
 
@@ -46,7 +46,7 @@ namespace HotaMechanics {
 		active_stack.setDone(); // TODO: shouldnt be done yet if we're attacking, unless quicksand or smth
 	}
 
-	void CombatManager::makeUnitAttack(int _unit_id, int _target_hex) {
+	void CombatManager::makeUnitAttack(int _unit_id, uint8_t _target_hex) {
 		auto& active_stack = getActiveStack();
 		if (active_stack.getHex() != _target_hex) {
 			makeUnitWalk(_target_hex);
@@ -83,7 +83,7 @@ namespace HotaMechanics {
 			active_stack.setDone();
 	}
 
-	void CombatManager::moveUnit(CombatUnit& _unit, int _target_hex) {
+	void CombatManager::moveUnit(CombatUnit& _unit, uint8_t _target_hex) {
 		current_state->field.clearHex(_unit.getHex());
 		// TODO: check double_wide
 		_unit.moveTo(_target_hex);

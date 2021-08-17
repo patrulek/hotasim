@@ -110,7 +110,7 @@ namespace HotaMechanics {
 		const UnitStats& getStats() const { return stats; }
 		const CombatUnitState getState() const { return state; }
 		int16_t getHealthLost() const { return health_lost; }
-		int16_t getHex() const { return hex; };
+		uint8_t getHex() const { return hex; };
 		const Unit& getTemplate() const { return unit_template; }
 		int16_t getStackNumber() const { return stack_number; }
 		float getFightValue() const { return unit_template.stats.fight_value; }
@@ -127,7 +127,7 @@ namespace HotaMechanics {
 		const CombatHero* hero{ nullptr };
 
 		UnitStats stats;
-		int16_t hex{ Constants::INVALID_HEX_ID };
+		uint8_t hex{ Constants::INVALID_HEX_ID };
 		int16_t stack_number{ 0 };
 		int16_t health_lost{ 0 };
 		CombatUnitState state{ 0 };

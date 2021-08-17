@@ -65,7 +65,7 @@ namespace HotaMechanics {
 	}
 
 	std::vector<int16_t> CombatAI::getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const {
-		std::vector<int16_t> attackable; attackable.reserve(64);
+		std::vector<int16_t> attackable; attackable.reserve(128);
 		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
 		int uid = _unit.getUnitId();
 
@@ -256,8 +256,8 @@ namespace HotaMechanics {
 
 		attackables[_unit.getHex()] |= unit_bit;
 
-		for (auto adj_hex : adjacent_hexes)
-			attackables[adj_hex] |= unit_bit;
+		for( uint8_t hex = 0; hex < 6; ++hex)
+			attackables[adjacent_hexes[hex]] |= unit_bit;
 
 		auto&& hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false, false);
 		for (auto hex : hexes) {
@@ -265,8 +265,8 @@ namespace HotaMechanics {
 			attackables[hex] |= unit_bit;
 
 			auto& attackable_adjacent = pathfinder->getAdjacentHexes(hex);
-			for (auto att_adj_hex : attackable_adjacent)
-				attackables[att_adj_hex] |= unit_bit;
+			for( uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex)
+				attackables[attackable_adjacent[adj_hex]] |= unit_bit;
 		}
 	}
 
@@ -327,11 +327,10 @@ namespace HotaMechanics {
 		for (auto unit : _enemy_hero.getUnitsPtrs()) {
 			bool can_reach_any_unit = false;
 
-			for (auto friendly_unit : _active_stack.getHero()->getUnitsPtrs()) { // h3hota hd.exe + 2055D
+			for (auto friendly_unit : _active_stack.getHero()->getUnitsPtrs())// h3hota hd.exe + 2055D
 				can_reach_any_unit |= canUnitAttackHex(*unit, friendly_unit->getHex());
-			}
 
-			if( can_reach_any_unit )
+			if (can_reach_any_unit)
 				continue;
 
 			int fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(*unit, _active_stack);
@@ -339,11 +338,9 @@ namespace HotaMechanics {
 			if (fight_value_gain <= 0)
 				continue;
 
-			for (int hex = 0, uid = unit->getUnitId(); hex < FIELD_SIZE; ++hex) {
-				if (player_unit_attackables[hex] & (1 << uid)) {
+			for (int hex = 1, uid = unit->getUnitId(); hex < FIELD_SIZE; ++hex)
+				if (hexes_fight_value_gain[hex] < max_fight_value_gain && player_unit_attackables[hex] & (1 << uid))
 					hexes_fight_value_gain[hex] = std::min(max_fight_value_gain, hexes_fight_value_gain[hex] + fight_value_gain);
-				}
-			}
 		}
 
 		std::for_each(std::begin(hexes_fight_value_gain), std::end(hexes_fight_value_gain), [](auto& obj) { obj = -obj; });

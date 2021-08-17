@@ -26,7 +26,9 @@ namespace HotaMechanics {
 		// ------------------------------
 
 		// check state ------------------
-		inline const bool isWalkable() const noexcept;
+		const bool isWalkable() const noexcept {
+			return walkable && (occupied_by == Constants::CombatHexOccupation::SOFT_OBSTACLE || occupied_by == Constants::CombatHexOccupation::EMPTY);
+		}
 		// ------------------------------
 
 		// simple getters ---------------
@@ -69,43 +71,33 @@ namespace HotaMechanics {
 		explicit CombatField(const Constants::CombatFieldType _field_type, const Constants::CombatFieldTemplate _field_template = Constants::CombatFieldTemplate::EMPTY);
 		CombatField(const CombatField& _obj) = default; 
 		CombatField(CombatField&& _obj) = default;
-		/*{
 
-
-			std::cout << "copy " << std::endl;
-		}*/
-		CombatField& operator=(const CombatField& _field) {
-			combatFieldId = _field.combatFieldId;
-			combatFieldTemplate = _field.combatFieldTemplate;
-			for (auto& hex : _field.hexes)
-				hexes[hex.getId()].occupyHex(hex.getOccupation());
-
-			return *this;
-		}
 
 		// complex getters -------------------
 		const int64_t getHash() const;
 		// -----------------------------------
 
 		// change state ----------------------
-		void fillHex(const int16_t _target_hex, const Constants::CombatHexOccupation _occupied_by) {
+		void fillHex(const uint8_t _target_hex, const Constants::CombatHexOccupation _occupied_by) {
 			hexes[_target_hex].occupyHex(_occupied_by);
+			occupied.push_back(_target_hex);
 		}
-		void clearHex(const int16_t _target_hex) {
-			fillHex(_target_hex, Constants::CombatHexOccupation::EMPTY);
+		void clearHex(const uint8_t _target_hex) {
+			hexes[_target_hex].occupyHex(Constants::CombatHexOccupation::EMPTY);
+			occupied.remove(_target_hex);
 		}
 		void setTemplate(const Constants::CombatFieldTemplate _field_template);
 		int64_t rehash();
 		// ----------------------------------
 
 		// check state ----------------------
-		const bool isHexWalkable(const int16_t _hex_id, const bool _ghost_hex = false) const {
+		const bool isHexWalkable(const uint8_t _hex_id, const bool _ghost_hex = false) const noexcept {
 			return hexes[_hex_id].isWalkable() || (_ghost_hex && hexes[_hex_id].getOccupation() == Constants::CombatHexOccupation::UNIT);
 		}
 		// ----------------------------------
 
 		// simple getters -------------------
-		const CombatHex& getById(const int16_t _hex_id) const { return hexes[_hex_id]; }
+		const CombatHex& getById(const uint8_t _hex_id) const { return hexes[_hex_id]; }
 		const HexArray& getHexes() const { return hexes; }
 		const Constants::CombatFieldType getType() { return combatFieldId; }
 		const Constants::CombatFieldTemplate getTemplate() { return combatFieldTemplate; }
@@ -119,6 +111,7 @@ namespace HotaMechanics {
 		Constants::CombatFieldTemplate combatFieldTemplate{ Constants::CombatFieldTemplate::EMPTY };
 		HexArray hexes;
 		int64_t hash{ 0 };
+		std::list<uint8_t> occupied;
 
 		static std::unordered_map<Constants::CombatFieldTemplate, CombatField*> fields;
 	};

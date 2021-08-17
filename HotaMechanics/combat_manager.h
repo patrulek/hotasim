@@ -100,13 +100,13 @@ namespace HotaMechanics {
 		// -----------------------------
 
 		// unit utils ------------------
-		void moveUnit(CombatUnit& _unit, int _target_hex);
-		void makeUnitAttack(int _unit_id, int _target_hex);
-		void makeUnitFly(int _target_hex);
-		void makeUnitWalk(int _target_hex, int _walk_distance = -1);
+		void moveUnit(CombatUnit& _unit, uint8_t _target_hex);
+		void makeUnitAttack(int _unit_id, uint8_t _target_hex);
+		void makeUnitFly(uint8_t _target_hex);
+		void makeUnitWalk(uint8_t _target_hex, int _walk_distance = -1);
 		void makeUnitDefend();
 		void makeUnitWait();
-		const std::vector<CombatUnit*> getUnitsInRange(const Constants::CombatSide _side, const std::vector<int16_t>& _hexes) const;
+		const std::vector<CombatUnit*> getUnitsInRange(const Constants::CombatSide _side, const std::vector<uint8_t>& _hexes) const;
 		// -----------------------------
 
 		// state utils -----------------

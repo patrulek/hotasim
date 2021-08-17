@@ -53,28 +53,28 @@ namespace HotaSim {
 	}
 
 	uint64_t CombatSimulator::evaluateCombatStateAttackScore(const CombatState& _initial_state, const CombatState& _state) const {
-		float initial_fight_value = calculateBaseHeroFightValue(_initial_state.defender);
-		float current_fight_value = calculateBaseHeroFightValue(_state.defender);
+		const float initial_fight_value = static_cast<float>(calculateBaseHeroFightValue(_initial_state.defender));
+		const float current_fight_value = static_cast<float>(calculateBaseHeroFightValue(_state.defender));
 
-		return (1 << 15) * (1.0f - current_fight_value / initial_fight_value);
+		return static_cast<uint64_t>((1 << 15) * (1.0f - current_fight_value / initial_fight_value));
 	}
 
 	uint64_t CombatSimulator::evaluateCombatStateDefenseScore(const CombatState& _initial_state, const CombatState& _state) const {
-		float initial_fight_value = calculateBaseHeroFightValue(_initial_state.attacker);
-		float current_fight_value = calculateBaseHeroFightValue(_state.attacker);
+		const float initial_fight_value = static_cast<float>(calculateBaseHeroFightValue(_initial_state.attacker));
+		const float current_fight_value = static_cast<float>(calculateBaseHeroFightValue(_state.attacker));
 
-		return (1 << 15) * (current_fight_value / initial_fight_value);
+		return static_cast<uint64_t>((1 << 15) * (current_fight_value / initial_fight_value));
 	}
 
 	uint64_t CombatSimulator::evaluateCombatStateTurnsScore(const CombatState& _initial_state, const CombatState& _state) const {
-		return (1 << 15) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f);
+		return static_cast<uint64_t>((1 << 15) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f));
 	}
 
 	uint64_t CombatSimulator::evaluateCombatStateManaScore(const CombatState& _initial_state, const CombatState& _state) const {
-		bool has_mana = _initial_state.attacker.getMana();
+		const bool has_mana = _initial_state.attacker.getMana();
 
 		if (has_mana)
-			return (1 << 15) * (1.0f - (_state.attacker.getMana() - _initial_state.attacker.getMana()) / _initial_state.attacker.getMana());
+			return static_cast<uint64_t>((1 << 15) * (1.0f - (_state.attacker.getMana() - _initial_state.attacker.getMana()) / _initial_state.attacker.getMana()));
 		return (1 << 15);
 	}
 

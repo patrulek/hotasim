@@ -66,13 +66,13 @@ namespace HotaMechanics {
 	void CombatManager::placeUnitsBeforeStart() {
 		int unit_order = 0;
 		for (auto& unit : current_state->attacker.getUnitsPtrs()) {
-			const int16_t hex = (int16_t)ai->getPathfinder().getUnitStartHex(CombatSide::ATTACKER, unit_order++, (int16_t)current_state->attacker.getUnitsPtrs().size(), unit->isDoubleWide(), combat_type);
+			const auto hex = ai->getPathfinder().getUnitStartHex(CombatSide::ATTACKER, unit_order++, (int16_t)current_state->attacker.getUnitsPtrs().size(), unit->isDoubleWide(), combat_type);
 			moveUnit(const_cast<CombatUnit&>(*unit), hex);
 		}
 
 		unit_order = 0;
 		for (auto& unit : current_state->defender.getUnitsPtrs()) {
-			const int16_t hex = (int16_t)ai->getPathfinder().getUnitStartHex(CombatSide::DEFENDER, unit_order++, (int16_t)current_state->defender.getUnitsPtrs().size(), unit->isDoubleWide(), combat_type);
+			const auto hex = ai->getPathfinder().getUnitStartHex(CombatSide::DEFENDER, unit_order++, (int16_t)current_state->defender.getUnitsPtrs().size(), unit->isDoubleWide(), combat_type);
 			moveUnit(const_cast<CombatUnit&>(*unit), hex);
 		}
 
@@ -142,7 +142,7 @@ namespace HotaMechanics {
 			nextUnit();
 	}
 
-	const std::vector<CombatUnit*> CombatManager::getUnitsInRange(const CombatSide _side, const std::vector<int16_t>& _hexes) const {
+	const std::vector<CombatUnit*> CombatManager::getUnitsInRange(const CombatSide _side, const std::vector<uint8_t>& _hexes) const {
 		std::vector<CombatUnit*> units_in_range;
 		auto& hero = _side == CombatSide::ATTACKER ? current_state->attacker : current_state->defender;
 

@@ -63,7 +63,7 @@ namespace HotaMechanics {
 
 	const std::vector<CombatAction> CombatManager::generateActionsForAI() {
 		auto& active_stack = getActiveStack();
-		const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, 998);
+		const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, 254);
 
 		if (!active_stack.canMakeAction())
 			return std::vector<CombatAction>();
