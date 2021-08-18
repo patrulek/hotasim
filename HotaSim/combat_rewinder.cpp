@@ -24,19 +24,20 @@ namespace HotaSim {
 			std::cout << "Unit (" << to_string(active_stack) << ") has defended\n";
 		}
 		else if (_action.action == CombatActionType::WALK) {
-			auto hex = manager.getCurrentState().field.getById(active_stack.getHex());
-			auto path = const_cast<CombatPathfinder&>(manager.getCombatAI().getPathfinder()).findPath(active_stack.getHex(), _action.target,
+			auto& hex = manager.getCurrentState().field.getById(active_stack.getHex());
+			const_cast<CombatPathfinder&>(manager.getCombatAI().getPathfinder()).clearPathCache();
+			auto& path = const_cast<CombatPathfinder&>(manager.getCombatAI().getPathfinder()).findPath(active_stack.getHex(), _action.target,
 				manager.getCurrentState().field, false);
 
 			int walk_distance = _action.param1 == -1 ? active_stack.getCombatStats().spd : _action.param1;
 			walk_distance = std::min(path.size(), (size_t)walk_distance) - 1;
-			auto target_hex = manager.getCurrentState().field.getById(path[walk_distance]);
+			auto& target_hex = manager.getCurrentState().field.getById(path[walk_distance]);
 
 			std::cout << "Unit (" << to_string(active_stack) << ") has walked from " << to_string(hex) << " to " << to_string(target_hex) << "\n";
 		}
 		else if (_action.action == CombatActionType::ATTACK) {
 			auto& defender = manager.getStackByLocalId(_action.param1, active_stack.getEnemyCombatSide());
-			auto hex = manager.getCurrentState().field.getById(_action.target);
+			auto& hex = manager.getCurrentState().field.getById(_action.target);
 			std::cout << "Unit (" << to_string(active_stack) << ") chose to attack unit (" << to_string(defender) << ") at " << to_string(hex) << "\n";
 		}
 	}

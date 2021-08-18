@@ -358,13 +358,14 @@ namespace HotaMechanics {
 		for (uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex) {
 			if (adjacent_hexes[adj_hex] == _active_stack.getHex())
 				return false;
-			hex_access |= combat_manager.getCurrentState().field.isHexWalkable(adjacent_hexes[adj_hex]);
+			if( !hex_access)
+				hex_access |= combat_manager.getCurrentState().field.isHexWalkable(adjacent_hexes[adj_hex]);
 		}
 
-		if (!hex_access)
+		if (!hex_access || !combat_manager.getCurrentState().field.isHexWalkable(_target_hex))
 			return true;
 
-		const bool path_exists = pathfinder->realDistanceBetweenHexes(_active_stack.getHex(), _target_hex, combat_manager.getCurrentState().field, false, true) != 255;
+		const bool path_exists = pathfinder->realDistanceBetweenHexes(_active_stack.getHex(), _target_hex, combat_manager.getCurrentState().field, false, false) != 255;
 		return !path_exists;
 	}
 
@@ -519,35 +520,34 @@ namespace HotaMechanics {
 		auto& adjacent_hexes = pathfinder->getAdjacentHexesClockwise(target_unit.getHex());
 		auto& field = combat_manager.getCurrentState().field;
 
-		int hex = INVALID_HEX_ID;
-		int turns = -1;
+		uint8_t hex = INVALID_HEX_ID, turns = 0xFF, distance = 0xFF, adj_hex = 0;
 		int hex_fight_value_gain = 0;
-		int distance = -1;
 
-		for( uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex) {
+		for (; adj_hex < 6; ++adj_hex) {
+			// choose first possible
+			if (!isHexBlockedFor(adjacent_hexes[adj_hex], activeStack)) {
+				hex = adjacent_hexes[adj_hex];
+				distance = pathfinder->realDistanceBetweenHexes(activeStack.getHex(), adjacent_hexes[adj_hex], field);
+				turns = (distance / activeStack.getCombatStats().spd) + ((distance % activeStack.getCombatStats().spd) != 0);
+				hex_fight_value_gain = hexes_fight_value_gain[adjacent_hexes[adj_hex]];
+
+				++adj_hex;
+				break;
+			}
+		}
+
+		for (;  adj_hex < 6; ++adj_hex) {
 			if (isHexBlockedFor(adjacent_hexes[adj_hex], activeStack))
 				continue;
 
-			int adj_distance = pathfinder->realDistanceBetweenHexes(activeStack.getHex(), adjacent_hexes[adj_hex], combat_manager.getCurrentState().field);
-
-			if (adj_distance == 0 && (adjacent_hexes[adj_hex] != activeStack.getHex())) // target hex isnt blocked but is not walkable
-				continue;
-
-			int adj_turns = static_cast<int>((adj_distance == 0) ? 1 : std::ceil((float)adj_distance / activeStack.getCombatStats().spd));
-			int adj_hex_fight_value_gain = hexes_fight_value_gain[adjacent_hexes[adj_hex]];
-
-			// if didnt choose any yet, check first possible
-			if (hex == INVALID_HEX_ID) {
-				hex = adjacent_hexes[adj_hex];
-				turns = adj_turns;
-				hex_fight_value_gain = adj_hex_fight_value_gain;
-				distance = adj_distance;
-				continue;
-			}
+			uint8_t adj_distance = pathfinder->realDistanceBetweenHexes(activeStack.getHex(), adjacent_hexes[adj_hex], field);
+			uint8_t adj_turns = (adj_distance / activeStack.getCombatStats().spd) + ((adj_distance % activeStack.getCombatStats().spd) != 0);
 
 			// if current hex is more turns away from us than already chosen, go next
 			if (adj_turns > turns)
 				continue;
+
+			int adj_hex_fight_value_gain = hexes_fight_value_gain[adjacent_hexes[adj_hex]];
 
 			// if current hex is worse in fight_value_gain terms, go next
 			if (adj_hex_fight_value_gain < hex_fight_value_gain)

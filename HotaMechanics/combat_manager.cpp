@@ -19,7 +19,9 @@ namespace HotaMechanics {
 		field = std::make_unique<CombatField>(_field);
 		ai = std::make_unique<CombatAI>(*this);
 
+		actions.reserve(128);
 		action_events.reserve(32);
+		hexes_to_attack.reserve(32);
 		all_units.reserve(32);
 	}
 

@@ -55,6 +55,8 @@ namespace HotaMechanics {
 		std::vector<uint8_t> path;
 		std::array<Constants::AdjacentArray, Constants::FIELD_SIZE + 1> adjacents;
 
+		std::unordered_map<uint64_t, std::tuple<Constants::FieldArray, Constants::FieldArray, Constants::FieldFlagArray, std::vector<uint8_t>>> pathmap_order;
+
 		using HexDistanceArray = std::array<std::array<uint8_t, Constants::FIELD_SIZE + 1>, Constants::FIELD_SIZE + 1>;
 		HexDistanceArray hex_distances;
 		// path cache
