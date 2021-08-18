@@ -168,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="combat_estimator.h" />
+    <ClInclude Include="combat_manager_serializer.h" />
     <ClInclude Include="combat_rewinder.h" />
     <ClInclude Include="combat_sequencetree.h" />
     <ClInclude Include="combat_simulator.h" />

@@ -32,7 +32,7 @@ namespace CombatManagerTest {
 		}
 		EXPECT_EQ(19, walking_actions);
 
-		CombatAction player_action{ CombatActionType::DEFENSE, -1, -1, true };
+		CombatAction player_action{ CombatActionType::DEFENSE, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
 		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(8, 15), true };
 		combat_manager->nextStateByAction(ai_action);
@@ -40,9 +40,9 @@ namespace CombatManagerTest {
 
 
 		// start turn 2
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
-		ai_action = CombatAction{ CombatActionType::DEFENSE, -1, -1, true };
+		ai_action = CombatAction{ CombatActionType::DEFENSE, -1, 0xFF, true };
 		combat_manager->nextStateByAction(ai_action);
 
 		actions = combat_manager->generateActionsForPlayer(); 
@@ -136,7 +136,7 @@ namespace CombatManagerTest {
 		combat_manager->nextState();
 
 		// start turn 2
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, -1 };
 		combat_manager->nextStateByAction(player_action);
 
 		// when one player unit in range, always choose that one to attack
@@ -155,16 +155,16 @@ namespace CombatManagerTest {
 		// start turn 1
 		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(7, 2), true };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::DEFENSE, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::DEFENSE, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
 		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(8, 2), true };
 		combat_manager->nextStateByAction(ai_action);
 		combat_manager->nextState();
 
 		// start turn 2
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, -1 };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, -1 };
 		combat_manager->nextStateByAction(player_action);
 
 		// when two player's units in range (at same distance), ane both are same(or very similar) strength, then AI attacks random stack, so generate 2 attack actions
@@ -209,7 +209,7 @@ namespace CombatManagerTest {
 		combat_manager->nextState();
 
 		// start turn 2
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, -1 };
 		combat_manager->nextStateByAction(player_action);
 
 		// when no player unit in range, choos to walk
@@ -235,7 +235,7 @@ namespace CombatManagerTest {
 		combat_manager->nextState();
 
 		// start turn 2
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, -1 };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, -1 };
 		combat_manager->nextStateByAction(player_action);
 
 		// when one player unit in range, always choose that one to attack
@@ -275,7 +275,7 @@ namespace CombatManagerTest {
 		combat_manager->nextStateByAction(player_action);
 		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(7, 7), true };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
 
 		auto actions = combat_manager->generateActionsForAI();
@@ -330,9 +330,9 @@ namespace CombatManagerTest {
 		// start turn 2
 		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(5, 9), true };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
 
 		auto actions = combat_manager->generateActionsForAI();
@@ -373,9 +373,9 @@ namespace CombatManagerTest {
 		// start turn 1
 		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(1, 6), true };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
 
 		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(2, 12), true };
@@ -391,16 +391,16 @@ namespace CombatManagerTest {
 		combat_manager->nextState();
 
 		// start turn 2
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
 
-		ai_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		ai_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(ai_action);
-		ai_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		ai_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(ai_action);
 		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(5, 11), true };
 		combat_manager->nextStateByAction(ai_action);

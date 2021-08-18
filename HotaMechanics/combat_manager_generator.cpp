@@ -75,7 +75,7 @@ namespace HotaMechanics {
 		hexes_to_attack.clear();
 
 		for (auto unit : current_state->attacker.getUnitsPtrs()) {
-			const int hex = ai->chooseHexToMoveForAttack(active_stack, *unit);
+			const uint8_t hex = ai->chooseHexToMoveForAttack(active_stack, *unit);
 			hexes_to_attack.push_back(hex);
 		}
 

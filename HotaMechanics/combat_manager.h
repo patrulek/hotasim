@@ -23,11 +23,6 @@ namespace HotaMechanics {
 		CombatManager& operator=(const CombatManager& _obj) = delete;
 		~CombatManager();
 
-		// state serializer -------------
-		std::shared_ptr<CombatStatePacked> packCombatState(const CombatState& _state);
-		CombatState* unpackCombatState(const CombatStatePacked& _packed_state);
-		// ------------------------------
-
 		// state machine ----------------
 		void initialize();
 		void reinitialize();

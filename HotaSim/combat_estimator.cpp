@@ -21,7 +21,7 @@ namespace HotaSim {
 		}
 
 		const int estimateTotalStatesNumber(const CombatState& _initial_state) {
-			return 1000000; // TODO: implement
+			return 4000000; // TODO: implement
 		}
 
 		const int estimateActionEffectivness(const CombatAction& _action, const CombatManager& _mgr) {

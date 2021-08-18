@@ -260,7 +260,7 @@ namespace HotaMechanics {
 		while (to_check_cnt > 0 && dist <= range_) {
 			uint8_t hex_id = to_check[--to_check_cnt];
 
-			if (dist <= range_) {
+			if (dist <= range_ && hex_id != _source_hex) {
 				reachables.push_back(hex_id);
 			}
 

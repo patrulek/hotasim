@@ -56,5 +56,8 @@
     <ClInclude Include="mempool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="combat_manager_serializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

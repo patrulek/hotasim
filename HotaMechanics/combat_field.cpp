@@ -59,6 +59,7 @@ namespace HotaMechanics {
 
 	void CombatField::setTemplate(const CombatFieldTemplate _field_template) {
 		const std::vector<int>& _template = Utils::getCombatFieldTemplate(_field_template);
+		occupied.clear();
 
 		if (_template.size() != FIELD_SIZE)
 			throw std::exception("Wrong template size");

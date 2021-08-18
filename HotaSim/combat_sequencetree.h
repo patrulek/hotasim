@@ -50,7 +50,7 @@ namespace std {
 }
 
 namespace HotaSim {
-	
+	struct CombatSerializer;
 
 	struct CombatSequenceNode {
 		std::shared_ptr<CombatStatePacked> state;
@@ -72,6 +72,7 @@ namespace HotaSim {
 	class CombatSequenceTree
 	{
 	public:
+		const CombatSerializer& serializer;
 		const CombatManager& manager;
 		std::shared_ptr<CombatSequenceNode> root{ nullptr };
 		CombatSequenceNode* current{ nullptr };
@@ -85,10 +86,14 @@ namespace HotaSim {
 		std::unordered_map<StateHash, int16_t> state_hashes;
 		std::unordered_map<StateHash, CombatSequenceNode*> node_hashes;
 		int circular_occurence{ 0 };
+		int early_cutoff{ 0 };
+		uint64_t best_score{ 0x0000800080008000 };
+		int best_turns{ 0 };
 		std::array<int, 32> turns_occurence;
 		std::array<int, 128> level_occurence;
 
-		CombatSequenceTree(const HotaMechanics::CombatManager& _manager, const CombatState& _initial_state, const uint64_t _initial_state_score = 0x0000800080008000);
+		CombatSequenceTree(const CombatSerializer& _serializer, const HotaMechanics::CombatManager& _manager, 
+			const CombatState& _initial_state, const uint64_t _initial_state_score = 0x0000800080008000);
 
 		bool hasParent() {
 			return current->parent != root.get();
@@ -96,7 +101,7 @@ namespace HotaSim {
 		bool unitStackLastAction() {
 			return current->action + 1 == current->action_size;
 		}
-		void addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed);
+		void addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const bool _first_ai_attack = false);
 		bool isCurrentRoot() const { return current == root.get(); }
 
 		void sortForgotten();

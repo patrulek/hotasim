@@ -84,7 +84,7 @@ namespace HotaMechanics {
 		Constants::AIDifficulty difficulty{ Constants::AIDifficulty::NORMAL };
 		bool similar_army_strength{ true }; // > 2x fight_value for one side
 
-		Constants::FieldArray hexes_fight_value_gain;
+		std::array<int, Constants::FIELD_SIZE + 1> hexes_fight_value_gain;
 
 		std::vector<CombatEvent> events_to_process;
 		std::vector<const CombatUnit*> units;

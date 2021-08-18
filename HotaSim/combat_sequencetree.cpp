@@ -1,6 +1,7 @@
 #include "combat_sequencetree.h"
 
 #include "../HotaMechanics/combat_manager.h"
+#include "combat_manager_serializer.h"
 
 #include "mempool.h"
 
@@ -8,12 +9,12 @@ using namespace HotaMechanics;
 
 namespace HotaSim {
 
-	CombatSequenceTree::CombatSequenceTree(const HotaMechanics::CombatManager& _manager, const CombatState& _initial_state, const uint64_t _initial_state_score)
-		: manager(_manager) {
-		const auto& packed_state = const_cast<CombatManager&>(manager).packCombatState(_initial_state);
+	CombatSequenceTree::CombatSequenceTree(const CombatSerializer& _serializer, const HotaMechanics::CombatManager& _manager, const CombatState& _initial_state, const uint64_t _initial_state_score)
+		: serializer(_serializer), manager(_manager) {
+		const auto& packed_state = const_cast<CombatSerializer&>(serializer).packCombatState(_initial_state);
 		size = 1;
 
-		auto root_node = Mempool::retrieveCombatSequenceNode();
+		auto& root_node = Mempool::retrieveCombatSequenceNode();
 		root_node->state = packed_state;
 		root_node->action = 0;
 		root_node->action_size = 1;
@@ -60,13 +61,23 @@ namespace HotaSim {
 	}
 
 
-	void CombatSequenceTree::addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed) {
+	void CombatSequenceTree::addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const bool _first_ai_attack) {
 		circular_path_found = false;
 
+		if (best_score & 0x8000000000000000) {
+			if ((_state_score & 0x0000FFFFFFFFFFFF) < (best_score & 0x0000FFFFFFFFFFFF) && _state.turn >= best_turns) {
+				++early_cutoff;
+				circular_path_found = true;
+				return;
+			}
+		}
 
-		++level_occurence[current->level];
-		++size;
-		++turns_occurence[_state.turn];
+		if (_first_ai_attack) {
+			++early_cutoff;
+			circular_path_found = true;
+			return;
+		}
+
 		auto state_hash = StateHash(const_cast<CombatState&>(_state));
 
 		if (auto it = state_hashes.find(state_hash); it != std::end(state_hashes)
@@ -81,7 +92,15 @@ namespace HotaSim {
 			state_hashes[state_hash] = _state.turn;
 		}
 
-		auto packed_state = const_cast<CombatManager&>(manager).packCombatState(_state);
+		if (_state_score > best_score) {
+			best_score = _state_score;
+			best_turns = _state.turn;
+		}
+
+		++level_occurence[current->level];
+		++size;
+		++turns_occurence[_state.turn];
+		auto packed_state = const_cast<CombatSerializer&>(serializer).packCombatState(_state);
 		current->addChild(packed_state, _action, _action_size, _state_score, _seed, size);
 		//node_hashes[StateHash(const_cast<CombatState&>(_state))] = current->children.back().get();
 		current = current->children.back().get();

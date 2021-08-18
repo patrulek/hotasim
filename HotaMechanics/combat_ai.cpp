@@ -365,7 +365,7 @@ namespace HotaMechanics {
 		if (!hex_access || !combat_manager.getCurrentState().field.isHexWalkable(_target_hex))
 			return true;
 
-		const bool path_exists = pathfinder->realDistanceBetweenHexes(_active_stack.getHex(), _target_hex, combat_manager.getCurrentState().field, false, false) != 255;
+		const bool path_exists = pathfinder->realDistanceBetweenHexes(_active_stack.getHex(), _target_hex, combat_manager.getCurrentState().field, false) != 255;
 		return !path_exists;
 	}
 

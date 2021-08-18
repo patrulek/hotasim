@@ -93,7 +93,6 @@ namespace HotaMechanics {
 	}
 
 	void CombatManager::setCurrentState(const CombatStatePacked& _state) {
-		unpackCombatState(_state);
 		setAllUnitStacks();
 		//const_cast<CombatField&>(current_state->field).rehash();
 		//ai->initializeBattle(nullptr, nullptr, nullptr, nullptr, true);

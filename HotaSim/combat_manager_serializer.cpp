@@ -1,14 +1,20 @@
+#include "combat_manager_serializer.h"
+
 #include "../HotaMechanics/combat_manager.h"
 #include "mempool.h"
 
 #include <thread>
 
-namespace HotaMechanics {
+namespace HotaSim {
 	using namespace Constants;
-	using namespace HotaSim;
 
-	std::shared_ptr<CombatStatePacked> CombatManager::packCombatState(const CombatState& _state) {
+
+	CombatSerializer::CombatSerializer(CombatManager& _manager)
+		: manager(_manager) {}
+
+	std::shared_ptr<CombatStatePacked> CombatSerializer::packCombatState(const CombatState& _state) {
 		auto& packed_state = Mempool::retrieveCombatStatePacked();
+		auto ai = &const_cast<CombatAI&>(manager.getCombatAI());
 
 		packed_state->last_unit = _state.last_unit;
 		packed_state->turn = _state.turn;
@@ -56,12 +62,10 @@ namespace HotaMechanics {
 			}
 		}
 
-		for (int i = 0; i < FIELD_SIZE; ++i) {
-			if (_state.field.getById(i).getOccupation() != CombatHexOccupation::EMPTY) {
-				const int idx = i / 2;
-				const int shift = (i & 1) * 4;
-				packed_state->hex_occupations[idx] |= (static_cast<int8_t>(_state.field.getById(i).getOccupation()) << shift);
-			}
+		for (int i = 0; i < FIELD_SIZE + 1; i+=2) {
+			const int idx = i / 2;
+			packed_state->hex_occupations[idx] =
+				(static_cast<uint8_t>(_state.field.getById(i).getOccupation())) | (static_cast<uint8_t>(_state.field.getById(i + 1).getOccupation()) << 4);
 		}
 
 		auto& p_r = ai->getPlayerReachables();
@@ -77,10 +81,13 @@ namespace HotaMechanics {
 		return packed_state;
 	}
 
-	CombatState* CombatManager::unpackCombatState(const CombatStatePacked& _packed_state) {
+	CombatState* CombatSerializer::unpackCombatState(const CombatStatePacked& _packed_state) {
 
 		// attacker hero
 		//CombatHero attacker_(attacker->getTemplate(), attacker->getArmyPermutation(), CombatSide::ATTACKER);
+		auto current_state = &manager.getCurrentState();
+		auto ai = &const_cast<CombatAI&>(manager.getCombatAI());
+
 		auto& units = current_state->attacker.getUnitsPtrs();
 		for (int i = 0; i < _packed_state.attacker_units_size; ++i) {
 			const_cast<CombatUnit*>(units[i])->setStats(_packed_state.attacker_units[i].stats);
@@ -127,6 +134,6 @@ namespace HotaMechanics {
 				state->order.push_back(_packed_state.order[i]);
 		}
 
-		return state.get();
+		return state;
 	}
 }

@@ -8,6 +8,7 @@
 #include "../HotaMechanics/combat_ai.h"
 #include "../HotaMechanics/combat_state.h"
 #include "../HotaMechanics/combat_calculator.h"
+#include "combat_manager_serializer.h"
 #include "combat_sequencetree.h"
 #include "combat_estimator.h"
 #include "combat_rewinder.h"
@@ -130,7 +131,7 @@ namespace HotaSim {
 			for (auto permutation : permutations) {
 				prepareCombat(permutation, /*i*/ CombatFieldTemplate::IMPS_2x100);
 
-				CombatSequenceTree tree(*manager, manager->getInitialState());
+				CombatSequenceTree tree(*serializer, *manager, manager->getInitialState());
 				int last_size = 0;
 				int jump_root = 0;
 				int jump_random_parent = 0;
@@ -147,15 +148,22 @@ namespace HotaSim {
 
 				while (!simulatorConstraintsViolated(tree)) {
 					int cb_finish_cnt = combat_finished_cnt;
+					bool was_player_attack = false;
+					bool player_started = false;
 
 					while (!combatConstraintsViolated(tree)) {
 						auto tsize = tree.getSize();
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
+								player_started = true;
+
 								auto actions = manager->generateActionsForPlayer();
 								//auto action_order = Estimator::shuffleActions(actions, *manager, seed);
 								
 								auto action_idx = action_cnt;// action_order[action_cnt];
+
+								if (actions[action_idx].action == CombatActionType::ATTACK)
+									was_player_attack = true;
 
 								//std::cout << "Player action (" << action_idx + 1 << " / " << actions.size() << "): " << (int)actions[action_idx].action
 								//	<< " - " << actions[action_idx].target << " ### Unit: " << manager->getActiveStack().getGlobalUnitId() << "\n";
@@ -171,9 +179,13 @@ namespace HotaSim {
 							else {
 								auto actions = manager->generateActionsForAI();
 								// TODO: for now, take only first ai action (in most cases there will be one action anyway)
+								bool ai_attack_first = false;
+								if (!was_player_attack && player_started && actions[0].action == CombatActionType::ATTACK)
+									ai_attack_first = true;
+
 								manager->nextStateByAction(actions[0]);
 								tree.addState(manager->getCurrentState(), 0, 1, 
-									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1);
+									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1, ai_attack_first);
 								//std::cout << "AI Action (size = " << actions.size() << ")\n";
 							}
 							continue;
@@ -183,6 +195,8 @@ namespace HotaSim {
 						tree.addState(manager->getCurrentState(), 0, 1,
 							evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1);
 
+						player_started = false;
+						was_player_attack = false;
 						//std::cout << "\n--- Start Turn " << manager->getCurrentState().turn << " --- \n\n";
 					}
 
@@ -190,6 +204,7 @@ namespace HotaSim {
 						++last_size;
 						std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
 						std::cout << "Circular occurences: " << tree.circular_occurence << std::endl;
+						std::cout << "Early cutoffs: " << tree.early_cutoff << std::endl;
 						std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
 						std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 						std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
@@ -243,6 +258,7 @@ namespace HotaSim {
 
 					//std::cout << " --- CURRENT TURN: " << tree.current->state->turn << " --- \n\n";
 					seed = tree.current->seed;
+					serializer->unpackCombatState(*tree.current->state);
 					manager->setCurrentState(*tree.current->state);
 
 					if (action_cnt == tree.current->children.back()->action_size) {
@@ -272,6 +288,7 @@ namespace HotaSim {
 
 				std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
 				std::cout << "Circular occurences: " << tree.circular_occurence << std::endl;
+				std::cout << "Early cutoffs: " << tree.early_cutoff << std::endl;
 				std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
 				std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 				std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
@@ -302,6 +319,7 @@ namespace HotaSim {
 
 		manager = std::make_unique<CombatManager>(*combat_attacker, *combat_defender, *combat_field, combat_type);
 		manager->initialize();
+		serializer = std::make_unique<CombatSerializer>(*manager);
 	}
 
 	std::shared_ptr<CombatField> CombatSimulator::prepareCombatField(const CombatFieldTemplate _field_template) {

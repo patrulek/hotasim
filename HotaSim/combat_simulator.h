@@ -23,6 +23,7 @@ namespace HotaMechanics {
 
 namespace HotaSim {
 	class CombatSequenceTree;
+	class CombatSerializer;
 
 	class CombatSimulator
 	{
@@ -65,6 +66,7 @@ namespace HotaSim {
 
 		// during combat
 		std::unique_ptr<CombatState> best_state;
+		std::unique_ptr<CombatSerializer> serializer;
 
 		// before combat start
 		std::unique_ptr<CombatManager> manager;

@@ -87,33 +87,33 @@ namespace CombatAITest {
 	// CombatAI::chooseUnitToAttack(attacker, enemy_hero)
 	TEST(CombatAI, shouldChooseExactlyThisUnitToAttackIfOnlyOneUnitStackLeftInEnemyHero) {
 		auto manager = createCombatManager();
-		auto& ai = manager->getCombatAI();
+		auto& ai = const_cast<CombatAI&>(manager->getCombatAI());
 
 		auto active_stack = manager->getCurrentState().defender.getUnitsPtrs()[0];
 		auto unit = manager->getCurrentState().attacker.getUnitsPtrs()[0];
 		auto& field = manager->getCurrentState().field;
 
-		std::vector<int16_t> hexes{ ai.chooseHexToMoveForAttack(*active_stack, *unit) };
+		std::vector<uint8_t> hexes{ ai.chooseHexToMoveForAttack(*active_stack, *unit) };
 		// only one unit
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, manager->getCurrentState().attacker, hexes).size());
 
 		// idx of this unit in enemy hero unit vector
-		EXPECT_EQ(0, ai.chooseUnitToAttack(*active_stack, manager->getCurrentState().attacker, hexes).front());
+		EXPECT_EQ(0, ai.chooseUnitToAttack(*active_stack, manager->getCurrentState().attacker, hexes).front()->getUnitId());
 	}
 
 	// CombatAI::chooseUnitToAttack(attacker, enemy_hero)
 	TEST(CombatAI, shouldChooseSecondUnitStackToChaseWhenEqualStacksAndCannotAttackBoth) {
 		auto combat_manager = createCombatManager(createHero(createArmy("Imp", 100, "Imp", 100)), createHero(createArmy("Peasant", 500), CombatSide::DEFENDER));
-		auto& ai = combat_manager->getCombatAI();
+		auto& ai = const_cast<CombatAI&>(combat_manager->getCombatAI());
 		auto& pathfinder = const_cast<CombatPathfinder&>(ai.getPathfinder());
 
 		// start battle
 		combat_manager->nextState();
 
 		// start turn 1
-		CombatAction player_action{ CombatActionType::WAIT, -1, -1, true };
+		CombatAction player_action{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WAIT, -1, -1, true };
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
 		combat_manager->nextStateByAction(player_action);
 
 		auto& field = combat_manager->getCurrentState().field;
@@ -123,40 +123,40 @@ namespace CombatAITest {
 		auto& attacker = combat_manager->getCurrentState().attacker;
 		auto unit = combat_manager->getCurrentState().attacker.getUnitsPtrs()[0];
 		auto unit2 = combat_manager->getCurrentState().attacker.getUnitsPtrs()[1];
-		std::vector<int16_t> hexes{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
+		std::vector<uint8_t> hexes{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
 
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
-		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
+		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front()->getUnitId());
 
 		const_cast<CombatUnit&>(active_stack).moveTo(getHexId(7, 13));
 		pathfinder.clearPathCache();
-		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
+		hexes = std::vector<uint8_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
-		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
+		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front()->getUnitId());
 
 		const_cast<CombatUnit&>(active_stack).moveTo(getHexId(7, 10));
 		pathfinder.clearPathCache();
-		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
+		hexes = std::vector<uint8_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
-		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
+		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front()->getUnitId());
 
 		const_cast<CombatUnit&>(active_stack).moveTo(getHexId(7, 7));
 		pathfinder.clearPathCache();
-		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
+		hexes = std::vector<uint8_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
-		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
+		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front()->getUnitId());
 
 		const_cast<CombatUnit&>(active_stack).moveTo(getHexId(7, 4));
 		pathfinder.clearPathCache();
-		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
+		hexes = std::vector<uint8_t>{ ai.chooseHexToMoveForAttack(active_stack, *unit), ai.chooseHexToMoveForAttack(active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).size());
-		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front());
+		EXPECT_EQ(1, ai.chooseUnitToAttack(active_stack, attacker, hexes).front()->getUnitId());
 	}
 
 	// CombatAI::chooseUnitToAttack(attacker, enemy_hero)
 	TEST(CombatAI, shouldChooseRandomlyFromTwoStacksIfEqualStacksAndCanAttackBoth) {
 		auto manager = createCombatManager();
-		auto& ai = manager->getCombatAI();
+		auto& ai = const_cast<CombatAI&>(manager->getCombatAI());
 		auto& pathfinder = const_cast<CombatPathfinder&>(ai.getPathfinder());
 
 		auto active_stack = manager->getCurrentState().defender.getUnitsPtrs()[0];
@@ -169,39 +169,39 @@ namespace CombatAITest {
 		auto& attacker = manager->getCurrentState().attacker;
 		auto unit = manager->getCurrentState().attacker.getUnitsPtrs()[0];
 		auto unit2 = manager->getCurrentState().attacker.getUnitsPtrs()[1];
-		std::vector<int16_t> hexes{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
+		std::vector<uint8_t> hexes{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 
 		auto& field = manager->getCurrentState().field;
 		field.setTemplate(CombatFieldTemplate::TMP1);
 		pathfinder.clearPathCache();
 
-		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
+		hexes = std::vector<uint8_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
-		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front());
+		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front()->getUnitId());
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(7, 13));
 		pathfinder.clearPathCache();
 		const_cast<CombatUnit*>(manager->getCurrentState().attacker.getUnitsPtrs()[0])->moveTo(getHexId(7, 1));
 		const_cast<CombatUnit*>(manager->getCurrentState().attacker.getUnitsPtrs()[1])->moveTo(getHexId(6, 1));
-		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
+		hexes = std::vector<uint8_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
-		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front());
+		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front()->getUnitId());
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(7, 10));
 		pathfinder.clearPathCache();
-		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
+		hexes = std::vector<uint8_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
-		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front());
+		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front()->getUnitId());
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(7, 7));
 		pathfinder.clearPathCache();
-		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
+		hexes = std::vector<uint8_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
-		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front());
+		EXPECT_EQ(1, ai.chooseUnitToAttack(*active_stack, attacker, hexes).front()->getUnitId());
 
 		const_cast<CombatUnit*>(active_stack)->moveTo(getHexId(7, 4));
 		pathfinder.clearPathCache();
-		hexes = std::vector<int16_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
+		hexes = std::vector<uint8_t>{ ai.chooseHexToMoveForAttack(*active_stack, *unit), ai.chooseHexToMoveForAttack(*active_stack, *unit2) };
 		EXPECT_EQ(2, ai.chooseUnitToAttack(*active_stack, attacker, hexes).size());
 	}
 
