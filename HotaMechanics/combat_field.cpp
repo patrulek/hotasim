@@ -14,7 +14,7 @@ namespace HotaMechanics {
 		//__debugbreak();
 		hash = 0;
 		for (auto& hex : occupied)
-			hash ^= std::hash<uint8_t>{}(hex);//((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
+			hash ^= std::hash<uint64_t>{}(hex);//((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
 		//for (auto& hex : hexes)
 		//	hash ^= (hex.isWalkable() * std::hash<int16_t>{}(hex.getId()));//((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
 
@@ -77,7 +77,7 @@ namespace HotaMechanics {
 
 		if (fields.find(_field_template) == std::end(fields))
 			fields[_field_template] = new CombatField(*this);
-		//rehash();
+		rehash();
 	}
 
 	CombatField CombatField::retrieveCombatField(CombatFieldType _field_type, CombatFieldTemplate _field_template) {

@@ -235,18 +235,18 @@ namespace HotaMechanics {
 			return EMPTY_PATH;
 
 		std::reverse(std::begin(path), std::end(path));
-		//distance_cache[PathCache(_field, _source_hex, _target_hex, _double_wide)] = (int16_t)path.size();
 		return path;
 	}
 
 	void CombatPathfinder::pathMap(const uint8_t _source_hex, const CombatField& _field, const bool _double_wide, const uint8_t _range) {
-		auto hash = _field.getHash();
-		hash ^= std::hash<uint64_t>{}(_source_hex);
-		if (pathmap_order.find(hash) != std::end(pathmap_order)) {
-			cache_buffer = pathmap_order[hash];
-			restorePathCache();
-			return;
-		}
+		//auto hash = _field.getHash();
+		//hash ^= std::hash<uint64_t>{}(_source_hex);
+		//hash ^= std::hash<uint64_t>{}(_range);
+		//if (pathmap_order.find(hash) != std::end(pathmap_order)) {
+		//	cache_buffer = pathmap_order[hash];
+		//	restorePathCache();
+		//	return;
+		//}
 		
 		checked[_source_hex] = true;
 		const uint8_t range_ = _range + 1;
@@ -287,9 +287,9 @@ namespace HotaMechanics {
 				to_check[to_check_cnt++] = next_to_check[--next_to_check_cnt]; // reverse array
 		}
 
-		if (range_ > 32) {
-			pathmap_order[hash] = std::make_tuple(paths, distances, checked, reachables);
-		}
+		//if (range_ > 32) {
+		//	pathmap_order[hash] = std::make_tuple(paths, distances, checked, reachables);
+		//}
 	}
 
 	std::vector<uint8_t>& CombatPathfinder::findPath(const uint8_t _source_hex, const uint8_t _target_hex, const CombatField& _field, const bool _double_wide, const bool _ghost_hex, const uint8_t _range) {

@@ -167,6 +167,9 @@ namespace HotaMechanics {
 	void CombatAI::processUnitPosChangedEvent(const CombatEvent& _ev) {
 		auto& unit = combat_manager.getStackByGlobalId(_ev.param1);
 		auto& field = combat_manager.getCurrentState().field;
+		field.clearHex(_ev.param2);
+		field.fillHex(_ev.param3, CombatHexOccupation::UNIT);
+		field.rehash();
 		//combat_manager.getCurrentState().field.rehash();
 
 		clearUnitAttackables(unit);
@@ -284,6 +287,8 @@ namespace HotaMechanics {
 		clearUnitAttackables(unit);
 
 		auto& field = combat_manager.getCurrentState().field;
+		field.clearHex(unit.getHex());
+		field.rehash();
 		//std::vector<int16_t> to_check(64);
 
 		for (auto u : combat_manager.getAllUnitStacks()) {

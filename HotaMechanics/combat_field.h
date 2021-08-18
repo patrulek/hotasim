@@ -83,13 +83,16 @@ namespace HotaMechanics {
 		// change state ----------------------
 		void fillHex(const uint8_t _target_hex, const Constants::CombatHexOccupation _occupied_by) {
 			hexes[_target_hex].occupyHex(_occupied_by);
-			occupied.insert(_target_hex);
+
+			if( _occupied_by == Constants::CombatHexOccupation::UNIT || _occupied_by == Constants::CombatHexOccupation::SOLID_OBSTACLE)
+				occupied.insert(_target_hex);
 		}
 		void clearHex(const uint8_t _target_hex) {
 			hexes[_target_hex].occupyHex(Constants::CombatHexOccupation::EMPTY);
 			occupied.erase(_target_hex);
 		}
 		void setTemplate(const Constants::CombatFieldTemplate _field_template);
+
 		int64_t rehash();
 		// ----------------------------------
 

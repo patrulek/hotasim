@@ -56,7 +56,7 @@ namespace HotaSim {
 		child_node->level = this->level + 1;
 		child_node->id = _size + 1;
 		if (child_node->action_size > 1)
-			children.reserve(32);
+			children.reserve(child_node->action_size);
 		children.emplace_back(std::move(child_node));
 	}
 

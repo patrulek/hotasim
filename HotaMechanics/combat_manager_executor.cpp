@@ -44,6 +44,7 @@ namespace HotaMechanics {
 		}
 
 		current_state->field.fillHex(new_event.param3, CombatHexOccupation::UNIT);
+		current_state->field.rehash();
 		action_events.emplace_back(std::move(new_event));
 		active_stack.setDone(); // TODO: shouldnt be done yet if we're attacking, unless quicksand or smth
 	}

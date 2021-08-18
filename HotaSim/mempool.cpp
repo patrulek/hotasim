@@ -10,7 +10,7 @@
 namespace HotaSim {
 	using namespace HotaMechanics;
 
-	const int Mempool::BLOCK_SIZE{ 200000 };
+	const int Mempool::BLOCK_SIZE{ 500000 };
 	const float Mempool::DEFRAG_FACTOR{ 0.75f };
 
 

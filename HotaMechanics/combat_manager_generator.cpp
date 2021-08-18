@@ -12,6 +12,16 @@ namespace HotaMechanics {
 		auto& active_stack = getActiveStack();
 		const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, active_stack.getCombatStats().spd);
 
+#ifdef _DEBUG
+		for (auto hex : const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd,
+			current_state->field, false, false, false)) {
+			if (!current_state->field.isHexWalkable(hex)) {
+				const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
+				const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, active_stack.getCombatStats().spd);
+			}//throw std::exception("serious shit here");
+		}
+#endif
+
 		if (!active_stack.canMakeAction())
 			return std::vector<CombatAction>();
 
@@ -26,7 +36,7 @@ namespace HotaMechanics {
 			auto& adjacent = ai->getPathfinder().getAdjacentHexes(unit->getHex());
 
 			for (uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex) {
-				if (ai->canUnitAttackHex(active_stack, adjacent[adj_hex]))
+				if (ai->canUnitReachHex(active_stack, adjacent[adj_hex]))
 					actions.push_back(createAttackAction(unit->getUnitId(), adjacent[adj_hex]));
 			}
 		}
@@ -65,6 +75,16 @@ namespace HotaMechanics {
 	const std::vector<CombatAction> CombatManager::generateActionsForAI() {
 		auto& active_stack = getActiveStack();
 		const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, 254);
+
+#ifdef _DEBUG
+		for (auto hex : const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(active_stack.getHex(), 254,
+			current_state->field, false, false, false)) {
+			if (!current_state->field.isHexWalkable(hex)) {
+				const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
+				const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, 254);
+			}//throw std::exception("serious shit here");
+		}
+#endif
 
 		if (!active_stack.canMakeAction())
 			return std::vector<CombatAction>();
