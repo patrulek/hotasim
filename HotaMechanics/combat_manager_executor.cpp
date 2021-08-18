@@ -37,12 +37,14 @@ namespace HotaMechanics {
 		auto new_event = createUnitPosChangedEvent(active_stack.getGlobalUnitId(), active_stack.getHex(), active_stack.getHex());
 		int walk_distance = _walk_distance == -1 ? active_stack.getCombatStats().spd : _walk_distance;
 		int16_t range = (int16_t)std::min(path.size(), (size_t)walk_distance);
+		current_state->field.clearHex(active_stack.getHex());
 		for (int i = 0; i < range; ++i) {
-			moveUnit(active_stack, path[i]);
+			active_stack.moveTo(path[i]);
 			new_event.param3 = path[i];
 		}
 
-		action_events.push_back(new_event);
+		current_state->field.fillHex(new_event.param3, CombatHexOccupation::UNIT);
+		action_events.emplace_back(std::move(new_event));
 		active_stack.setDone(); // TODO: shouldnt be done yet if we're attacking, unless quicksand or smth
 	}
 
@@ -81,13 +83,5 @@ namespace HotaMechanics {
 
 		if (active_stack.isAlive())
 			active_stack.setDone();
-	}
-
-	void CombatManager::moveUnit(CombatUnit& _unit, uint8_t _target_hex) {
-		current_state->field.clearHex(_unit.getHex());
-		// TODO: check double_wide
-		_unit.moveTo(_target_hex);
-		current_state->field.fillHex(_target_hex, CombatHexOccupation::UNIT);
-		// TODO: check double_wide
 	}
 }; // HotaMechanics

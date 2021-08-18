@@ -2,7 +2,6 @@
 
 #include "combat_hero.h"
 #include "combat_field.h"
-
 #include "utils.h"
 #include <memory>
 #include <iostream>
@@ -28,41 +27,45 @@ namespace HotaMechanics {
 		CombatHero defender;
 		CombatField field;
 
-		std::list<int16_t> order;	// for attacker it will be 0-20; for defender it will be 21-41
+		void setAttacker(CombatHero&& _attacker) {
+			memmove(&attacker, &_attacker, sizeof(CombatHero));//attacker = std::move(_attacker);
+		}
+		void setDefender(CombatHero&& _defender) { 
+			memmove(&defender, &_defender, sizeof(CombatHero));
+		}
+		void setField(CombatField&& _field) { 
+			memmove(&field, &_field, sizeof(CombatField)); 
+		}
+
+		std::list<uint8_t> order;	// for attacker it will be 0-20; for defender it will be 21-41
 
 		int64_t rehash();
 	};
 
 	struct CombatUnitPacked {
 		UnitStats stats{ 0 };
-		uint16_t hex{ 0 };
+		uint8_t hex{ 0 };
 		uint16_t stack_number{ 0 };
 		uint16_t health_lost{ 0 };
 		CombatUnitState state{ 0 };
 	};
 
 	struct CombatStatePacked {
-		~CombatStatePacked() {
-			if (order) delete[] order;
-			if (attacker_units) delete[] attacker_units;
-			if (defender_units) delete[] defender_units;
-		}
-
 		// combat state
-		int16_t last_unit : 6;
-		int16_t turn : 8;
-		int16_t result : 3;
-		int16_t order_size : 6;
-		int16_t* order{ nullptr };
+		int8_t last_unit : 6;
+		int8_t turn : 8;
+		int8_t result : 3;
+		int8_t order_size : 6;
+		uint8_t* order{ nullptr };
 
 		// attacker state
 		HeroStats attacker_stats{ 0 };
-		uint16_t attacker_units_size : 3;
+		uint8_t attacker_units_size : 3;
 		CombatUnitPacked* attacker_units{ nullptr };
 
 		// defender state
 		HeroStats defender_stats{ 0 };
-		uint16_t defender_units_size : 3;
+		uint8_t defender_units_size : 3;
 		CombatUnitPacked* defender_units{ nullptr };
 
 		// field state

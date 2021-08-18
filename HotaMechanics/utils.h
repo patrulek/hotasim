@@ -36,6 +36,56 @@ namespace HotaMechanics::Utils {
 	constexpr size_t ceil(const double _val) {
 		return (size_t)_val;
 	}
+
+	//template<typename T>
+	//struct VectorList {
+	//	std::vector<T> data;
+	//	std::vector<uint8_t> nexts;
+	//	std::vector<uint8_t> prevs;
+	//	uint8_t head{ 0xFF };
+	//	uint8_t tail{ 0xFF };
+
+	//	VectorList() {
+	//		data.reserve(32);
+	//		nexts.reserve(32);
+	//		prevs.reserve(32);
+	//	}
+
+	//	void push_first(const T& _val) {
+	//		head = tail = 0;
+	//		data[0] = _val;
+	//		nexts[0] = 0xFF;
+	//		prevs[0] = 0xFF;
+	//	}
+
+	//	void push_back(const T& _val) {
+	//		if (tail = 0xFF) {
+	//			push_first(_val);
+	//			return;
+	//		}
+
+	//		nexts[tail] = tail + 1;
+	//		prevs[tail + 1] = tail;
+	//		data[++tail] = _val;
+	//	}
+
+	//	void remove_first() {
+	//		head = nexts[0];
+
+	//		if( head )
+	//	}
+
+	//	void remove(const T& _val) {
+	//		if (auto it = std::find(std::begin(data), std::end(data), _val); it != std::end(data)) {
+	//			if (it == std::begin(data))
+	//				remove_first();
+	//		}
+	//	}
+
+	//	std::vector<T> get_list() {
+	//		return data;
+	//	}
+	//};
 	//template<int16_t hex, typename... Args>
 	//static const std::array<CombatHex, 32> make_hexarray(const CombatHex& t, const Args&... _args) {
 	//	if constexpr (sizeof...(_args) == 31)

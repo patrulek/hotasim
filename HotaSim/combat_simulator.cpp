@@ -149,7 +149,7 @@ namespace HotaSim {
 					int cb_finish_cnt = combat_finished_cnt;
 
 					while (!combatConstraintsViolated(tree)) {
-						int tsize = tree.getSize();
+						auto tsize = tree.getSize();
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
 								auto actions = manager->generateActionsForPlayer();
@@ -161,7 +161,7 @@ namespace HotaSim {
 								//	<< " - " << actions[action_idx].target << " ### Unit: " << manager->getActiveStack().getGlobalUnitId() << "\n";
 
 								manager->nextStateByAction(actions[action_idx]);
-								tree.addState(manager->getCurrentState(), action_cnt, actions.size(), 
+								tree.addState(manager->getCurrentState(), action_cnt, (int)actions.size(), 
 									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), seed);
 
 								//seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
@@ -243,8 +243,7 @@ namespace HotaSim {
 
 					//std::cout << " --- CURRENT TURN: " << tree.current->state->turn << " --- \n\n";
 					seed = tree.current->seed;
-					auto forgotten_state = manager->unpackCombatState(*tree.current->state);
-					manager->setCurrentState(*forgotten_state);
+					manager->setCurrentState(*tree.current->state);
 
 					if (action_cnt == tree.current->children.back()->action_size) {
 						std::cout << "All states reached. End simulation\n";

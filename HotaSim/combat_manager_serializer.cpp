@@ -1,19 +1,22 @@
-#include "combat_manager.h"
+#include "../HotaMechanics/combat_manager.h"
+#include "mempool.h"
 
+#include <thread>
 
 namespace HotaMechanics {
 	using namespace Constants;
+	using namespace HotaSim;
 
 	std::shared_ptr<CombatStatePacked> CombatManager::packCombatState(const CombatState& _state) {
-		auto packed_state = std::make_shared<CombatStatePacked>();
+		auto& packed_state = Mempool::retrieveCombatStatePacked();
 
 		packed_state->last_unit = _state.last_unit;
 		packed_state->turn = _state.turn;
-		packed_state->result = static_cast<int16_t>(_state.result);
+		packed_state->result = static_cast<int8_t>(_state.result);
 		packed_state->order_size = _state.order.size();
 
 		if (packed_state->order_size > 0) {
-			packed_state->order = new int16_t[packed_state->order_size];
+			packed_state->order = Mempool::retrieveUint8(packed_state->order_size);
 			int i = 0;
 			for (auto order_unit : _state.order)
 				packed_state->order[i++] = order_unit;
@@ -23,7 +26,7 @@ namespace HotaMechanics {
 		packed_state->attacker_units_size = _state.attacker.getUnitsPtrs().size();
 
 		if (packed_state->attacker_units_size > 0) {
-			packed_state->attacker_units = new CombatUnitPacked[packed_state->attacker_units_size];
+			packed_state->attacker_units = Mempool::retrieveCombatUnitPacked(packed_state->attacker_units_size);
 			int i = 0;
 
 			for (auto unit : _state.attacker.getUnitsPtrs()) {
@@ -40,7 +43,7 @@ namespace HotaMechanics {
 		packed_state->defender_units_size = _state.defender.getUnitsPtrs().size();
 
 		if (packed_state->defender_units_size > 0) {
-			packed_state->defender_units = new CombatUnitPacked[packed_state->defender_units_size];
+			packed_state->defender_units = Mempool::retrieveCombatUnitPacked(packed_state->defender_units_size);
 			int i = 0;
 
 			for (auto unit : _state.defender.getUnitsPtrs()) {
@@ -53,27 +56,32 @@ namespace HotaMechanics {
 			}
 		}
 
-		for (int i = 0; i < FIELD_SIZE + 1; ++i) {
-			const int idx = i / 2;
-			const int shift = (i % 2 == 1) * 4;
-			packed_state->hex_occupations[idx] |= (static_cast<int8_t>(_state.field.getById(i).getOccupation()) << shift);
+		for (int i = 0; i < FIELD_SIZE; ++i) {
+			if (_state.field.getById(i).getOccupation() != CombatHexOccupation::EMPTY) {
+				const int idx = i / 2;
+				const int shift = (i & 1) * 4;
+				packed_state->hex_occupations[idx] |= (static_cast<int8_t>(_state.field.getById(i).getOccupation()) << shift);
+			}
 		}
 
-		for (int i = 0; i < FIELD_SIZE + 1; ++i) {
-			packed_state->player_reachables[i] = static_cast<int8_t>(ai->getPlayerReachables()[i]);
-			packed_state->player_attackables[i] = static_cast<int8_t>(ai->getPlayerAttackables()[i]);
-			packed_state->ai_reachables[i] = static_cast<int8_t>(ai->getAIReachables()[i]);
-			packed_state->ai_attackables[i] = static_cast<int8_t>(ai->getAIAttackables()[i]);
-		}
+		auto& p_r = ai->getPlayerReachables();
+		auto& p_a = ai->getPlayerAttackables();
+		auto& ai_r = ai->getAIReachables();
+		auto& ai_a = ai->getAIAttackables();
+
+		std::copy(std::begin(p_r), std::end(p_r), std::begin(packed_state->player_reachables));
+		std::copy(std::begin(p_a), std::end(p_a), std::begin(packed_state->player_attackables));
+		std::copy(std::begin(ai_r), std::end(ai_r), std::begin(packed_state->ai_reachables));
+		std::copy(std::begin(ai_a), std::end(ai_a), std::begin(packed_state->ai_attackables));
 
 		return packed_state;
 	}
 
-	std::shared_ptr<CombatState> CombatManager::unpackCombatState(const CombatStatePacked& _packed_state) {
+	CombatState* CombatManager::unpackCombatState(const CombatStatePacked& _packed_state) {
 
 		// attacker hero
-		CombatHero attacker_(attacker->getTemplate(), attacker->getArmyPermutation(), CombatSide::ATTACKER);
-		auto& units = attacker_.getUnitsPtrs();
+		//CombatHero attacker_(attacker->getTemplate(), attacker->getArmyPermutation(), CombatSide::ATTACKER);
+		auto& units = current_state->attacker.getUnitsPtrs();
 		for (int i = 0; i < _packed_state.attacker_units_size; ++i) {
 			const_cast<CombatUnit*>(units[i])->setStats(_packed_state.attacker_units[i].stats);
 			const_cast<CombatUnit*>(units[i])->setHex(_packed_state.attacker_units[i].hex);
@@ -83,8 +91,8 @@ namespace HotaMechanics {
 		}
 
 		// defender hero
-		CombatHero defender_(defender->getTemplate(), defender->getArmyPermutation(), CombatSide::DEFENDER);
-		auto& def_units = defender_.getUnitsPtrs();
+		//CombatHero defender_(defender->getTemplate(), defender->getArmyPermutation(), CombatSide::DEFENDER);
+		auto& def_units = current_state->defender.getUnitsPtrs();
 		for (int i = 0; i < _packed_state.defender_units_size; ++i) {
 			const_cast<CombatUnit*>(def_units[i])->setStats(_packed_state.defender_units[i].stats);
 			const_cast<CombatUnit*>(def_units[i])->setHex(_packed_state.defender_units[i].hex);
@@ -94,35 +102,31 @@ namespace HotaMechanics {
 		}
 
 		// field state info
-		CombatField field_ = CombatField::retrieveCombatField(field->getType(), field->getTemplate());
+		//CombatField field_ = CombatField::retrieveCombatField(field->getType(), field->getTemplate());
+		auto& field = current_state->field;
 		int i = 0;
-		for ( auto hex_occupation : _packed_state.hex_occupations) {
-			const_cast<CombatHex&>(field_.getById(i++)).occupyHex(static_cast<CombatHexOccupation>(hex_occupation & 0x0F));
-			const_cast<CombatHex&>(field_.getById(i++)).occupyHex(static_cast<CombatHexOccupation>((hex_occupation & 0xF0) >> 4));
+		for (auto hex_occupation : _packed_state.hex_occupations) {
+			const_cast<CombatHex&>(field.getById(i++)).occupyHex(static_cast<CombatHexOccupation>(hex_occupation & 0x0F));
+			const_cast<CombatHex&>(field.getById(i++)).occupyHex(static_cast<CombatHexOccupation>((hex_occupation & 0xF0) >> 4));
 		}
 
 		// ai state info
-		FieldArray player_reachables, player_attackables, ai_reachables, ai_attackables;
-		for (int i = 0; i < FIELD_SIZE + 1; ++i) {
-			player_reachables[i] = _packed_state.player_reachables[i];
-			player_attackables[i] = _packed_state.player_attackables[i];
-			ai_reachables[i] = _packed_state.ai_reachables[i];
-			ai_attackables[i] = _packed_state.ai_attackables[i];
-		}
-
-		ai->initializeBattle(&player_reachables, &player_attackables, &ai_reachables, &ai_attackables);
+		ai->initializeBattle(&_packed_state.player_reachables, &_packed_state.player_attackables,
+			&_packed_state.ai_reachables, &_packed_state.ai_attackables);
 
 		// combat state info
-		auto state = std::make_shared<CombatState>(std::move(attacker_), std::move(defender_), std::move(field_));
+		//auto state = Mempool::retrieveCombatState(std::move(attacker_), std::move(defender_), std::move(field_));
+		auto& state = current_state;
 		state->last_unit = _packed_state.last_unit;
 		state->turn = _packed_state.turn;
 		state->result = static_cast<CombatResult>(_packed_state.result);
 
 		if (_packed_state.order_size > 0) {
+			state->order.clear();
 			for (int i = 0; i < _packed_state.order_size; ++i)
 				state->order.push_back(_packed_state.order[i]);
 		}
 
-		return state;
+		return state.get();
 	}
 }

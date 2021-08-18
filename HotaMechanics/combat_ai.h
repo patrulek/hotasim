@@ -31,9 +31,9 @@ namespace HotaMechanics {
 		// -------------------------------
 
 		// AI decision making ------------
-		const std::vector<int> chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const std::vector<int16_t>& _hexes_to_attack) const;
-		const int16_t chooseHexToMoveForAttack(const CombatUnit& _active_stack, const CombatUnit& _target_unit) const;
-		const int chooseWalkDistanceFromPath(const CombatUnit& _active_stack, int _target_hex, const CombatField& _field, const int _unit_id) const;
+		const std::vector<const CombatUnit*>& chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const std::vector<uint8_t>& _hexes_to_attack);
+		const uint8_t chooseHexToMoveForAttack(const CombatUnit& _active_stack, const CombatUnit& _target_unit) const;
+		const int chooseWalkDistanceFromPath(const CombatUnit& _active_stack, uint8_t _target_hex, const CombatField& _field, const int _unit_id) const;
 		// -------------------------------
 
 		// AI state ----------------------
@@ -45,15 +45,15 @@ namespace HotaMechanics {
 
 		const Constants::FieldArray& getAttackablesForUnit(const CombatUnit& _unit) const;
 		const Constants::FieldArray& getReachablesForUnit(const CombatUnit& _unit) const;
-		std::vector<int16_t> getAttackableHexesForUnit(const CombatUnit& _unit) const;
-		std::vector<int16_t> getReachableHexesForUnit(const CombatUnit& _unit) const;
-		std::vector<int16_t> getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const;
+		std::vector<uint8_t> getAttackableHexesForUnit(const CombatUnit& _unit) const;
+		std::vector<uint8_t> getReachableHexesForUnit(const CombatUnit& _unit) const;
+		std::vector<uint8_t> getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<uint8_t>& _hexes) const;
 		
-		const bool canUnitReachHex(const CombatUnit& _unit, const int16_t _hex) const;
-		const bool canUnitAttackHex(const CombatUnit& _unit, const int16_t _hex) const;
+		const bool canUnitReachHex(const CombatUnit& _unit, const uint8_t _hex) const;
+		const bool canUnitAttackHex(const CombatUnit& _unit, const uint8_t _hex) const;
 
-		std::vector<const CombatUnit*> getEnemyUnitsInAttackRange(const CombatUnit& _unit) const;
-		const bool isHexBlockedFor(const int16_t _target_hex, const CombatUnit& _active_stack) const;
+		std::vector<const CombatUnit*>& getEnemyUnitsInAttackRange(const CombatUnit& _unit);
+		const bool isHexBlockedFor(const uint8_t _target_hex, const CombatUnit& _active_stack) const;
 		const bool isUnitBlockedFor(const CombatUnit& _unit, const CombatUnit& _active_stack) const;
 		// -------------------------------
 
@@ -87,6 +87,7 @@ namespace HotaMechanics {
 		Constants::FieldArray hexes_fight_value_gain;
 
 		std::vector<CombatEvent> events_to_process;
+		std::vector<const CombatUnit*> units;
 
 		Constants::FieldArray player_unit_reachables;
 		Constants::FieldArray player_unit_attackables;

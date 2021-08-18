@@ -53,7 +53,7 @@ namespace HotaSim {
 	
 
 	struct CombatSequenceNode {
-		const std::shared_ptr<CombatStatePacked> state;
+		std::shared_ptr<CombatStatePacked> state;
 		CombatSequenceNode* parent{ nullptr };
 		std::vector<std::shared_ptr<CombatSequenceNode>> children;
 		int action{ 0 };
@@ -61,18 +61,12 @@ namespace HotaSim {
 		int depth{ 0 };
 		int level{ 0 };
 		int seed{ 0 };
-		int id{ 0 };
+		uint64_t id{ 0 };
 		uint64_t score{ 0 };
 		uint64_t best_branch_score{ 0 };
 		bool cutout{ false };
 
-		CombatSequenceNode(std::shared_ptr<CombatStatePacked> _state, const int _action, const int _action_size, const uint64_t _score, CombatSequenceNode* _parent, const int _seed)
-			: state(_state), action(_action), action_size(_action_size), score(_score), best_branch_score(_score), parent(_parent), seed(_seed) {
-
-			children.reserve(64);
-		}
-
-		void addChild(std::shared_ptr<CombatStatePacked> _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const int _size);
+		void addChild(std::shared_ptr<CombatStatePacked> _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const uint64_t _size);
 	};
 
 	class CombatSequenceTree
@@ -108,7 +102,7 @@ namespace HotaSim {
 		void sortForgotten();
 		void takeForgotten();
 
-		int getSize() const { return size; }
+		uint64_t getSize() const { return size; }
 		const bool canTakeForgotten() const { return fp_cnt >= forgotten_paths.size(); }
 
 		void goParent();

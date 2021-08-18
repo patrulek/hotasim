@@ -12,17 +12,20 @@ namespace HotaMechanics {
 	class CombatHero;
 	class CombatField;
 
-	struct CombatUnitState {
-		bool is_alive{ false };
-		bool is_summon{ false };
-		bool is_clone{ false };
-		bool morale{ false };
-		bool waiting{ false };
-		bool done{ false };
-		bool defending{ false };
-		bool sacrificed{ false };
-		bool retaliated{ false };
-		bool applied_hero_stats{ false };
+	union CombatUnitState {
+		int16_t state;
+		struct {
+			bool is_alive{ false };
+			bool is_summon{ false };
+			bool is_clone{ false };
+			bool morale{ false };
+			bool waiting{ false };
+			bool done{ false };
+			bool defending{ false };
+			bool sacrificed{ false };
+			bool retaliated{ false };
+			bool applied_hero_stats{ false };
+		} flags;
 	};
 
 	class CombatUnit {
@@ -51,15 +54,15 @@ namespace HotaMechanics {
 		// -------------------------------
 
 		// check unit state --------------
-		const bool canDefend() const { return !state.defending; }
-		const bool isAlive() const { return state.is_alive; }
-		const bool canMakeAction() const { return state.is_alive && !state.done; }
-		const bool canWait() const {	return !state.waiting; }
+		const bool canDefend() const { return !state.flags.defending; }
+		const bool isAlive() const { return state.flags.is_alive; }
+		const bool canMakeAction() const { return state.flags.is_alive && !state.flags.done; }
+		const bool canWait() const {	return !state.flags.waiting; }
 			// C8DE0 - get unit number shots and check if arrow tower
 		const bool canShoot() const { return stats.combat_stats.shots > 0; }// 0 && false; // unit->getNumberShots && unit->isArrowTower()}
 		const bool canFly() const { return false; }// flags & 2; }
 		const bool canCast() const { return false; } // todo}
-		const bool canRetaliate() const { return !state.retaliated; }
+		const bool canRetaliate() const { return !state.flags.retaliated; }
 		// -------------------------------
 
 		// check hero state --------------
@@ -100,7 +103,7 @@ namespace HotaMechanics {
 		void setStats(const UnitStats& _stats) { stats = _stats; }
 		void setStackNumber(const int16_t _stack_number) { stack_number = _stack_number; }
 		void setHealthLost(const int16_t _health_lost) { health_lost = _health_lost; }
-		void setHex(const int16_t _hex) { hex = _hex; }
+		void setHex(const uint8_t _hex) { hex = _hex; }
 		// -------------------------------
 
 		// simple getters ----------------
@@ -111,9 +114,9 @@ namespace HotaMechanics {
 		const CombatUnitState getState() const { return state; }
 		int16_t getHealthLost() const { return health_lost; }
 		uint8_t getHex() const { return hex; };
-		const Unit& getTemplate() const { return unit_template; }
+		const Unit& getTemplate() const { return *unit_template; }
 		int16_t getStackNumber() const { return stack_number; }
-		float getFightValue() const { return unit_template.stats.fight_value; }
+		float getFightValue() const { return unit_template->stats.fight_value; }
 		const CombatHero* getHero() const { return hero; }
 		const int16_t getUnitId() const { return uid; }
 		// -------------------------------
@@ -123,7 +126,7 @@ namespace HotaMechanics {
 		// -------------------------------
 	private:
 		int16_t uid{ -1 };
-		Unit unit_template;
+		const Unit* unit_template;
 		const CombatHero* hero{ nullptr };
 
 		UnitStats stats;

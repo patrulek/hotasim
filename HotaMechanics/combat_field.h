@@ -9,6 +9,7 @@
 #include "structures.h"
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace HotaMechanics {
 	class CombatHex {
@@ -72,6 +73,8 @@ namespace HotaMechanics {
 		CombatField(const CombatField& _obj) = default; 
 		CombatField(CombatField&& _obj) = default;
 
+		CombatField& operator=(CombatField&& _obj) = default;
+
 
 		// complex getters -------------------
 		const int64_t getHash() const;
@@ -80,11 +83,11 @@ namespace HotaMechanics {
 		// change state ----------------------
 		void fillHex(const uint8_t _target_hex, const Constants::CombatHexOccupation _occupied_by) {
 			hexes[_target_hex].occupyHex(_occupied_by);
-			occupied.push_back(_target_hex);
+			occupied.insert(_target_hex);
 		}
 		void clearHex(const uint8_t _target_hex) {
 			hexes[_target_hex].occupyHex(Constants::CombatHexOccupation::EMPTY);
-			occupied.remove(_target_hex);
+			occupied.erase(_target_hex);
 		}
 		void setTemplate(const Constants::CombatFieldTemplate _field_template);
 		int64_t rehash();
@@ -111,7 +114,7 @@ namespace HotaMechanics {
 		Constants::CombatFieldTemplate combatFieldTemplate{ Constants::CombatFieldTemplate::EMPTY };
 		HexArray hexes;
 		int64_t hash{ 0 };
-		std::list<uint8_t> occupied;
+		std::unordered_set<uint8_t> occupied;
 
 		static std::unordered_map<Constants::CombatFieldTemplate, CombatField*> fields;
 	};

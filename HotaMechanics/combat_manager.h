@@ -25,7 +25,7 @@ namespace HotaMechanics {
 
 		// state serializer -------------
 		std::shared_ptr<CombatStatePacked> packCombatState(const CombatState& _state);
-		std::shared_ptr<CombatState> unpackCombatState(const CombatStatePacked& _packed_state);
+		CombatState* unpackCombatState(const CombatStatePacked& _packed_state);
 		// ------------------------------
 
 		// state machine ----------------
@@ -33,9 +33,9 @@ namespace HotaMechanics {
 		void reinitialize();
 		void nextState();
 		void nextStateByAction(const CombatAction& _action);
-		void setCurrentState(const CombatState& _current_state);
+		void setCurrentState(const CombatStatePacked& _current_state);
 		const bool isUnitMove() const;
-		const bool isPlayerMove() const;
+		const bool isPlayerMove();
 		const bool isCombatFinished() const;
 		// ------------------------------
 
@@ -45,7 +45,7 @@ namespace HotaMechanics {
 		// ------------------------------
 
 		// unit utils -------------------
-		CombatUnit& getActiveStack() const;
+		CombatUnit& getActiveStack();
 		CombatUnit& getStackByGlobalId(const int _guid) const;
 		CombatUnit& getStackByLocalId(const int _uid, const Constants::CombatSide _side) const;
 		const std::vector<const CombatUnit*>& getAllUnitStacks() const;
@@ -67,17 +67,17 @@ namespace HotaMechanics {
 		const CombatAction createPreBattleAction() const;
 		const CombatAction createPreTurnAction() const;
 		const CombatAction createWaitAction() const;
-		const CombatAction createWalkAction(int16_t _hex_id, int16_t _walk_distance = -1) const;
+		const CombatAction createWalkAction(uint8_t _hex_id, int16_t _walk_distance = -1) const;
 		const CombatAction createDefendAction() const;
-		const CombatAction createSpellCastAction(int16_t _spell_id, int16_t _unit_id, int16_t _hex_id) const;
-		const CombatAction createAttackAction(int16_t _unit_id, int16_t _hex_id) const;
+		const CombatAction createSpellCastAction(int16_t _spell_id, int16_t _unit_id, uint8_t _hex_id) const;
+		const CombatAction createAttackAction(int16_t _unit_id, uint8_t _hex_id) const;
 		// ------------------------------
 
 		// event creator ----------------
-		const CombatEvent createUnitStatsChangedEvent(const int16_t _unit_id, const int16_t _stats_id) const;
+		const CombatEvent createUnitStatsChangedEvent(const int16_t _unit_id, const uint8_t _stats_id) const;
 		const CombatEvent createUnitHealthLostEvent(const int16_t _unit_id) const;
-		const CombatEvent createUnitPosChangedEvent(const int16_t _unit_id, const int16_t _source_hex, const int16_t _target_hex) const;
-		const CombatEvent createFieldChangeEvent(const std::vector<int16_t>& _hexes, const bool _destroy = true) const;
+		const CombatEvent createUnitPosChangedEvent(const int16_t _unit_id, const uint8_t _source_hex, const uint8_t _target_hex) const;
+		const CombatEvent createFieldChangeEvent(const std::vector<uint8_t>& _hexes, const bool _destroy = true) const;
 		// ------------------------------
 
 		// action processor -------------
@@ -100,7 +100,6 @@ namespace HotaMechanics {
 		// -----------------------------
 
 		// unit utils ------------------
-		void moveUnit(CombatUnit& _unit, uint8_t _target_hex);
 		void makeUnitAttack(int _unit_id, uint8_t _target_hex);
 		void makeUnitFly(uint8_t _target_hex);
 		void makeUnitWalk(uint8_t _target_hex, int _walk_distance = -1);
@@ -124,7 +123,7 @@ namespace HotaMechanics {
 		std::vector<const CombatUnit*> all_units;
 		const CombatUnit* active_stack{ nullptr };
 		std::vector<CombatAction> actions;
-		std::vector<int16_t> hexes_to_attack;
+		std::vector<uint8_t> hexes_to_attack;
 		
 
 		// post-initialization

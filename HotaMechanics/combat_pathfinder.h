@@ -33,7 +33,7 @@ namespace HotaMechanics {
 		const Constants::AdjacentArray getAdjacentHexesClockwise(const uint8_t _source_hex) const;
 		const Constants::AdjacentArray getAdjacentHexesCounterClockwise(const uint8_t _source_hex) const;
 
-		std::vector<uint8_t> getReachableHexesInRange(const uint8_t _source_hex, const uint8_t _range, const CombatField& _field,
+		std::vector<uint8_t>& getReachableHexesInRange(const uint8_t _source_hex, const uint8_t _range, const CombatField& _field,
 																		const bool _can_fly, const bool _double_wide, const bool _ghost_hex = false);
 
 		const uint8_t getDistanceBetweenHexes(const uint8_t _source_hex, const uint8_t _target_hex) const;

@@ -53,7 +53,7 @@ namespace HotaMechanics {
 			return;
 		}
 
-		occupied.resize(16);
+		occupied.rehash(64);
 		setTemplate(_field_template);
 	}
 

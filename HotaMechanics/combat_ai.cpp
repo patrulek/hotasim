@@ -16,13 +16,14 @@ namespace HotaMechanics {
 
 		pathfinder = std::make_unique<CombatPathfinder>();
 		events_to_process.reserve(128);
+		units.reserve(16);
 	}
 
-	std::vector<int16_t> CombatAI::getReachableHexesForUnit(const CombatUnit& _unit) const {
-		std::vector<int16_t> reachable; reachable.reserve(64);
+	std::vector<uint8_t> CombatAI::getReachableHexesForUnit(const CombatUnit& _unit) const {
+		std::vector<uint8_t> reachable; reachable.reserve(64);
 		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
 
-		for (int hex = 0, uid = _unit.getUnitId(); hex < FIELD_SIZE; ++hex) {
+		for (uint8_t hex = 0, uid = _unit.getUnitId(); hex < FIELD_SIZE; ++hex) {
 			if (reachables[hex] & (1 << uid))
 				reachable.push_back(hex);
 		}
@@ -30,11 +31,11 @@ namespace HotaMechanics {
 		return reachable;
 	}
 
-	std::vector<int16_t> CombatAI::getAttackableHexesForUnit(const CombatUnit& _unit) const {
-		std::vector<int16_t> attackable; attackable.reserve(64);
+	std::vector<uint8_t> CombatAI::getAttackableHexesForUnit(const CombatUnit& _unit) const {
+		std::vector<uint8_t> attackable; attackable.reserve(64);
 		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
 
-		for (int hex = 0, uid = _unit.getUnitId(); hex < FIELD_SIZE; ++hex) {
+		for (uint8_t hex = 0, uid = _unit.getUnitId(); hex < FIELD_SIZE; ++hex) {
 			if (attackables[hex] & (1 << uid))
 				attackable.push_back(hex);
 		}
@@ -42,14 +43,14 @@ namespace HotaMechanics {
 		return attackable;
 	}
 
-	const bool CombatAI::canUnitReachHex(const CombatUnit& _unit, const int16_t _hex) const {
+	const bool CombatAI::canUnitReachHex(const CombatUnit& _unit, const uint8_t _hex) const {
 		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
 		auto uid = _unit.getUnitId();
 
 		return reachables[_hex] & (1 << uid);
 	}
 
-	const bool CombatAI::canUnitAttackHex(const CombatUnit& _unit, const int16_t _hex) const {
+	const bool CombatAI::canUnitAttackHex(const CombatUnit& _unit, const uint8_t _hex) const {
 		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
 		auto uid = _unit.getUnitId();
 
@@ -64,8 +65,8 @@ namespace HotaMechanics {
 		return _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
 	}
 
-	std::vector<int16_t> CombatAI::getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<int16_t>& _hexes) const {
-		std::vector<int16_t> attackable; attackable.reserve(128);
+	std::vector<uint8_t> CombatAI::getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<uint8_t>& _hexes) const {
+		std::vector<uint8_t> attackable; attackable.reserve(128);
 		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
 		int uid = _unit.getUnitId();
 
@@ -77,11 +78,10 @@ namespace HotaMechanics {
 		return attackable;
 	}
 
-	std::vector<const CombatUnit*> CombatAI::getEnemyUnitsInAttackRange(const CombatUnit& _unit) const {
-		std::vector<const CombatUnit*> units; units.reserve(16);
+	std::vector<const CombatUnit*>& CombatAI::getEnemyUnitsInAttackRange(const CombatUnit& _unit) {
+		units.clear();
 		auto& hero = _unit.getCombatSide() == CombatSide::ATTACKER ? combat_manager.getCurrentState().defender : combat_manager.getCurrentState().attacker;
 		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
-		int uid = _unit.getUnitId();
 
 		for (auto enemy_unit : hero.getUnitsPtrs()) {
 			if (!enemy_unit->isAlive())
@@ -97,18 +97,18 @@ namespace HotaMechanics {
 	void CombatAI::initializeBattle(const FieldArray* _player_unit_reachables, const FieldArray* _player_unit_attackables,
 											  const FieldArray* _ai_unit_reachables, const FieldArray* _ai_unit_attackables, const bool _only_ranges) {
 
-		if (_only_ranges) {
-			// temp - check correctness
-			/*FieldArray current_reachables = player_unit_reachables;
-			initializePlayerUnitAttackables();
-			for (int i = 0; i < FIELD_SIZE + 1; ++i) {
-				if (current_reachables[i] != player_unit_reachables[i]) {
-					throw std::exception("xxx, never happen");
-				}
-			}*/
-			//
-			return;
-		}
+		//if (_only_ranges) {
+		//	// temp - check correctness
+		//	/*FieldArray current_reachables = player_unit_reachables;
+		//	initializePlayerUnitAttackables();
+		//	for (int i = 0; i < FIELD_SIZE + 1; ++i) {
+		//		if (current_reachables[i] != player_unit_reachables[i]) {
+		//			throw std::exception("xxx, never happen");
+		//		}
+		//	}*/
+		//	//
+		//	return;
+		//}
 
 		initializePlayerUnitAttackables(_player_unit_reachables, _player_unit_attackables);
 		initializeAIUnitAttackables(_ai_unit_reachables, _ai_unit_attackables);
@@ -116,10 +116,12 @@ namespace HotaMechanics {
 
 	void CombatAI::initializePlayerUnitAttackables(const FieldArray* _player_unit_reachables, const FieldArray* _player_unit_attackables) {
 		if (_player_unit_reachables) {
-			for (int16_t hex = 0; hex < FIELD_SIZE + 1; ++hex) {
+			std::copy(std::begin(*_player_unit_reachables), std::end(*_player_unit_reachables), std::begin(player_unit_reachables));
+			std::copy(std::begin(*_player_unit_attackables), std::end(*_player_unit_attackables), std::begin(player_unit_attackables));
+			/*for (int16_t hex = 0; hex < FIELD_SIZE + 1; ++hex) {
 				player_unit_reachables[hex] = (*_player_unit_reachables)[hex];
 				player_unit_attackables[hex] = (*_player_unit_attackables)[hex];
-			}
+			}*/
 			return;
 		}
 
@@ -132,10 +134,12 @@ namespace HotaMechanics {
 
 	void CombatAI::initializeAIUnitAttackables(const FieldArray* _ai_unit_reachables, const FieldArray* _ai_unit_attackables) {
 		if (_ai_unit_reachables) {
-			for (int16_t hex = 0; hex < FIELD_SIZE + 1; ++hex) {
-				ai_unit_reachables[hex] = (*_ai_unit_reachables)[hex];
-				ai_unit_attackables[hex] = (*_ai_unit_attackables)[hex];
-			}
+			std::copy(std::begin(*_ai_unit_reachables), std::end(*_ai_unit_reachables), std::begin(ai_unit_reachables));
+			std::copy(std::begin(*_ai_unit_attackables), std::end(*_ai_unit_attackables), std::begin(ai_unit_attackables));
+			//for (int16_t hex = 0; hex < FIELD_SIZE + 1; ++hex) {
+			//	ai_unit_reachables[hex] = (*_ai_unit_reachables)[hex];
+			//	ai_unit_attackables[hex] = (*_ai_unit_attackables)[hex];
+			//}
 			return;
 		}
 
@@ -172,9 +176,9 @@ namespace HotaMechanics {
 			if (u == &unit || !u->isAlive())
 				continue;
 
-			pathfinder->clearPathCache();
-			auto unit_bit = (1 << u->getUnitId());
+			//auto unit_bit = (1 << u->getUnitId());
 			if (canUnitAttackHex(*u, _ev.param2) || canUnitReachHex(*u, _ev.param3)) {
+				pathfinder->clearPathCache();
 				clearUnitAttackables(*u);
 				setUnitAttackables(*u);
 			}
@@ -252,14 +256,14 @@ namespace HotaMechanics {
 		auto& adjacent_hexes = pathfinder->getAdjacentHexes(_unit.getHex());
 		auto& reachables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
 		auto& attackables = _unit.getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
-		const int unit_bit = (1 << _unit.getUnitId());
+		const uint8_t unit_bit = (1 << _unit.getUnitId());
 
 		attackables[_unit.getHex()] |= unit_bit;
 
 		for( uint8_t hex = 0; hex < 6; ++hex)
 			attackables[adjacent_hexes[hex]] |= unit_bit;
 
-		auto&& hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false, false);
+		auto& hexes = pathfinder->getReachableHexesInRange(_unit.getHex(), _unit.getCombatStats().spd, combat_manager.getCurrentState().field, false, false, false);
 		for (auto hex : hexes) {
 			reachables[hex] |= unit_bit;
 			attackables[hex] |= unit_bit;
@@ -286,25 +290,27 @@ namespace HotaMechanics {
 			if (u == &unit || !u->isAlive())
 				continue;
 
-			pathfinder->clearPathCache();
 			// if died unit was in unit range and unit was attackable (so we could reach any adjacent hex to it)
 			if (canUnitAttackHex(*u, unit.getHex())) {
-				auto unit_bit = (1 << u->getUnitId());
+				pathfinder->clearPathCache();
+				const uint8_t unit_bit = (1 << u->getUnitId());
 				auto& reachables = u->getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
 				auto& attackables = u->getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
 
 				// set dead unit pos as reachable now
 				reachables[unit.getHex()] |= unit_bit;
-				for (auto adj_hex : pathfinder->getAdjacentHexes(unit.getHex()))
-					attackables[adj_hex] |= unit_bit;
+				auto& adjacent_hexes = pathfinder->getAdjacentHexes(unit.getHex());
+				for( uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex )
+					attackables[adjacent_hexes[adj_hex]] |= unit_bit;
 
 				// go through all hexes in range that we could not reach earlier, and check that we can reach it now
 				for (auto range_hex : pathfinder->getReachableHexesInRange(u->getHex(), u->getCombatStats().spd, field, false, false, false)) {
 					reachables[range_hex] |= unit_bit;
 					attackables[range_hex] |= unit_bit;
 
-					for( auto adj_hex : pathfinder->getAdjacentHexes(range_hex))
-						attackables[adj_hex] |= unit_bit;
+					auto& adjacent_ranges = pathfinder->getAdjacentHexes(range_hex);
+					for( uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex)
+						attackables[adjacent_ranges[adj_hex]] |= unit_bit;
 				}
 			}
 		}
@@ -346,28 +352,19 @@ namespace HotaMechanics {
 		std::for_each(std::begin(hexes_fight_value_gain), std::end(hexes_fight_value_gain), [](auto& obj) { obj = -obj; });
 	}
 
-	const bool CombatAI::isHexBlockedFor(const int16_t _target_hex, const CombatUnit& _active_stack) const {
+	const bool CombatAI::isHexBlockedFor(const uint8_t _target_hex, const CombatUnit& _active_stack) const {
 		auto& adjacent_hexes = pathfinder->getAdjacentHexes(_target_hex);
-		const bool staying_around = (_target_hex == _active_stack.getHex()) ||
-			std::any_of(std::begin(adjacent_hexes), std::end(adjacent_hexes), [&_active_stack](const auto adj_hex) {return _active_stack.getHex() == adj_hex; });
-
-		if (staying_around)
-			return false;
-
 		bool hex_access = false;
-		for (auto adj_hex : adjacent_hexes) {
-			if (combat_manager.getCurrentState().field.isHexWalkable(adj_hex))
-				hex_access = true;
-			if (hex_access)
-				break;
+		for (uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex) {
+			if (adjacent_hexes[adj_hex] == _active_stack.getHex())
+				return false;
+			hex_access |= combat_manager.getCurrentState().field.isHexWalkable(adjacent_hexes[adj_hex]);
 		}
 
 		if (!hex_access)
 			return true;
 
-		// it should be better to check path from given hex to active stack than otherwise, because if hex is blocked it probably ends searching faster
-		// const bool path_exists = !pathfinder->findPath(_target_hex, _active_stack.getHex(), combat_manager.getCurrentState().field, false, true).empty();
-		const bool path_exists = !pathfinder->findPath(_active_stack.getHex(), _target_hex, combat_manager.getCurrentState().field, false, true).empty();
+		const bool path_exists = pathfinder->realDistanceBetweenHexes(_active_stack.getHex(), _target_hex, combat_manager.getCurrentState().field, false, true) != 255;
 		return !path_exists;
 	}
 
@@ -377,12 +374,15 @@ namespace HotaMechanics {
 
 	// because of randomization which cant be mirrored in this project, this function can possibly return more
 	// than one unit to attack (only if some specified conditions are met; for most cases there will be only one unit)
-	const std::vector<int> CombatAI::chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const std::vector<int16_t>& _hexes_to_attack) const {
-		if (_enemy_hero.getUnitsPtrs().size() == 1)
-			return std::vector<int>{ _enemy_hero.getUnitsPtrs()[0]->getUnitId() }; // todo: to could not always be [0]
+	const std::vector<const CombatUnit*>& CombatAI::chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const std::vector<uint8_t>& _hexes_to_attack) {
+		units.clear();
+		
+		if (_enemy_hero.getUnitsPtrs().size() == 1) {
+			units.push_back(_enemy_hero.getUnitsPtrs()[0]);
+			return units; // todo: to could not always be [0]
+		}
 
 		int turns = 999;
-		std::vector<int> unit_ids{};
 		int fight_value_gain = 0;
 		int min_fight_value_gain = 0;
 		int max_fight_value_gain = 0;
@@ -407,8 +407,8 @@ namespace HotaMechanics {
 			int unit_fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(_active_stack, *unit); //351d0
 
 			// if no unit picked or chosen unit not attackable
-			if (unit_ids.empty()) {
-				unit_ids.push_back(unit->getUnitId());
+			if (units.empty()) {
+				units.push_back(unit);
 				turns = unit_turns;
 				fight_value_gain = unit_fight_value_gain / unit_turns;
 				min_fight_value_gain = static_cast<int>(0.75f * fight_value_gain);
@@ -420,8 +420,8 @@ namespace HotaMechanics {
 
 			// if less turns to attack, pick this one
 			if (unit_turns < turns) {
-				unit_ids.clear();
-				unit_ids.push_back(unit->getUnitId());
+				units.clear();
+				units.push_back(unit);
 				turns = unit_turns;
 				fight_value_gain = unit_fight_value_gain / unit_turns;
 				min_fight_value_gain = static_cast<int>(0.75f * fight_value_gain);
@@ -437,8 +437,8 @@ namespace HotaMechanics {
 			// todo: this is simple randomization example; we'll checking fight_value range from 75%-100% of unit_fight_value_gain
 			// if attacking current unit is better, then replace 
 			if (static_cast<int>(unit_fight_value_gain * 0.75f) > max_fight_value_gain) { // if cur_min_fv > ch_max_fv -> pick cur
-				unit_ids.clear();
-				unit_ids.push_back(unit->getUnitId());
+				units.clear();
+				units.push_back(unit);
 				turns = unit_turns;
 				fight_value_gain = unit_fight_value_gain / unit_turns;
 				min_fight_value_gain = static_cast<int>(0.75f * fight_value_gain);
@@ -457,8 +457,8 @@ namespace HotaMechanics {
 
 			// check if closer
 			if (unit_distance < distance) {
-				unit_ids.clear();
-				unit_ids.push_back(unit->getUnitId());
+				units.clear();
+				units.push_back(unit);
 				fight_value_gain = unit_fight_value_gain / unit_turns;
 				min_fight_value_gain = static_cast<int>(0.75f * fight_value_gain);
 				max_fight_value_gain = fight_value_gain;
@@ -468,7 +468,7 @@ namespace HotaMechanics {
 			if (unit_distance > distance)
 				continue;
 
-			unit_ids.push_back(unit->getUnitId());
+			units.push_back(unit);
 			min_fight_value_gain = std::min(min_fight_value_gain, static_cast<int>(0.75f * fight_value_gain));
 			max_fight_value_gain = std::max(max_fight_value_gain, fight_value_gain);
 
@@ -512,34 +512,33 @@ namespace HotaMechanics {
 			*/
 		}
 
-		return unit_ids;
+		return units;
 	}
 
-	const int16_t CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const {
-		auto adjacent_hexes = pathfinder->getAdjacentHexesClockwise(target_unit.getHex());
+	const uint8_t CombatAI::chooseHexToMoveForAttack(const CombatUnit& activeStack, const CombatUnit& target_unit) const {
+		auto& adjacent_hexes = pathfinder->getAdjacentHexesClockwise(target_unit.getHex());
 		auto& field = combat_manager.getCurrentState().field;
-		auto& pathfinder_ = *pathfinder;
 
 		int hex = INVALID_HEX_ID;
 		int turns = -1;
 		int hex_fight_value_gain = 0;
 		int distance = -1;
 
-		for (auto adj_hex : adjacent_hexes) {
-			if (isHexBlockedFor(adj_hex, activeStack))
+		for( uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex) {
+			if (isHexBlockedFor(adjacent_hexes[adj_hex], activeStack))
 				continue;
 
-			int adj_distance = pathfinder->realDistanceBetweenHexes(activeStack.getHex(), adj_hex, combat_manager.getCurrentState().field);
+			int adj_distance = pathfinder->realDistanceBetweenHexes(activeStack.getHex(), adjacent_hexes[adj_hex], combat_manager.getCurrentState().field);
 
-			if (adj_distance == 0 && (adj_hex != activeStack.getHex())) // target hex isnt blocked but is not walkable
+			if (adj_distance == 0 && (adjacent_hexes[adj_hex] != activeStack.getHex())) // target hex isnt blocked but is not walkable
 				continue;
 
 			int adj_turns = static_cast<int>((adj_distance == 0) ? 1 : std::ceil((float)adj_distance / activeStack.getCombatStats().spd));
-			int adj_hex_fight_value_gain = hexes_fight_value_gain[adj_hex];
+			int adj_hex_fight_value_gain = hexes_fight_value_gain[adjacent_hexes[adj_hex]];
 
 			// if didnt choose any yet, check first possible
 			if (hex == INVALID_HEX_ID) {
-				hex = adj_hex;
+				hex = adjacent_hexes[adj_hex];
 				turns = adj_turns;
 				hex_fight_value_gain = adj_hex_fight_value_gain;
 				distance = adj_distance;
@@ -555,7 +554,7 @@ namespace HotaMechanics {
 				continue;
 			// if is better then choose this field
 			else if (adj_hex_fight_value_gain > hex_fight_value_gain) {
-				hex = adj_hex;
+				hex = adjacent_hexes[adj_hex];
 				turns = adj_turns;
 				hex_fight_value_gain = adj_hex_fight_value_gain;
 				distance = adj_distance;
@@ -565,7 +564,7 @@ namespace HotaMechanics {
 			// if equal, check if we are unit that benefits from longer distances
 			if (false /*TODO: check if cavalier or champion*/) {
 				if (adj_distance > distance) {
-					hex = adj_hex;
+					hex = adjacent_hexes[adj_hex];
 					turns = adj_turns;
 					distance = adj_distance;
 				}
@@ -575,7 +574,7 @@ namespace HotaMechanics {
 
 			// if not, just choose field that is closer
 			if (adj_distance < distance) {
-				hex = adj_hex;
+				hex = adjacent_hexes[adj_hex];
 				distance = adj_distance;
 			}
 		}
@@ -584,13 +583,13 @@ namespace HotaMechanics {
 	}
 
 
-	const int CombatAI::chooseWalkDistanceFromPath(const CombatUnit& _active_stack, const int _target_hex, const CombatField& _field, const int _unit_id) const {
+	const int CombatAI::chooseWalkDistanceFromPath(const CombatUnit& _active_stack, const uint8_t _target_hex, const CombatField& _field, const int _unit_id) const {
 		int walk_distance = !_active_stack.canWait();
-		auto path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
+		auto& path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
 
-		if (path.empty()) {
-			throw std::exception("Should never happen here (empty path)");
-		}
+		//if (path.empty()) {
+		//	throw std::exception("Should never happen here (empty path)");
+		//}
 
 		int fight_value_gain = !_active_stack.canWait() ? hexes_fight_value_gain[path[0]] : hexes_fight_value_gain[_active_stack.getHex()];
 		int range = (int)std::min(path.size(), (size_t)_active_stack.getCombatStats().spd);
@@ -604,7 +603,7 @@ namespace HotaMechanics {
 			if ( !_active_stack.canWait() && i + 1 >= walk_distance) {
 				if (std::ceil((float)(path.size() - walk_distance) / _active_stack.getCombatStats().spd
 					> std::ceil((float)(path.size() - i - 1) / _active_stack.getCombatStats().spd))) {
-					walk_distance++;
+					++walk_distance;
 					i = walk_distance - 1;
 					fight_value_gain = hexes_fight_value_gain[path[walk_distance]];
 				}

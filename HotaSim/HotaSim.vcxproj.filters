@@ -30,6 +30,12 @@
     <ClCompile Include="combat_rewinder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mempool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="combat_manager_serializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="combat_simulator.h">
@@ -45,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="combat_rewinder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mempool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

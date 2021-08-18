@@ -67,13 +67,15 @@ namespace HotaMechanics {
 		int unit_order = 0;
 		for (auto& unit : current_state->attacker.getUnitsPtrs()) {
 			const auto hex = ai->getPathfinder().getUnitStartHex(CombatSide::ATTACKER, unit_order++, (int16_t)current_state->attacker.getUnitsPtrs().size(), unit->isDoubleWide(), combat_type);
-			moveUnit(const_cast<CombatUnit&>(*unit), hex);
+			const_cast<CombatUnit*>(unit)->moveTo(hex);
+			current_state->field.fillHex(hex, CombatHexOccupation::UNIT);
 		}
 
 		unit_order = 0;
 		for (auto& unit : current_state->defender.getUnitsPtrs()) {
 			const auto hex = ai->getPathfinder().getUnitStartHex(CombatSide::DEFENDER, unit_order++, (int16_t)current_state->defender.getUnitsPtrs().size(), unit->isDoubleWide(), combat_type);
-			moveUnit(const_cast<CombatUnit&>(*unit), hex);
+			const_cast<CombatUnit*>(unit)->moveTo(hex);
+			current_state->field.fillHex(hex, CombatHexOccupation::UNIT);
 		}
 
 		setAllUnitStacks();
@@ -81,18 +83,18 @@ namespace HotaMechanics {
 
 	void CombatManager::setAllUnitStacks() {
 		all_units.clear();
-		auto attacker_units = current_state->attacker.getUnitsPtrs();
-		auto defender_units = current_state->defender.getUnitsPtrs();
+		auto& attacker_units = current_state->attacker.getUnitsPtrs();
+		auto& defender_units = current_state->defender.getUnitsPtrs();
 
-		std::move(std::begin(attacker_units), std::end(attacker_units), std::back_inserter(all_units));
-		std::move(std::begin(defender_units), std::end(defender_units), std::back_inserter(all_units));
+		std::copy(std::begin(attacker_units), std::end(attacker_units), std::back_inserter(all_units));
+		std::copy(std::begin(defender_units), std::end(defender_units), std::back_inserter(all_units));
 	}
 
-	void CombatManager::setCurrentState(const CombatState& _state) {
-		current_state = std::make_unique<CombatState>(std::move(_state));
+	void CombatManager::setCurrentState(const CombatStatePacked& _state) {
+		unpackCombatState(_state);
 		setAllUnitStacks();
 		//const_cast<CombatField&>(current_state->field).rehash();
-		ai->initializeBattle(nullptr, nullptr, nullptr, nullptr, true);
+		//ai->initializeBattle(nullptr, nullptr, nullptr, nullptr, true);
 		//const_cast<CombatPathfinder&>(ai->getPathfinder()).clearCache();
 	}
 
@@ -190,7 +192,7 @@ namespace HotaMechanics {
 		return !isNewCombat() && !isNewTurn();
 	}
 
-	const bool CombatManager::isPlayerMove() const {
+	const bool CombatManager::isPlayerMove() {
 		try {
 			return getActiveStack().getCombatSide() == CombatSide::ATTACKER;
 		}

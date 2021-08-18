@@ -114,7 +114,7 @@ namespace HotaMechanics {
 		return AdjacentArray{ hexes[0], hexes[2], hexes[4], hexes[5], hexes[3], hexes[1] };
 	}
 
-	std::vector<uint8_t> CombatPathfinder::getReachableHexesInRange(const uint8_t _source_hex, const uint8_t _range, const CombatField& _field,
+	std::vector<uint8_t>& CombatPathfinder::getReachableHexesInRange(const uint8_t _source_hex, const uint8_t _range, const CombatField& _field,
 																							const bool _can_fly, const bool _double_wide, const bool _ghost_hex) {
 		if (_can_fly) {
 			if (_double_wide)
@@ -181,20 +181,17 @@ namespace HotaMechanics {
 
 		if (!checked[_target_hex])
 			pathMap(_source_hex, _field, false, _range);
-		
-		if (distances[_target_hex] != 255)
-			return distances[_target_hex];
 
 		if (_ghost_hex) {
 			int dist = 254;
 			auto& adjacent = getAdjacentHexes(_target_hex);
-			for (auto adj_hex : adjacent)
-				if (distances[adj_hex] < dist)
-					dist = distances[adj_hex];
+			for (uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex)
+				if (distances[adjacent[adj_hex]] < dist)
+					dist = distances[adjacent[adj_hex]];
 			return std::min(dist + 1, 255);
 		}
 
-		return 255;
+		return distances[_target_hex];
 	}
 
 	void CombatPathfinder::clearPathCache() {
@@ -225,7 +222,7 @@ namespace HotaMechanics {
 		if (paths[_target_hex] == INVALID_HEX_ID || !ghost_target_hex)
 			return EMPTY_PATH;
 
-		int16_t start = _target_hex;
+		uint8_t start = _target_hex;
 		path.clear();
 		path.push_back(start);
 

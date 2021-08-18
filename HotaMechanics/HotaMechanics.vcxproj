@@ -137,6 +137,10 @@
       <StructMemberAlignment>4Bytes</StructMemberAlignment>
       <Optimization>Full</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <StringPooling>true</StringPooling>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,7 +157,6 @@
     <ClCompile Include="combat_manager_executor.cpp" />
     <ClCompile Include="combat_manager_generator.cpp" />
     <ClCompile Include="combat_manager_processor.cpp" />
-    <ClCompile Include="combat_manager_serializer.cpp" />
     <ClCompile Include="combat_manager_turnordering.cpp" />
     <ClCompile Include="combat_pathfinder.cpp" />
     <ClCompile Include="combat_field.cpp" />

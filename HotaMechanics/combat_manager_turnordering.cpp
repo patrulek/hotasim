@@ -24,14 +24,15 @@ namespace HotaMechanics {
 	}
 
 
-	CombatUnit& CombatManager::getActiveStack() const {
+	CombatUnit& CombatManager::getActiveStack() {
 		if (active_stack)
 			return const_cast<CombatUnit&>(*active_stack);
 
 		if (current_state->order.empty())
 			throw std::exception("Cant get active stack from empty queue");
 
-		return getStackByGlobalId(current_state->order.front());
+		active_stack = &getStackByGlobalId(current_state->order.front());
+		return const_cast<CombatUnit&>(*active_stack);
 	}
 
 	CombatUnit& CombatManager::getStackByGlobalId(const int _guid) const {
@@ -76,9 +77,7 @@ namespace HotaMechanics {
 
 	void CombatManager::orderUnitsInTurn()
 	{
-		auto units = current_state->attacker.getUnitsPtrs();
-		auto defender_units = current_state->defender.getUnitsPtrs();
-		units.insert(std::end(units), std::begin(defender_units), std::end(defender_units));
+		auto& units = const_cast<std::vector<const CombatUnit*>&>(getAllUnitStacks());
 		std::sort(std::begin(units), std::end(units), [](auto _obj1, auto _obj2) { return _obj1->getCombatStats().spd > _obj2->getCombatStats().spd; });
 
 		current_state->order.clear();
@@ -87,8 +86,7 @@ namespace HotaMechanics {
 			if (!unit->isAlive())
 				continue;
 
-			int offset = unit->getCombatSide() == CombatSide::ATTACKER ? 0 : 21;
-			current_state->order.push_back(unit->getUnitId() + offset);
+			current_state->order.push_back(unit->getGlobalUnitId());
 		}
 	}
 

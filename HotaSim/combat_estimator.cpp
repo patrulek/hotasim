@@ -29,7 +29,7 @@ namespace HotaSim {
 
 			const_cast<CombatPathfinder&>(_mgr.getCombatAI().getPathfinder()).storePathCache(false);
 			auto& state = _mgr.getCurrentState();
-			auto& active_stack = _mgr.getActiveStack();
+			auto& active_stack = const_cast<CombatManager&>(_mgr).getActiveStack();
 			auto& ai = _mgr.getCombatAI();
 
 			int additional_score = 1;
