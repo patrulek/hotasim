@@ -367,7 +367,7 @@ namespace HotaMechanics {
 				hex_access |= combat_manager.getCurrentState().field.isHexWalkable(adjacent_hexes[adj_hex]);
 		}
 
-		if (!hex_access || !combat_manager.getCurrentState().field.isHexWalkable(_target_hex))
+		if (!hex_access)
 			return true;
 
 		const bool path_exists = pathfinder->realDistanceBetweenHexes(_active_stack.getHex(), _target_hex, combat_manager.getCurrentState().field, false) != 255;
@@ -592,9 +592,10 @@ namespace HotaMechanics {
 		int walk_distance = !_active_stack.canWait();
 		auto& path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
 
-		//if (path.empty()) {
-		//	throw std::exception("Should never happen here (empty path)");
-		//}
+		if (path.empty()) {
+			path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
+			throw std::exception("Should never happen here (empty path)");
+		}
 
 		int fight_value_gain = !_active_stack.canWait() ? hexes_fight_value_gain[path[0]] : hexes_fight_value_gain[_active_stack.getHex()];
 		int range = (int)std::min(path.size(), (size_t)_active_stack.getCombatStats().spd);

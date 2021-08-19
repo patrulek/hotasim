@@ -42,8 +42,10 @@ namespace HotaMechanics {
 		}
 
 		// get reachable hexes;
-		auto& reachable_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd,
+		auto reachable_hexes = const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd,
 			current_state->field, false, false, false);
+		std::reverse(std::begin(reachable_hexes), std::end(reachable_hexes));
+		std::reverse(std::begin(reachable_hexes), std::begin(reachable_hexes) + reachable_hexes.size() / 2);
 		//reachable_hexes.erase(std::remove(std::begin(reachable_hexes), std::end(reachable_hexes), active_stack.getHex()), std::end(reachable_hexes));
 
 		//auto& field = current_state->field;

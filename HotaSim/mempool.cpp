@@ -14,7 +14,7 @@ namespace HotaSim {
 	const float Mempool::DEFRAG_FACTOR{ 0.75f };
 
 
-	std::array<std::shared_ptr<CombatStatePacked>*, 128> Mempool::packed_states;
+	std::array<std::shared_ptr<CombatStatePacked>*, 256> Mempool::packed_states;
 
 	std::stack<std::shared_ptr<CombatStatePacked>*> Mempool::freed_state_packed{};
 
@@ -28,11 +28,11 @@ namespace HotaSim {
 	}
 
 	std::shared_ptr<CombatStatePacked>& Mempool::retrieveCombatStatePacked(int _size) {
-		//if (!freed_state_packed.empty() && _size == 1) {
-		//	auto top = freed_state_packed.top();
-		//	freed_state_packed.pop();
-		//	return *top;
-		//}
+		if (!freed_state_packed.empty() && _size == 1) {
+			auto top = freed_state_packed.top();
+			freed_state_packed.pop();
+			return *top;
+		}
 
 		int bucket = (counter_state_packed + _size) / BLOCK_SIZE;
 		if (counter_state_packed + _size >= size_state_packed) {
@@ -55,7 +55,7 @@ namespace HotaSim {
 
 	// ------------------
 
-	std::array<std::shared_ptr<CombatSequenceNode>*, 128> Mempool::sequence_nodes;
+	std::array<std::shared_ptr<CombatSequenceNode>*, 256> Mempool::sequence_nodes;
 
 	std::stack<std::shared_ptr<CombatSequenceNode>*> Mempool::freed_sequence_nodes{};
 
@@ -69,11 +69,11 @@ namespace HotaSim {
 	}
 
 	std::shared_ptr<CombatSequenceNode>& Mempool::retrieveCombatSequenceNode(int _size) {
-		//if (!freed_state_packed.empty() && _size == 1) {
-		//	auto top = freed_state_packed.top();
-		//	freed_state_packed.pop();
-		//	return *top;
-		//}
+		if (!freed_sequence_nodes.empty() && _size == 1) {
+			auto top = freed_sequence_nodes.top();
+			freed_sequence_nodes.pop();
+			return *top;
+		}
 
 		int bucket = (counter_sequence_nodes + _size) / BLOCK_SIZE;
 		if (counter_sequence_nodes + _size >= size_sequence_nodes) {
@@ -97,7 +97,7 @@ namespace HotaSim {
 	// ------------------
 
 
-	std::array<CombatUnitPacked*, 256> Mempool::packed_units;
+	std::array<CombatUnitPacked*, 512> Mempool::packed_units;
 
 	std::stack<CombatUnitPacked*> Mempool::freed_unit_packed{};
 
@@ -142,7 +142,7 @@ namespace HotaSim {
 
 	// ----------------------------------
 
-	std::array<uint8_t*, 256> Mempool::packed_uint8;
+	std::array<uint8_t*, 512> Mempool::packed_uint8;
 
 	//std::stack<CombatUnitPacked*> Mempool::freed_unit_packed{};
 

@@ -28,7 +28,7 @@ namespace HotaSim {
 		static std::shared_ptr<CombatStatePacked>& retrieveCombatStatePacked(int _size = 1);
 		static void freeCombatStatePacked(std::shared_ptr<CombatStatePacked>* _freed);
 
-		static std::array<std::shared_ptr<CombatStatePacked>*, 128> packed_states;
+		static std::array<std::shared_ptr<CombatStatePacked>*, 256> packed_states;
 		static std::stack<std::shared_ptr<CombatStatePacked>*> freed_state_packed;
 		static int size_state_packed;
 		static int counter_state_packed;
@@ -39,7 +39,7 @@ namespace HotaSim {
 		static std::shared_ptr<CombatSequenceNode>& retrieveCombatSequenceNode(int _size = 1);
 		static void freeCombatSequenceNode(std::shared_ptr<CombatSequenceNode>* _freed);
 
-		static std::array<std::shared_ptr<CombatSequenceNode>*, 128> sequence_nodes;
+		static std::array<std::shared_ptr<CombatSequenceNode>*, 256> sequence_nodes;
 		static std::stack<std::shared_ptr<CombatSequenceNode>*> freed_sequence_nodes;
 		static int size_sequence_nodes;
 		static int counter_sequence_nodes;
@@ -51,7 +51,7 @@ namespace HotaSim {
 		static CombatUnitPacked* retrieveCombatUnitPacked(int _size = 1);
 		static void freeCombatUnitPacked(CombatUnitPacked* _freed);
 
-		static std::array<CombatUnitPacked*, 256> packed_units;
+		static std::array<CombatUnitPacked*, 512> packed_units;
 		static std::stack<CombatUnitPacked*> freed_unit_packed;
 		static int size_unit_packed;
 		static int counter_unit_packed;
@@ -63,7 +63,7 @@ namespace HotaSim {
 		static uint8_t* retrieveUint8(int _size = 1);
 		//static void freeUint8(CombatUnitPacked* _freed);
 
-		static std::array<uint8_t*, 256> packed_uint8;
+		static std::array<uint8_t*, 512> packed_uint8;
 		//static std::stack<uint8_t*> freed_unit_packed;
 		static int size_uint8_packed;
 		static int counter_uint8_packed;

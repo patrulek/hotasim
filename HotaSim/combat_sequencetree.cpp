@@ -32,16 +32,13 @@ namespace HotaSim {
 
 
 
-	void CombatSequenceNode::addChild(std::shared_ptr<CombatStatePacked> _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const uint64_t _size) {
+	void CombatSequenceNode::addChild(std::shared_ptr<CombatStatePacked> _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const uint64_t _size, const bool _player_won) {
 		score = _state_score;
 
 		CombatSequenceNode* branch = this;
 		int new_depth = children.empty();
 
 		while (branch) {
-			if (_state_score > branch->best_branch_score)
-				branch->best_branch_score = _state_score;
-
 			branch->depth = std::max(branch->depth, branch->depth + new_depth);
 			branch = branch->parent;
 		}
@@ -55,9 +52,22 @@ namespace HotaSim {
 		child_node->seed = _seed;
 		child_node->level = this->level + 1;
 		child_node->id = _size + 1;
+		child_node->turn = _state->turn;
 		if (child_node->action_size > 1)
 			children.reserve(child_node->action_size);
+
+		if (child_node->turn > this->turn || _player_won) {
+			branch = this;
+			while (branch) {
+				if( _state_score > branch->best_branch_score)
+					branch->best_branch_score = _state_score;
+				branch = branch->parent;
+			}
+		}
+
 		children.emplace_back(std::move(child_node));
+
+
 	}
 
 
@@ -65,7 +75,8 @@ namespace HotaSim {
 		circular_path_found = false;
 
 		if (best_score & 0x8000000000000000) {
-			if ((_state_score & 0x0000FFFFFFFFFFFF) < (best_score & 0x0000FFFFFFFFFFFF) && _state.turn >= best_turns) {
+			if ((_state_score & 0xFFFF000000000000) <= (best_score & 0xFFFF000000000000) &&
+				(_state_score & 0x0000FFFFFFFFFFFF) < (best_score & 0x0000FFFFFFFFFFFF) && _state.turn >= best_turns) {
 				++early_cutoff;
 				circular_path_found = true;
 				return;
@@ -77,6 +88,7 @@ namespace HotaSim {
 			circular_path_found = true;
 			return;
 		}
+
 
 		auto state_hash = StateHash(const_cast<CombatState&>(_state));
 
@@ -92,18 +104,33 @@ namespace HotaSim {
 			state_hashes[state_hash] = _state.turn;
 		}
 
-		if (_state_score > best_score) {
-			best_score = _state_score;
-			best_turns = _state.turn;
-		}
-
 		++level_occurence[current->level];
 		++size;
 		++turns_occurence[_state.turn];
 		auto packed_state = const_cast<CombatSerializer&>(serializer).packCombatState(_state);
-		current->addChild(packed_state, _action, _action_size, _state_score, _seed, size);
+		current->addChild(packed_state, _action, _action_size, _state_score, _seed, size, manager.didPlayerWon());
 		//node_hashes[StateHash(const_cast<CombatState&>(_state))] = current->children.back().get();
+		//if (_state_score > 0x0000800000008000) {
+		//	nodes_to_release[_state_score].push_back(&current->children.back());
+		//}
 		current = current->children.back().get();
+
+
+		if (_state_score > best_score ) {
+			best_score = _state_score;
+			best_turns = _state.turn;
+
+			//for (auto& ntr : nodes_to_release) {
+			//	for (auto& node : ntr.second) {
+			//		if ((*node)->best_branch_score < best_score) {
+			//			Mempool::freeCombatStatePacked(&(*node)->state);
+			//			Mempool::freeCombatSequenceNode(&(*node));
+			//		}
+			//	}
+			//}
+
+			//nodes_to_release.clear();
+		}
 	}
 
 	void CombatSequenceTree::sortForgotten() {
@@ -176,12 +203,14 @@ namespace HotaSim {
 			int best_idx = 0, idx = 0;
 			uint64_t best_score = 0x0000000000000000;
 
-			for (auto child : branch->children) {
-				if (child->best_branch_score == branch->best_branch_score && child->score > best_score) {
-					best_idx = idx;
-					best_score = child->score;
+			if (branch->children.size() > 1) {
+				for (auto& child : branch->children) {
+					if ((child->best_branch_score == branch->best_branch_score && child->score > best_score)) {
+						best_idx = idx;
+						best_score = child->score;
+					}
+					++idx;
 				}
-				++idx;
 			}
 
 			branch = branch->children[best_idx].get();

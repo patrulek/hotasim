@@ -9,6 +9,7 @@ namespace HotaMechanics {
 
 
 	void CombatManager::removeFromOrderList(const int _unit_id) {
+
 		current_state->order.remove(_unit_id);
 	}
 

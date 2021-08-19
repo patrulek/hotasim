@@ -16,6 +16,7 @@
 #include <list>
 #include <iostream>
 #include <random>
+#include <unordered_set>
 
 using namespace HotaMechanics;
 using namespace HotaMechanics::Calculator;
@@ -56,27 +57,82 @@ namespace HotaSim {
 	uint64_t CombatSimulator::evaluateCombatStateAttackScore(const CombatState& _initial_state, const CombatState& _state) const {
 		const float initial_fight_value = static_cast<float>(calculateBaseHeroFightValue(_initial_state.defender));
 		const float current_fight_value = static_cast<float>(calculateBaseHeroFightValue(_state.defender));
+		const auto attack_score = std::max(std::min(current_fight_value / initial_fight_value, 1.0f), 0.0f);
 
-		return static_cast<uint64_t>((1 << 15) * (1.0f - current_fight_value / initial_fight_value));
+		return static_cast<uint64_t>((1 << 15) * (1.0f - attack_score));
 	}
 
 	uint64_t CombatSimulator::evaluateCombatStateDefenseScore(const CombatState& _initial_state, const CombatState& _state) const {
 		const float initial_fight_value = static_cast<float>(calculateBaseHeroFightValue(_initial_state.attacker));
 		const float current_fight_value = static_cast<float>(calculateBaseHeroFightValue(_state.attacker));
+		const auto defense_score = std::max(std::min(current_fight_value / initial_fight_value, 1.0f), 0.0f);
 
-		return static_cast<uint64_t>((1 << 15) * (current_fight_value / initial_fight_value));
+		return static_cast<uint64_t>((1 << 15) * defense_score);
 	}
 
 	uint64_t CombatSimulator::evaluateCombatStateTurnsScore(const CombatState& _initial_state, const CombatState& _state) const {
-		return static_cast<uint64_t>((1 << 15) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f));
+		//return static_cast<uint64_t>((1 << 15) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f));
+
+		const auto turn_score = static_cast<uint64_t>((1 << 7) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f)) << 8;
+		auto order_score = 0.5f;
+		const auto attacker_score = static_cast<float>(calculateHeroFightValue(_state.attacker));
+		const auto defender_score = static_cast<float>(calculateHeroFightValue(_state.defender));
+
+		for (auto& order_unit : _state.order) {
+			const auto& unit = manager->getStackByGlobalId(order_unit);
+			const auto unit_score = static_cast<float>(calculateStackUnitFightValue(unit));
+
+			if (order_unit < 21)
+				order_score += (unit_score / attacker_score) / 2.0f;
+			else
+				order_score -= (unit_score / defender_score) / 2.0f;
+		}
+
+		order_score = std::max(std::min(order_score, 1.0f), 0.0f);
+		
+		return turn_score | (static_cast<uint64_t>((1 << 7) * order_score));
 	}
 
 	uint64_t CombatSimulator::evaluateCombatStateManaScore(const CombatState& _initial_state, const CombatState& _state) const {
-		const bool has_mana = _initial_state.attacker.getMana();
+		// return (1 << 15);
 
+		const bool has_mana = _initial_state.attacker.getMana();
+		uint64_t mana_score = (1 << 7);
 		if (has_mana)
-			return static_cast<uint64_t>((1 << 15) * (1.0f - (_state.attacker.getMana() - _initial_state.attacker.getMana()) / _initial_state.attacker.getMana()));
-		return (1 << 15);
+			mana_score = static_cast<uint64_t>((1 << 7) * (1.0f - (float)(_state.attacker.getMana() - _initial_state.attacker.getMana()) / _initial_state.attacker.getMana()));
+		
+		
+		std::unordered_set<uint8_t> free_hexes;
+		std::unordered_set<uint8_t> reachable_hexes;
+		std::unordered_set<uint8_t> attackable_hexes;
+
+		for (auto& order_unit : _state.order) {
+			if (order_unit >= 21)
+				continue;
+
+			const auto& unit = manager->getStackByGlobalId(order_unit);
+			const auto& reachables = manager->getCombatAI().getReachableHexesForUnit(unit);
+			reachable_hexes.insert(std::begin(reachables), std::end(reachables));
+			free_hexes.insert(std::begin(reachables), std::end(reachables));
+		}
+		
+		for (auto& order_unit : _state.order) {
+			if (order_unit < 21)
+				continue;
+
+			const auto& unit = manager->getStackByGlobalId(order_unit);
+			const auto& attackables = manager->getCombatAI().getAttackableHexesForUnit(unit);
+			attackable_hexes.insert(std::begin(attackables), std::end(attackables));
+		}
+
+		for (const auto& att : attackable_hexes)
+			free_hexes.erase(att);
+
+		const size_t max_free_hexes = FIELD_SIZE - 2 * FIELD_ROWS - _state.field.getOccupied().size();
+		const int valuable_hexes = std::min(max_free_hexes, reachable_hexes.size() + free_hexes.size());
+		uint64_t map_awareness_score = static_cast<uint64_t>((1 << 7) * (float)valuable_hexes / max_free_hexes) << 8;
+
+		return map_awareness_score | mana_score;
 	}
 
 	// TODO: make more permutations; for now dont change unit order
@@ -142,9 +198,13 @@ namespace HotaSim {
 
 				// start battle (PRE_BATTLE action)
 				manager->nextState();
-				tree.addState(manager->getCurrentState(), 0, 1, 0x0000800080008000, 1);
+				tree.addState(manager->getCurrentState(), 0, 1, 0x0000800000008000, 1);
 				int action_cnt = 0;
 				int seed =  std::random_device()();
+				int player_flag = 0;
+				int first_turn_actions_player = 1;
+				int first_turn_actions = 0;
+				bool check_first_turn = true;
 				//size_t tsize = 0;
 
 				while (!simulatorConstraintsViolated(tree)) {
@@ -154,7 +214,11 @@ namespace HotaSim {
 					int tidx = tree.current->id;
 
 					while (!combatConstraintsViolated(tree)) {
-						//tsize = tree.getSize();
+						check_first_turn = manager->getCurrentState().turn == 0;
+						auto tsize = tree.getSize();
+						/*if (tsize == 980991) {
+							__debugbreak();
+						}*/
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
 								player_started = true;
@@ -167,6 +231,14 @@ namespace HotaSim {
 								if (actions[action_idx].action == CombatActionType::ATTACK)
 									was_player_attack = true;
 
+
+								if (check_first_turn && action_idx == 0) {
+									if (player_flag & (1 << manager->getActiveStack().getGlobalUnitId()))
+										first_turn_actions_player += actions.size();
+									else
+										first_turn_actions_player *= actions.size();
+									player_flag |= (1 << manager->getActiveStack().getGlobalUnitId());
+								}
 								//std::cout << "Player action (" << action_idx + 1 << " / " << actions.size() << "): " << (int)actions[action_idx].action
 								//	<< " - " << actions[action_idx].target << " ### Unit: " << manager->getActiveStack().getGlobalUnitId() << "\n";
 
@@ -185,6 +257,9 @@ namespace HotaSim {
 								if (!was_player_attack && player_started && actions[0].action == CombatActionType::ATTACK)
 									ai_attack_first = true;
 
+								if (check_first_turn) {
+									first_turn_actions += 1;
+								}
 								manager->nextStateByAction(actions[0]);
 								tree.addState(manager->getCurrentState(), 0, 1, 
 									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1, ai_attack_first);
@@ -202,9 +277,11 @@ namespace HotaSim {
 						//std::cout << "\n--- Start Turn " << manager->getCurrentState().turn << " --- \n\n";
 					}
 
+
 					if (tree.getSize() / 5000 > last_size) {
 						++last_size;
 						std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
+						std::cout << "Total percentage checked: " << (float)tree.turns_occurence[0] / (first_turn_actions + first_turn_actions_player) << std::endl;
 						std::cout << "Circular occurences: " << tree.circular_occurence << std::endl;
 						std::cout << "Early cutoffs: " << tree.early_cutoff << std::endl;
 						std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
@@ -212,7 +289,8 @@ namespace HotaSim {
 						std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
 						std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]
 							<< " [2] = " << tree.turns_occurence[2] << " [3] = " << tree.turns_occurence[3] << " [4] = " << tree.turns_occurence[4]
-							<< " [5] = " << tree.turns_occurence[5] << " [6] = " << tree.turns_occurence[6] << " [7] = " << tree.turns_occurence[7] << std::endl;
+							<< " [5] = " << tree.turns_occurence[5] << " [6] = " << tree.turns_occurence[6] << " [7] = " << tree.turns_occurence[7]
+							<< " [8] = " << tree.turns_occurence[8] << " [9] = " << tree.turns_occurence[9] << " [10] = " << tree.turns_occurence[10] << std::endl;
 						std::cout << "Depth occurence: [0] = " << tree.level_occurence[0] << " [1] = " << tree.level_occurence[1]
 							<< " [2] = " << tree.level_occurence[2] << " [3] = " << tree.level_occurence[3] << " [4] = " << tree.level_occurence[4]
 							<< " [5] = " << tree.level_occurence[5] << " [6] = " << tree.level_occurence[6] << " [7] = " << tree.level_occurence[7]
@@ -298,7 +376,8 @@ namespace HotaSim {
 				std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
 				std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]
 					<< " [2] = " << tree.turns_occurence[2] << " [3] = " << tree.turns_occurence[3] << " [4] = " << tree.turns_occurence[4]
-					<< " [5] = " << tree.turns_occurence[5] << " [6] = " << tree.turns_occurence[6] << " [7] = " << tree.turns_occurence[7] << std::endl;
+					<< " [5] = " << tree.turns_occurence[5] << " [6] = " << tree.turns_occurence[6] << " [7] = " << tree.turns_occurence[7]
+					<< " [8] = " << tree.turns_occurence[8] << " [9] = " << tree.turns_occurence[9] << " [10] = " << tree.turns_occurence[10] << std::endl;
 				std::cout << "Level occurence: [0] = " << tree.level_occurence[0] << " [1] = " << tree.level_occurence[1]
 					<< " [2] = " << tree.level_occurence[2] << " [3] = " << tree.level_occurence[3] << " [4] = " << tree.level_occurence[4]
 					<< " [5] = " << tree.level_occurence[5] << " [6] = " << tree.level_occurence[6] << " [7] = " << tree.level_occurence[7]

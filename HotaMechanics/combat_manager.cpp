@@ -181,6 +181,10 @@ namespace HotaMechanics {
 		return current_state->result != CombatResult::IN_PROGRESS && current_state->result != CombatResult::NOT_STARTED;
 	}
 
+	const bool CombatManager::didPlayerWon() const {
+		return current_state->result == CombatResult::PLAYER;
+	}
+
 	const bool CombatManager::isNewTurn() const {
 		return current_state->order.empty();
 	}

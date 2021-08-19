@@ -22,7 +22,7 @@ int main()
    attacker.setAttack(0); attacker.setDefense(0);
    //attacker.addUnit(unit_templates()["Peasant"], 1);
    //attacker.addUnit(unit_templates()["Peasant"], 1);
-   attacker.addUnit(unit_templates()["Imp"], 100);
+   attacker.addUnit(unit_templates()["Imp"], 120);
    //attacker.addUnit(unit_templates()["Imp"], 50);
    //attacker.addUnit(unit_templates()["Imp"], 96);
    //attacker.addUnit(unit_templates()["Imp"], 50);

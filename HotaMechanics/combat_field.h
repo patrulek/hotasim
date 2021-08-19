@@ -107,6 +107,7 @@ namespace HotaMechanics {
 		const HexArray& getHexes() const { return hexes; }
 		const Constants::CombatFieldType getType() { return combatFieldId; }
 		const Constants::CombatFieldTemplate getTemplate() { return combatFieldTemplate; }
+		const std::unordered_set<uint8_t>& getOccupied() const { return occupied; }
 		// ----------------------------------
 
 		// static creator -------------------

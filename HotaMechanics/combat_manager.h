@@ -32,6 +32,7 @@ namespace HotaMechanics {
 		const bool isUnitMove() const;
 		const bool isPlayerMove();
 		const bool isCombatFinished() const;
+		const bool didPlayerWon() const;
 		// ------------------------------
 
 		// action generator -------------
