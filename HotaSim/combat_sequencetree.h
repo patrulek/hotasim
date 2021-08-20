@@ -88,14 +88,17 @@ namespace HotaSim {
 		std::unordered_map<StateHash, CombatSequenceNode*> node_hashes;
 		int circular_occurence{ 0 };
 		int early_cutoff{ 0 };
-		uint64_t best_score{ 0x0000800000008000 };
+		uint64_t best_score{ 0x0000800000000000 };
 		int best_turns{ -1 };
 		std::array<int, 32> turns_occurence;
 		std::array<int, 128> level_occurence;
 		std::unordered_map<uint64_t, std::vector<std::shared_ptr<CombatSequenceNode>*>> nodes_to_release;
 
+		std::vector<std::shared_ptr<CombatSequenceNode>*> node_order;
+		std::unordered_set<std::shared_ptr<CombatSequenceNode>*> taken;
+
 		CombatSequenceTree(const CombatSerializer& _serializer, const HotaMechanics::CombatManager& _manager, 
-			const CombatState& _initial_state, const uint64_t _initial_state_score = 0x0000800000008000);
+			const CombatState& _initial_state, const uint64_t _initial_state_score = 0x0000800000000000);
 
 		bool hasParent() {
 			return current->parent != root.get();
@@ -108,6 +111,8 @@ namespace HotaSim {
 
 		void sortForgotten();
 		void takeForgotten();
+
+		void takeBest(const bool _halving = false);
 
 		uint64_t getSize() const { return size; }
 		const bool canTakeForgotten() const { return fp_cnt >= forgotten_paths.size(); }

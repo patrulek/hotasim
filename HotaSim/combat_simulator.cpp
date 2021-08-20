@@ -73,7 +73,8 @@ namespace HotaSim {
 	uint64_t CombatSimulator::evaluateCombatStateTurnsScore(const CombatState& _initial_state, const CombatState& _state) const {
 		//return static_cast<uint64_t>((1 << 15) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f));
 
-		const auto turn_score = static_cast<uint64_t>((1 << 7) * (1.0f - (_state.turn - _initial_state.turn) / 250.0f)) << 8;
+		auto turn_score = static_cast<uint64_t>((1 << 7) * (1.0f - (_state.turn - _initial_state.turn) / 100.0f)) << 8;
+		//turn_score = std::min(turn_score, (uint64_t)(1 << 7) << 8);
 		auto order_score = 0.5f;
 		const auto attacker_score = static_cast<float>(calculateHeroFightValue(_state.attacker));
 		const auto defender_score = static_cast<float>(calculateHeroFightValue(_state.defender));
@@ -104,7 +105,16 @@ namespace HotaSim {
 		
 		std::unordered_set<uint8_t> free_hexes;
 		std::unordered_set<uint8_t> reachable_hexes;
+		std::unordered_set<uint8_t> ai_reachable_hexes;
 		std::unordered_set<uint8_t> attackable_hexes;
+		uint64_t team_awareness_score = 0;
+
+		if (_state.last_unit != -1 && _state.last_unit < 21) {
+			const auto& last_unit = manager->getStackByGlobalId(_state.last_unit);
+			const auto& reachables_ = manager->getCombatAI().getReachableHexesForUnit(last_unit);
+			reachable_hexes.insert(std::begin(reachables_), std::end(reachables_));
+			free_hexes.insert(std::begin(reachables_), std::end(reachables_));
+		}
 
 		for (auto& order_unit : _state.order) {
 			if (order_unit >= 21)
@@ -122,17 +132,43 @@ namespace HotaSim {
 
 			const auto& unit = manager->getStackByGlobalId(order_unit);
 			const auto& attackables = manager->getCombatAI().getAttackableHexesForUnit(unit);
+			const auto& reachables = manager->getCombatAI().getReachableHexesForUnit(unit);
 			attackable_hexes.insert(std::begin(attackables), std::end(attackables));
+			ai_reachable_hexes.insert(std::begin(reachables), std::end(reachables));
 		}
 
 		for (const auto& att : attackable_hexes)
 			free_hexes.erase(att);
 
-		const size_t max_free_hexes = FIELD_SIZE - 2 * FIELD_ROWS - _state.field.getOccupied().size();
-		const int valuable_hexes = std::min(max_free_hexes, reachable_hexes.size() + free_hexes.size());
-		uint64_t map_awareness_score = static_cast<uint64_t>((1 << 7) * (float)valuable_hexes / max_free_hexes) << 8;
+		int alive_un = 0;
+		for (auto unit : manager->getCurrentState().attacker.getUnitsPtrs()) {
+			int score = 0;
+			int alive_units = 0;
 
-		return map_awareness_score | mana_score;
+			for (auto def_unit : manager->getCurrentState().defender.getUnitsPtrs()) {
+				if (!def_unit->isAlive())
+					continue;
+				alive_units++;
+				score += manager->getCombatAI().canUnitAttackHex(*unit, def_unit->getHex());
+			}
+
+			if (score == alive_units)
+				team_awareness_score++;
+			alive_un = std::max(alive_un, alive_units);
+		}
+
+		const size_t max_free_hexes = FIELD_SIZE - 2 * FIELD_ROWS - _state.field.getOccupied().size();
+		uint64_t max_map_awareness_score = max_free_hexes * 100;
+		uint64_t map_awareness_score = static_cast<uint64_t>((1 << 3) * 
+			((float)(92.5f * free_hexes.size() + 5.0f * reachable_hexes.size() + 2.5f * (max_free_hexes - ai_reachable_hexes.size())) 
+			/ max_map_awareness_score)) << 8;
+
+		map_awareness_score = std::min(map_awareness_score, (uint64_t)(1 << 3) << 8);
+
+		team_awareness_score = static_cast<uint64_t>(((float)team_awareness_score / alive_un) * (1 << 3)) << 12;
+		team_awareness_score = std::min(team_awareness_score, (uint64_t)(1 << 3) << 12);
+
+		return team_awareness_score | map_awareness_score | mana_score;
 	}
 
 	// TODO: make more permutations; for now dont change unit order
@@ -198,11 +234,10 @@ namespace HotaSim {
 
 				// start battle (PRE_BATTLE action)
 				manager->nextState();
-				tree.addState(manager->getCurrentState(), 0, 1, 0x0000800000008000, 1);
+				tree.addState(manager->getCurrentState(), 0, 1, 0x0000800000000000, 1);
 				int action_cnt = 0;
 				int seed =  std::random_device()();
 				int player_flag = 0;
-				int first_turn_actions_player = 1;
 				int first_turn_actions = 0;
 				bool check_first_turn = true;
 				//size_t tsize = 0;
@@ -214,37 +249,66 @@ namespace HotaSim {
 					int tidx = tree.current->id;
 
 					while (!combatConstraintsViolated(tree)) {
-						check_first_turn = manager->getCurrentState().turn == 0;
 						auto tsize = tree.getSize();
+						if (tsize / 5000 > last_size) {
+							++last_size;
+							std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
+							std::cout << "Total percentage checked: " << (float)tree.level_occurence[1] / first_turn_actions << std::endl;
+							std::cout << "Circular occurences: " << tree.circular_occurence << std::endl;
+							std::cout << "Early cutoffs: " << tree.early_cutoff << std::endl;
+							std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
+							std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
+							std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
+							std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]
+								<< " [2] = " << tree.turns_occurence[2] << " [3] = " << tree.turns_occurence[3] << " [4] = " << tree.turns_occurence[4]
+								<< " [5] = " << tree.turns_occurence[5] << " [6] = " << tree.turns_occurence[6] << " [7] = " << tree.turns_occurence[7]
+								<< " [8] = " << tree.turns_occurence[8] << " [9] = " << tree.turns_occurence[9] << " [10] = " << tree.turns_occurence[10] << std::endl;
+							std::cout << "Depth occurence: [0] = " << tree.level_occurence[0] << " [1] = " << tree.level_occurence[1]
+								<< " [2] = " << tree.level_occurence[2] << " [3] = " << tree.level_occurence[3] << " [4] = " << tree.level_occurence[4]
+								<< " [5] = " << tree.level_occurence[5] << " [6] = " << tree.level_occurence[6] << " [7] = " << tree.level_occurence[7]
+								<< " [8] = " << tree.level_occurence[8] << " [9] = " << tree.level_occurence[9] << " [10] = " << tree.level_occurence[10] << std::endl;
+							std::cout << "Cache access/miss: " << std::dec << CombatPathfinder::cache_access << " / " << CombatPathfinder::cache_misses << std::endl;
+							std::cout << "Best score so far: " << std::hex << tree.root->best_branch_score << std::dec << std::endl << std::endl;
+						}
 						/*if (tsize == 980991) {
 							__debugbreak();
 						}*/
 						if (manager->isUnitMove()) {
 							if (manager->isPlayerMove()) {
-								player_started = true;
 
 								auto actions = manager->generateActionsForPlayer();
 								//auto action_order = Estimator::shuffleActions(actions, *manager, seed);
 								
 								auto action_idx = action_cnt;// action_order[action_cnt];
 
-								if (actions[action_idx].action == CombatActionType::ATTACK)
-									was_player_attack = true;
-
-
-								if (check_first_turn && action_idx == 0) {
-									if (player_flag & (1 << manager->getActiveStack().getGlobalUnitId()))
-										first_turn_actions_player += actions.size();
-									else
-										first_turn_actions_player *= actions.size();
-									player_flag |= (1 << manager->getActiveStack().getGlobalUnitId());
-								}
+								if( first_turn_actions == 0)
+									first_turn_actions = actions.size();
 								//std::cout << "Player action (" << action_idx + 1 << " / " << actions.size() << "): " << (int)actions[action_idx].action
 								//	<< " - " << actions[action_idx].target << " ### Unit: " << manager->getActiveStack().getGlobalUnitId() << "\n";
+								//const_cast<CombatPathfinder&>(manager->getCombatAI().getPathfinder()).storePathCache(false);
+								for (int i = 0; i < actions.size(); ++i) {
+									manager->nextStateByAction(actions[i]);
+									tree.addState(manager->getCurrentState(), i, (int)actions.size(),
+										evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), seed);
 
-								manager->nextStateByAction(actions[action_idx]);
-								tree.addState(manager->getCurrentState(), action_cnt, (int)actions.size(), 
-									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), seed);
+									if( !tree.circular_path_found && i != actions.size() - 1)
+										tree.goParent();
+
+									if (i != actions.size() - 1) {
+										serializer->unpackCombatState(*tree.current->state);
+										manager->setCurrentState(*tree.current->state);
+										manager->getCurrentState().field.rehash();
+										//const_cast<CombatPathfinder&>(manager->getCombatAI().getPathfinder()).restorePathCache();
+									}
+								}
+
+								if (!tree.node_order.empty()) {
+									tree.takeBest(true);
+									serializer->unpackCombatState(*tree.current->state);
+									manager->setCurrentState(*tree.current->state);
+									manager->getCurrentState().field.rehash();
+								}
+								//const_cast<CombatPathfinder&>(manager->getCombatAI().getPathfinder()).restorePathCache();
 
 								//seed = action_cnt % 40 > 10 ? std::random_device()() : 42;
 								//seed = 42;
@@ -253,16 +317,9 @@ namespace HotaSim {
 							else {
 								auto actions = manager->generateActionsForAI();
 								// TODO: for now, take only first ai action (in most cases there will be one action anyway)
-								bool ai_attack_first = false;
-								if (!was_player_attack && player_started && actions[0].action == CombatActionType::ATTACK)
-									ai_attack_first = true;
-
-								if (check_first_turn) {
-									first_turn_actions += 1;
-								}
 								manager->nextStateByAction(actions[0]);
 								tree.addState(manager->getCurrentState(), 0, 1, 
-									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1, ai_attack_first);
+									evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1, false);
 								//std::cout << "AI Action (size = " << actions.size() << ")\n";
 							}
 							continue;
@@ -272,69 +329,54 @@ namespace HotaSim {
 						tree.addState(manager->getCurrentState(), 0, 1,
 							evaluateCombatStateScore(manager->getInitialState(), manager->getCurrentState()), 1);
 
-						player_started = false;
-						was_player_attack = false;
 						//std::cout << "\n--- Start Turn " << manager->getCurrentState().turn << " --- \n\n";
 					}
 
 
-					if (tree.getSize() / 5000 > last_size) {
-						++last_size;
-						std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
-						std::cout << "Total percentage checked: " << (float)tree.turns_occurence[0] / (first_turn_actions + first_turn_actions_player) << std::endl;
-						std::cout << "Circular occurences: " << tree.circular_occurence << std::endl;
-						std::cout << "Early cutoffs: " << tree.early_cutoff << std::endl;
-						std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
-						std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
-						std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
-						std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]
-							<< " [2] = " << tree.turns_occurence[2] << " [3] = " << tree.turns_occurence[3] << " [4] = " << tree.turns_occurence[4]
-							<< " [5] = " << tree.turns_occurence[5] << " [6] = " << tree.turns_occurence[6] << " [7] = " << tree.turns_occurence[7]
-							<< " [8] = " << tree.turns_occurence[8] << " [9] = " << tree.turns_occurence[9] << " [10] = " << tree.turns_occurence[10] << std::endl;
-						std::cout << "Depth occurence: [0] = " << tree.level_occurence[0] << " [1] = " << tree.level_occurence[1]
-							<< " [2] = " << tree.level_occurence[2] << " [3] = " << tree.level_occurence[3] << " [4] = " << tree.level_occurence[4]
-							<< " [5] = " << tree.level_occurence[5] << " [6] = " << tree.level_occurence[6] << " [7] = " << tree.level_occurence[7]
-							<< " [8] = " << tree.level_occurence[8] << " [9] = " << tree.level_occurence[9] << " [10] = " << tree.level_occurence[10] << std::endl;
-						std::cout << "Cache access/miss: " << std::dec << CombatPathfinder::cache_access << " / " << CombatPathfinder::cache_misses << std::endl;
-						std::cout << "Best score so far: " << std::hex << tree.root->best_branch_score << std::dec << std::endl << std::endl;
-					}
+					
 
 					bool random_jump = false;
 					bool root_jump = false;
 					bool take_forgotten = false;
 
 					// check if need to go up further
-					if (tree.foundCircularPath()) {
-						//std::cout << " CIRCULAR PATH FOUND\n\n";
-						if (tree.unitStackLastAction()) {
-							//tree.goParent();
-							while (tree.hasParent() && tree.unitStackLastAction())
-								tree.goParent();
+					//if (tree.foundCircularPath()) {
+					//	//std::cout << " CIRCULAR PATH FOUND\n\n";
+					//	if (tree.unitStackLastAction()) {
+					//		//tree.goParent();
+					//		while (tree.hasParent() && tree.unitStackLastAction())
+					//			tree.goParent();
 
-							action_cnt = tree.current->action + 1;
-							tree.goParent();
-						}
-						else {
-							// if we found circular path, and it isnt last unit of action, just go back one more state
-							action_cnt = tree.current->action + 1;
-							tree.goParent();
-						}
+					//		action_cnt = tree.current->action + 1;
+					//		tree.goParent();
+					//	}
+					//	else {
+					//		// if we found circular path, and it isnt last unit of action, just go back one more state
+					//		action_cnt = tree.current->action + 1;
+					//		tree.goParent();
+					//	}
+					//}
+					//else if (!root_jump && !random_jump) {
+					//	//std::cout << " LAST ACTION, JUMP\n\n";
+					//	while (tree.hasParent() && tree.unitStackLastAction())
+					//		tree.goParent();
+
+					//	// wasnt last action of this unit, so we need to go back one more state (before that unit acted)
+					//	action_cnt = tree.current->action + 1;
+					//	tree.goParent();
+					//	//tree.goParent();
+					//	/*while (tree.current->parent && tree.current->action + 1 >= tree.current->action_size)
+					//		tree.goParent();
+
+					//	if (tree.current->parent)
+					//		tree.goParent();*/
+					//}
+					//if (action_cnt == tree.current->children.back()->action_size) {
+					if (tree.node_order.empty()) {
+						std::cout << "All states reached. End simulation\n";
+						break;
 					}
-					else if (!root_jump && !random_jump) {
-						//std::cout << " LAST ACTION, JUMP\n\n";
-						while (tree.hasParent() && tree.unitStackLastAction())
-							tree.goParent();
-
-						// wasnt last action of this unit, so we need to go back one more state (before that unit acted)
-						action_cnt = tree.current->action + 1;
-						tree.goParent();
-						//tree.goParent();
-						/*while (tree.current->parent && tree.current->action + 1 >= tree.current->action_size)
-							tree.goParent();
-
-						if (tree.current->parent)
-							tree.goParent();*/
-					}
+					tree.takeBest();
 
 					//std::cout << " --- CURRENT TURN: " << tree.current->state->turn << " --- \n\n";
 					//size_t xsize = tree.getSize();
@@ -343,10 +385,6 @@ namespace HotaSim {
 					manager->setCurrentState(*tree.current->state);
 					manager->getCurrentState().field.rehash();
 
-					if (action_cnt == tree.current->children.back()->action_size) {
-						std::cout << "All states reached. End simulation\n";
-						break;
-					}
 				}
 
 				auto best_leaf = tree.findBestLeaf();

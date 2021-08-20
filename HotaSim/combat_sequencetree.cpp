@@ -26,6 +26,7 @@ namespace HotaSim {
 		current = root.get();
 		forgotten_paths.reserve(8096);
 		state_hashes.rehash(262144);
+		node_order.reserve(262144);
 		turns_occurence.fill(0);
 		level_occurence.fill(0);
 	}
@@ -74,20 +75,20 @@ namespace HotaSim {
 	void CombatSequenceTree::addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const bool _first_ai_attack) {
 		circular_path_found = false;
 
-		if (best_score & 0x8000000000000000) {
-			if ((_state_score & 0xFFFF000000000000) <= (best_score & 0xFFFF000000000000) &&
-				(_state_score & 0x0000FFFFFFFFFFFF) < (best_score & 0x0000FFFFFFFFFFFF) && _state.turn >= best_turns) {
-				++early_cutoff;
-				circular_path_found = true;
-				return;
-			}
-		}
+		//if (best_score & 0xFFFF000000000000) {
+		//	if ((_state_score & 0xFFFF000000000000) <= (best_score & 0xFFFF000000000000) &&
+		//		(_state_score & 0x0000FFFFFFFFFFFF) < (best_score & 0x0000FFFFFFFFFFFF) && _state.turn >= best_turns) {
+		//		++early_cutoff;
+		//		circular_path_found = true;
+		//		return;
+		//	}
+		//}
 
-		if (_first_ai_attack) {
-			++early_cutoff;
-			circular_path_found = true;
-			return;
-		}
+		//if (_first_ai_attack) {
+		//	++early_cutoff;
+		//	circular_path_found = true;
+		//	return;
+		//}
 
 
 		auto state_hash = StateHash(const_cast<CombatState&>(_state));
@@ -113,6 +114,8 @@ namespace HotaSim {
 		//if (_state_score > 0x0000800000008000) {
 		//	nodes_to_release[_state_score].push_back(&current->children.back());
 		//}
+		if( current->level > 0 && _action_size > 1 && taken.find(&current->children.back()) == std::end(taken))
+			node_order.push_back(&current->children.back());
 		current = current->children.back().get();
 
 
@@ -131,6 +134,18 @@ namespace HotaSim {
 
 			//nodes_to_release.clear();
 		}
+	}
+
+	void CombatSequenceTree::takeBest(const bool _halving) {
+		std::sort(std::begin(node_order), std::end(node_order), [](auto& n1, auto& n2) { 
+			return (0xFFFFFFFF00FFFFFF & (*n1)->score) < (0xFFFFFFFF00FFFFFF & (*n2)->score); 
+		});
+		current = node_order.back()->get();
+		taken.insert(node_order.back());
+		node_order.pop_back();
+		if( _halving && node_order.size() > 15000)
+			node_order.erase(std::begin(node_order) + 150, std::begin(node_order) + node_order.size() - 150);
+		circular_path_found = false;
 	}
 
 	void CombatSequenceTree::sortForgotten() {

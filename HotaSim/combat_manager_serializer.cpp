@@ -123,17 +123,16 @@ namespace HotaSim {
 
 		// combat state info
 		//auto state = Mempool::retrieveCombatState(std::move(attacker_), std::move(defender_), std::move(field_));
-		auto& state = current_state;
-		state->last_unit = _packed_state.last_unit;
-		state->turn = _packed_state.turn;
-		state->result = static_cast<CombatResult>(_packed_state.result);
+		current_state->last_unit = _packed_state.last_unit;
+		current_state->turn = _packed_state.turn;
+		current_state->result = static_cast<CombatResult>(_packed_state.result);
+		current_state->order.clear();
 
 		if (_packed_state.order_size > 0) {
-			state->order.clear();
 			for (int i = 0; i < _packed_state.order_size; ++i)
-				state->order.push_back(_packed_state.order[i]);
+				current_state->order.push_back(_packed_state.order[i]);
 		}
 
-		return state;
+		return current_state;
 	}
 }
