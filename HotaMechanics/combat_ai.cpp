@@ -290,14 +290,17 @@ namespace HotaMechanics {
 			int unit_distance = unit_hex ? 0 : pathfinder->realDistanceBetweenHexes(_active_stack.getHex(), _hexes_to_attack[cnt], field, false);
 			int unit_turns = unit_hex ? 1 : static_cast<int>(std::ceil((float)unit_distance / _active_stack.getCombatStats().spd)); // 1 = can attack; todo: check if should be distance - 1
 
-			
-			int unit_fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(_active_stack, *unit); //351d0
+			// jeden ch³op atakuj¹cy 1 impa (w herosku z 2x1 imp) ma sumaryczn¹ wartoœæ równ¹ 220
+			// -15 jako hex_fight_value_gain i + 235 jako atak (1dmg * 1000/4hp_impa - 1deadch³op * 15fv_chlopa)
+			int hex_fight_value_gain = hexes_fight_value_gain[_hexes_to_attack[cnt]];
+			int unit_fight_value_gain = calculateFightValueAdvantageAfterMeleeUnitAttack(_active_stack, *unit, !similar_army_strength); //351d0
+			int current_fight_value_gain = hex_fight_value_gain + unit_fight_value_gain;
 
 			// if no unit picked or chosen unit not attackable
 			if (units.empty()) {
 				units.push_back(unit);
 				turns = unit_turns;
-				fight_value_gain = unit_fight_value_gain / unit_turns;
+				fight_value_gain = current_fight_value_gain / unit_turns;
 				min_fight_value_gain = static_cast<int>(0.75f * fight_value_gain);
 				max_fight_value_gain = fight_value_gain;
 				distance = unit_distance;
@@ -310,7 +313,7 @@ namespace HotaMechanics {
 				units.clear();
 				units.push_back(unit);
 				turns = unit_turns;
-				fight_value_gain = unit_fight_value_gain / unit_turns;
+				fight_value_gain = current_fight_value_gain / unit_turns;
 				min_fight_value_gain = static_cast<int>(0.75f * fight_value_gain);
 				max_fight_value_gain = fight_value_gain;
 				distance = unit_distance;
@@ -323,11 +326,11 @@ namespace HotaMechanics {
 
 			// todo: this is simple randomization example; we'll checking fight_value range from 75%-100% of unit_fight_value_gain
 			// if attacking current unit is better, then replace 
-			if (static_cast<int>(unit_fight_value_gain * 0.75f) > max_fight_value_gain) { // if cur_min_fv > ch_max_fv -> pick cur
+			if (static_cast<int>(current_fight_value_gain * 0.75f) > max_fight_value_gain) { // if cur_min_fv > ch_max_fv -> pick cur
 				units.clear();
 				units.push_back(unit);
 				turns = unit_turns;
-				fight_value_gain = unit_fight_value_gain / unit_turns;
+				fight_value_gain = current_fight_value_gain / unit_turns;
 				min_fight_value_gain = static_cast<int>(0.75f * fight_value_gain);
 				max_fight_value_gain = fight_value_gain;
 				distance = unit_distance;
@@ -335,7 +338,7 @@ namespace HotaMechanics {
 			}
 
 			// if attacking chosen unit is better, check next
-			if (unit_fight_value_gain < min_fight_value_gain) // if cur_max_fv < ch_min_fv -> pick ch
+			if (current_fight_value_gain < min_fight_value_gain) // if cur_max_fv < ch_min_fv -> pick ch
 				continue;
 
 			
@@ -346,7 +349,7 @@ namespace HotaMechanics {
 			if (unit_distance < distance) {
 				units.clear();
 				units.push_back(unit);
-				fight_value_gain = unit_fight_value_gain / unit_turns;
+				fight_value_gain = current_fight_value_gain / unit_turns;
 				min_fight_value_gain = static_cast<int>(0.75f * fight_value_gain);
 				max_fight_value_gain = fight_value_gain;
 				distance = unit_distance;
@@ -356,8 +359,8 @@ namespace HotaMechanics {
 				continue;
 
 			units.push_back(unit);
-			min_fight_value_gain = std::min(min_fight_value_gain, static_cast<int>(0.75f * fight_value_gain));
-			max_fight_value_gain = std::max(max_fight_value_gain, fight_value_gain);
+			min_fight_value_gain = std::min(min_fight_value_gain, static_cast<int>(0.75f * current_fight_value_gain));
+			max_fight_value_gain = std::max(max_fight_value_gain, current_fight_value_gain);
 
 			/*
 			* That is how it looks like in H3 code, but as we cant mirror here pseudorandomness

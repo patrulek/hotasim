@@ -78,19 +78,25 @@ namespace HotaMechanics {
 			return hero_fight_value;
 		}
 
-		const int calculateFightValueAdvantageAfterMeleeUnitAttack(const CombatUnit& attacker, const CombatUnit& defender) {
+		const int calculateFightValueAdvantageAfterMeleeUnitAttack(const CombatUnit& attacker, const CombatUnit& defender, const bool _advantage) {
 			CombatUnit attacker_copy(attacker);
 			CombatUnit defender_copy(defender);
 
 			int first_attack_dmg = calculateMeleeUnitAverageDamage(attacker_copy, defender_copy);
 			defender_copy.applyDamage(first_attack_dmg);
 
+			// TODO: when one side fight value > 2 * second side fight value -> then dmg * 1000/hp
+			float fight_value_per_hp_for_attacker = _advantage ? 1000.0f / defender_copy.getPrimaryStats().hp : defender_copy.getFightValuePerOneHp();
+			int attacker_fight_value_gain = static_cast<int>(first_attack_dmg * fight_value_per_hp_for_attacker);
+
+			if (!defender_copy.isAlive())
+				return attacker_fight_value_gain;
+
 			int counter_attack_dmg = calculateMeleeUnitAverageDamage(defender_copy, attacker_copy);
 			attacker_copy.applyDamage(counter_attack_dmg);
-
-			// TODO: when one side fight value > 2 * second side fight value -> then * 1000 for stronger side, and * 100 for weaker side
-			int attacker_fight_value_gain = static_cast<int>(first_attack_dmg * defender_copy.getFightValuePerOneHp());
-			int defender_fight_value_gain = static_cast<int>(counter_attack_dmg * attacker_copy.getFightValuePerOneHp());
+			// not sure that
+			float fight_value_per_hp_for_defender = attacker_copy.getFightValuePerOneHp();
+			int defender_fight_value_gain = static_cast<int>(counter_attack_dmg * fight_value_per_hp_for_defender);
 
 			return attacker_fight_value_gain - defender_fight_value_gain;
 		}
