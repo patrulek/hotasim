@@ -23,11 +23,11 @@ namespace HotaSim::Utils {
 		}
 
 		void addUnit(const Unit& _unit, const int16_t _stack_size) {
-			addUnitStack(UnitStack{ _unit, _stack_size });
+			addUnitStack(UnitStack{ &_unit, _stack_size });
 		}
 
 		void addUnitStack(const UnitStack& _unit_stack) {
-			if (hero.army.size() >= MAX_ARMY_SIZE)
+			if (hero.army.size() >= BASE_ARMY_SIZE)
 				return;
 			hero.army.push_back(_unit_stack);
 		}

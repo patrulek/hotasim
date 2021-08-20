@@ -18,7 +18,7 @@ namespace HotaSim {
 
 		packed_state->last_unit = _state.last_unit;
 		packed_state->turn = _state.turn;
-		packed_state->result = static_cast<int8_t>(_state.result);
+		packed_state->result = _state.result;
 		packed_state->order_size = _state.order.size();
 
 		if (packed_state->order_size > 0) {
@@ -125,7 +125,7 @@ namespace HotaSim {
 		//auto state = Mempool::retrieveCombatState(std::move(attacker_), std::move(defender_), std::move(field_));
 		current_state->last_unit = _packed_state.last_unit;
 		current_state->turn = _packed_state.turn;
-		current_state->result = static_cast<CombatResult>(_packed_state.result);
+		current_state->result = _packed_state.result;
 		current_state->order.clear();
 
 		if (_packed_state.order_size > 0) {
