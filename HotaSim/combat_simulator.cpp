@@ -175,14 +175,14 @@ namespace HotaSim {
 	void CombatSimulator::findBestAttackerPermutations() {
 		ArmyPermutation permutation;
 
-		for (int8_t i = 0; i < attacker->army.size(); ++i)
+		for (uint8_t i = 0; i < attacker->army.size(); ++i)
 			permutation.permutations.push_back(UnitPermutation{ i, i, attacker->army[i].stack_number });
 
 		permutations.push_back(permutation);
 	}
 
 	void CombatSimulator::setDefenderPermutation() {
-		for (int8_t i = 0; i < defender->army.size(); ++i)
+		for (uint8_t i = 0; i < defender->army.size(); ++i)
 			defender_permutation.permutations.push_back(UnitPermutation{ i, i, defender->army[i].stack_number });
 	}
 
@@ -220,7 +220,7 @@ namespace HotaSim {
 
 	void CombatSimulator::start() {
 		for (int i = 0; i < 1 /* combat field templates */; ++i) {
-			for (auto permutation : permutations) {
+			for (auto& permutation : permutations) {
 				prepareCombat(permutation, /*i*/ CombatFieldTemplate::IMPS_2x100);
 
 				CombatSequenceTree tree(*serializer, *manager, manager->getInitialState());

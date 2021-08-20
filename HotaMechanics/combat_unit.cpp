@@ -6,14 +6,16 @@
 namespace HotaMechanics {
 	using namespace Constants;
 
-	CombatUnit::CombatUnit(const Unit& _unit_template, const int _stack_number, const CombatHero& _hero)
-		: unit_template(&_unit_template), stats(_unit_template.stats), stack_number(_stack_number), hero(&_hero) {
-		uid = (int16_t)hero->getUnitsPtrs().size();
+
+	CombatUnit::CombatUnit(const Unit& _unit_template, const CombatHero& _hero, const int16_t _stack_number)
+		: unit_template(&_unit_template), hero(&_hero), stack_number(_stack_number) {
+		uid = (UnitId)getHero().getUnitsPtrs().size();
+		stats = _unit_template.stats;
 	}
 
 	CombatUnit::CombatUnit(const CombatUnit& _unit, const CombatHero& _hero)
-		: hero(&_hero), unit_template(_unit.unit_template) {
-		uid = (int16_t)hero->getUnitsPtrs().size();
+		: unit_template(_unit.unit_template), hero(&_hero) {
+		uid = _unit.uid;
 		state = _unit.state;
 		hex = _unit.hex;
 		stats = _unit.stats;
@@ -23,8 +25,8 @@ namespace HotaMechanics {
 	}
 
 	CombatUnit::CombatUnit(CombatUnit&& _unit, const CombatHero& _hero)
-		: hero(&_hero), unit_template(std::move(_unit.unit_template)) {
-		uid = (int16_t)hero->getUnitsPtrs().size();
+		: unit_template(_unit.unit_template), hero(&_hero) {
+		uid = std::move(_unit.uid);
 		state = std::move(_unit.state);
 		hex = std::move(_unit.hex);
 		stats = std::move(_unit.stats);
@@ -34,11 +36,11 @@ namespace HotaMechanics {
 	}
 
 	std::string CombatUnit::toString() const {
-		return unit_template->name + "(" + std::to_string(uid) + ") : StackNumber(" + std::to_string(stack_number) + ") : Hex(" + std::to_string(hex / FIELD_COLS) + ", " 
+		return getTemplate().name + "(" + std::to_string(uid) + ") : StackNumber(" + std::to_string(stack_number) + ") : Hex(" + std::to_string(hex / FIELD_COLS) + ", " 
 			+ std::to_string(hex % FIELD_COLS) + ") : " + (getCombatSide() == CombatSide::ATTACKER ? "player_unit" : "ai_unit");
 	}
 
-	void CombatUnit::moveTo(const int _target_hex) {
+	void CombatUnit::moveTo(const HexId _target_hex) {
 		hex = _target_hex;
 	}
 
@@ -61,7 +63,7 @@ namespace HotaMechanics {
 			return;
 		}
 
-		int total_health_after_dmg = getUnitStackHP() - _damage;
+		const int total_health_after_dmg = getUnitStackHP() - _damage;
 		health_lost = (stats.primary_stats.hp - total_health_after_dmg % stats.primary_stats.hp) % stats.primary_stats.hp;
 		stack_number = (total_health_after_dmg / stats.primary_stats.hp) + (health_lost != 0);
 	}
@@ -75,7 +77,7 @@ namespace HotaMechanics {
 	}
 
 	void CombatUnit::applyHeroStats() {
-		BaseStats hero_stats = hero->getBaseStats();
+		BaseStats hero_stats = getHero().getBaseStats();
 		stats.base_stats.atk += (hero_stats.atk * !state.flags.applied_hero_stats);
 		stats.base_stats.def += (hero_stats.def * !state.flags.applied_hero_stats);
 		state.flags.applied_hero_stats = true;
@@ -94,21 +96,21 @@ namespace HotaMechanics {
 	}
 
 	bool CombatUnit::canHeroCast() const {
-		return hero->canCast();
+		return getHero().canCast();
 	}
 
-	const int CombatUnit::getAttackGain() const {
-		return stats.base_stats.atk - unit_template->stats.base_stats.atk;
+	const int16_t CombatUnit::getAttackGain() const {
+		return stats.base_stats.atk - getTemplate().stats.base_stats.atk;
 	}
 
-	const int CombatUnit::getDefenseGain() const {
-		int bonus_def = state.flags.defending;
+	const int16_t CombatUnit::getDefenseGain() const {
+		const int bonus_def = state.flags.defending;
 		//if has moat;
 		// if hasdefmodspellactive; isFrenzyActive
-		return stats.base_stats.def + bonus_def - unit_template->stats.base_stats.def;
+		return stats.base_stats.def + bonus_def - getTemplate().stats.base_stats.def;
 	}
 	const float CombatUnit::getBaseAverageDmg() const {
-		return (unit_template->stats.combat_stats.min_dmg + unit_template->stats.combat_stats.max_dmg) / 2.0f;
+		return (getTemplate().stats.combat_stats.min_dmg + getTemplate().stats.combat_stats.max_dmg) / 2.0f;
 	}
 
 	const float CombatUnit::getFightValuePerOneHp() const {
@@ -123,28 +125,27 @@ namespace HotaMechanics {
 		return stack_number * stats.primary_stats.hp - health_lost;
 	}
 
-	const int CombatUnit::getGlobalUnitId() const {
+	const UnitId CombatUnit::getGlobalUnitId() const {
 		return getCombatSide() == CombatSide::ATTACKER ? uid : uid + GUID_OFFSET;
 	}
 
 	const CombatSide CombatUnit::getCombatSide() const {
-		return hero->getCombatSide();
+		return getHero().getCombatSide();
 	}
 
 	const CombatSide CombatUnit::getEnemyCombatSide() const {
-		auto side = hero->getCombatSide();
-		return side == CombatSide::ATTACKER ? CombatSide::DEFENDER : CombatSide::ATTACKER;
+		return getCombatSide() == CombatSide::ATTACKER ? CombatSide::DEFENDER : CombatSide::ATTACKER;
 	}
 
-	int64_t CombatUnit::rehash() {
-		int64_t state_hash = state.state;
-		int64_t hash = (uid << static_cast<int8_t>(getCombatSide())) | (hex << 4) | (stack_number << 10) | (health_lost << 26)
-			| (state_hash << 36);
+	Hash CombatUnit::rehash() {
+		Hash state_hash = state.flagsToValue();
+		Hash hash = getGlobalUnitId() | (hex << 6) | (stack_number << 12) | (health_lost << 28)
+			| (state_hash << 38);
 		
-		hash = std::hash<int64_t>{}(hash);
-		hash ^= std::hash<int>{}(stats.base_stats.stats);
-		hash ^= std::hash<int>{}(stats.combat_stats.stats);
-		hash ^= std::hash<int16_t>{}(stats.primary_stats.stats);
+		hash = std::hash<Hash>{}(hash);
+		hash ^= std::hash<Hash>{}(stats.base_stats.stats);
+		hash ^= std::hash<Hash>{}(stats.combat_stats.stats);
+		hash ^= std::hash<Hash>{}(stats.primary_stats.stats);
 		
 		return hash;
 	}

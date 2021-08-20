@@ -3,22 +3,31 @@
 #include <vector>
 #include <cstdint>
 
-namespace HotaMechanics::Constants {
 
+namespace HotaMechanics {
+	using HexId = uint8_t;
+	using HexAreaId = uint8_t;
+	using UnitId = uint8_t;
+	using Hash = int64_t;
+}
+
+namespace HotaMechanics::Constants {
 	static const int16_t MANA_PER_KGD = 10;
-	static const int16_t MAX_ARMY_SIZE = 7;
 	static const uint8_t FIELD_COLS = 17;
 	static const uint8_t FIELD_ROWS = 11;
 	static constexpr uint8_t FIELD_SIZE = FIELD_COLS * FIELD_ROWS;
-	static const uint8_t INVALID_HEX_ID = FIELD_SIZE;
-	static const int16_t GUID_OFFSET = 21;
+	static const HexId INVALID_HEX_ID = FIELD_SIZE;
+	static const UnitId GUID_OFFSET = 21;
+	static const UnitId INVALID_UNIT_ID = 255;
+	static const uint8_t BASE_ARMY_SIZE = 7;
+	static const uint8_t MAX_FIELD_RANGE = 254;
 
-	static std::vector<uint8_t> EMPTY_PATH;
-	static std::vector<uint8_t> EMPTY_VEC;
 
-	using AdjacentArray = std::array<uint8_t, 6>;
-	using FieldArray = std::array<uint8_t, FIELD_SIZE + 1>;
+	using AdjacentArray = std::array<HexId, 6>;
+	using FieldArray = std::array<HexId, FIELD_SIZE + 1>;
 	using FieldFlagArray = std::array<bool, FIELD_SIZE + 1>;
+	static std::vector<HexId> EMPTY_PATH;
+	static std::vector<HexId> EMPTY_VEC;
 
 	enum class AIDifficulty : int8_t {
 		EASY /*80%, 100%*/, NORMAL /*130%, 160%, 200%*/

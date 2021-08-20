@@ -22,6 +22,7 @@ namespace HotaMechanics {
 		current_state->last_unit = current_state->order.front();
 		current_state->order.pop_front();
 		active_stack = nullptr;
+		const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
 	}
 
 

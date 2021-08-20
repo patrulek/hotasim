@@ -6,6 +6,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <memory>
 
 namespace HotaMechanics {
 	class CombatHex;
@@ -26,17 +27,24 @@ namespace HotaMechanics {
 			bool retaliated{ false };
 			bool applied_hero_stats{ false };
 		} flags;
+
+		int16_t flagsToValue() {
+			state = (1 << 0) * flags.is_alive | (1 << 1) * flags.is_summon | (1 << 2) * flags.is_clone | (1 << 3) * flags.morale
+				| (1 << 4) * flags.waiting | (1 << 5) * flags.done | (1 << 6) * flags.defending | (1 << 7) * flags.sacrificed
+				| (1 << 8) * flags.retaliated | (1 << 9) * flags.applied_hero_stats;
+			return state;
+		}
 	};
 
 	class CombatUnit {
 	public:
 		CombatUnit() = delete;
-		explicit CombatUnit(const Unit& _unit_template, const int _stack_number, const CombatHero& _hero);
-		explicit CombatUnit(const CombatUnit& _unit, const CombatHero& _hero);
+		explicit CombatUnit(const Unit& _unit_template, const CombatHero& _hero, const int16_t _stack_number = 0);
+		CombatUnit(const CombatUnit& _unit, const CombatHero& _hero);
 		CombatUnit(CombatUnit&& _unit, const CombatHero& _hero);
 		
 		// state change by action --------
-		void moveTo(const int _target_hex);
+		void moveTo(const HexId _target_hex);
 
 		void defend();
 		void wait();
@@ -81,19 +89,19 @@ namespace HotaMechanics {
 
 		// complex getters ---------------
 			// 42270 - not sure
-		const int getAttackGain() const;
+		const int16_t getAttackGain() const;
 			// 42380 - additionaly checking if we have moat;
-		const int getDefenseGain() const;
+		const int16_t getDefenseGain() const;
 		const float getBaseAverageDmg() const;
 		const float getFightValuePerOneHp() const;
 		const float getFightValuePerUnitStack() const;
 		const int getUnitStackHP() const;
 
-		int64_t rehash();
+		Hash rehash();
 		// -------------------------------
 
 		//	hero getters ------------------
-		const int getGlobalUnitId() const;
+		const HexId getGlobalUnitId() const;
 		const Constants::CombatSide getCombatSide() const;
 		const Constants::CombatSide getEnemyCombatSide() const;
 		// -------------------------------
@@ -103,7 +111,7 @@ namespace HotaMechanics {
 		void setStats(const UnitStats& _stats) { stats = _stats; }
 		void setStackNumber(const int16_t _stack_number) { stack_number = _stack_number; }
 		void setHealthLost(const int16_t _health_lost) { health_lost = _health_lost; }
-		void setHex(const uint8_t _hex) { hex = _hex; }
+		void setHex(const HexId _hex) { hex = _hex; }
 		// -------------------------------
 
 		// simple getters ----------------
@@ -113,24 +121,24 @@ namespace HotaMechanics {
 		const UnitStats& getStats() const { return stats; }
 		const CombatUnitState getState() const { return state; }
 		int16_t getHealthLost() const { return health_lost; }
-		uint8_t getHex() const { return hex; };
+		HexId getHex() const { return hex; };
 		const Unit& getTemplate() const { return *unit_template; }
 		int16_t getStackNumber() const { return stack_number; }
 		float getFightValue() const { return unit_template->stats.fight_value; }
-		const CombatHero* getHero() const { return hero; }
-		const int16_t getUnitId() const { return uid; }
+		const CombatHero& getHero() const { return *hero; }
+		const UnitId getUnitId() const { return uid; }
 		// -------------------------------
 
 		// util --------------------------
 		std::string toString() const;
 		// -------------------------------
 	private:
-		int16_t uid{ -1 };
-		const Unit* unit_template;
+		UnitId uid{ Constants::INVALID_UNIT_ID };
+		const Unit* const unit_template{ nullptr };
 		const CombatHero* hero{ nullptr };
 
-		UnitStats stats;
-		uint8_t hex{ Constants::INVALID_HEX_ID };
+		UnitStats stats{ 0 };
+		HexId hex{ Constants::INVALID_HEX_ID };
 		int16_t stack_number{ 0 };
 		int16_t health_lost{ 0 };
 		CombatUnitState state{ 0 };

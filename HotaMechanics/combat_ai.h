@@ -31,30 +31,25 @@ namespace HotaMechanics {
 		// -------------------------------
 
 		// AI decision making ------------
-		const std::vector<const CombatUnit*>& chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const std::vector<uint8_t>& _hexes_to_attack);
-		const uint8_t chooseHexToMoveForAttack(const CombatUnit& _active_stack, const CombatUnit& _target_unit) const;
-		const int chooseWalkDistanceFromPath(const CombatUnit& _active_stack, uint8_t _target_hex, const CombatField& _field, const int _unit_id) const;
+		const std::vector<const CombatUnit*>& chooseUnitToAttack(const CombatUnit& _active_stack, const CombatHero& _enemy_hero, const std::vector<HexId>& _hexes_to_attack);
+		const HexId chooseHexToMoveForAttack(const CombatUnit& _active_stack, const CombatUnit& _target_unit) const;
+		const int chooseWalkDistanceFromPath(const CombatUnit& _active_stack, HexId _target_hex, const CombatField& _field, const UnitId _unit_id) const;
 		// -------------------------------
 
 		// AI state ----------------------
 		void initializeBattle(const Constants::FieldArray* _player_unit_reachables = nullptr, const Constants::FieldArray* _player_unit_attackables = nullptr,
-									 const Constants::FieldArray* _ai_unit_reachables = nullptr, const Constants::FieldArray* _ai_unit_attackables = nullptr,
-									 const bool _only_ranges = false);
+									 const Constants::FieldArray* _ai_unit_reachables = nullptr, const Constants::FieldArray* _ai_unit_attackables = nullptr);
 		void addEventsToProcess(const std::vector<CombatEvent>& _events) { events_to_process.insert(std::end(events_to_process), std::begin(_events), std::end(_events)); }
 		void processEvents();
 
-		const Constants::FieldArray& getAttackablesForUnit(const CombatUnit& _unit) const;
-		const Constants::FieldArray& getReachablesForUnit(const CombatUnit& _unit) const;
-		std::vector<uint8_t> getAttackableHexesForUnit(const CombatUnit& _unit) const;
-		std::vector<uint8_t> getReachableHexesForUnit(const CombatUnit& _unit) const;
-		std::vector<uint8_t> getAttackableHexesForUnitFromList(const CombatUnit& _unit, std::vector<uint8_t>& _hexes) const;
+		std::vector<HexId> getAttackableHexesForUnit(const CombatUnit& _unit) const;
+		std::vector<HexId> getReachableHexesForUnit(const CombatUnit& _unit) const;
 		
-		const bool canUnitReachHex(const CombatUnit& _unit, const uint8_t _hex) const;
-		const bool canUnitAttackHex(const CombatUnit& _unit, const uint8_t _hex) const;
+		const bool canUnitReachHex(const CombatUnit& _unit, const HexId _hex) const;
+		const bool canUnitAttackHex(const CombatUnit& _unit, const HexId _hex) const;
 
 		std::vector<const CombatUnit*>& getEnemyUnitsInAttackRange(const CombatUnit& _unit);
-		const bool isHexBlockedFor(const uint8_t _target_hex, const CombatUnit& _active_stack) const;
-		const bool isUnitBlockedFor(const CombatUnit& _unit, const CombatUnit& _active_stack) const;
+		const bool isHexBlockedFor(const HexId _target_hex, const CombatUnit& _active_stack) const;
 		// -------------------------------
 
 		// simple getters ----------------

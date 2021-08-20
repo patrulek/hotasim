@@ -20,26 +20,15 @@ namespace HotaMechanics {
 		~CombatState();
 
 		int16_t turn{ -1 };
-		int16_t last_unit{ -1 };
+		UnitId last_unit{ Constants::INVALID_UNIT_ID };
 		Constants::CombatResult result{ Constants::CombatResult::NOT_STARTED };
 
 		CombatHero attacker;
 		CombatHero defender;
 		CombatField field;
 
-		void setAttacker(CombatHero&& _attacker) {
-			memmove(&attacker, &_attacker, sizeof(CombatHero));//attacker = std::move(_attacker);
-		}
-		void setDefender(CombatHero&& _defender) { 
-			memmove(&defender, &_defender, sizeof(CombatHero));
-		}
-		void setField(CombatField&& _field) { 
-			memmove(&field, &_field, sizeof(CombatField)); 
-		}
-
-		std::list<uint8_t> order;	// for attacker it will be 0-20; for defender it will be 21-41
-
-		int64_t rehash();
+		std::list<UnitId> order;	// for attacker it will be 0-20; for defender it will be 21-41
+		Hash rehash();
 	};
 
 	struct CombatUnitPacked {
@@ -52,11 +41,11 @@ namespace HotaMechanics {
 
 	struct CombatStatePacked {
 		// combat state
-		int8_t last_unit : 6;
+		UnitId last_unit : 6;
 		int8_t turn : 8;
-		int8_t result : 3;
+		Constants::CombatResult result : 3;
 		int8_t order_size : 6;
-		uint8_t* order{ nullptr };
+		UnitId* order{ nullptr };
 
 		// attacker state
 		HeroStats attacker_stats{ 0 };

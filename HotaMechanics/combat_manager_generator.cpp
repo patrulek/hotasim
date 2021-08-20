@@ -36,7 +36,7 @@ namespace HotaMechanics {
 			auto& adjacent = ai->getPathfinder().getAdjacentHexes(unit->getHex());
 
 			for (uint8_t adj_hex = 0; adj_hex < 6; ++adj_hex) {
-				if (ai->canUnitReachHex(active_stack, adjacent[adj_hex]))
+				if (ai->canUnitReachHex(active_stack, adjacent[adj_hex]) || active_stack.getHex() == adjacent[adj_hex])
 					actions.push_back(createAttackAction(unit->getUnitId(), adjacent[adj_hex]));
 			}
 		}

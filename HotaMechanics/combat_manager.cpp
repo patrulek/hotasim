@@ -106,6 +106,7 @@ namespace HotaMechanics {
 		if (isNewCombat()) {
 			nextStateByAction(createPreBattleAction());
 			ai->initializeBattle();
+			const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
 			return;
 		}
 

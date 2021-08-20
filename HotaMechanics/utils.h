@@ -22,15 +22,15 @@ namespace HotaMechanics::Utils {
 	int getRandomInt(int _min, int _max);
 	float getRandomFloat(float _min, float _max);
 
-	std::vector<int> getCombatFieldTemplate(const Constants::CombatFieldTemplate _field_template);
-
+	std::vector<uint8_t> getCombatFieldTemplate(const Constants::CombatFieldTemplate _field_template);
+	ArmyPermutation createBaseArmyPermutation(std::vector<UnitStack>& _army);
 
 	template<typename Printable>
 	std::string to_string(const Printable& _printable) {
 		//if (std::is_fundamental_v<Printable>)
 		//	return std::to_string((std::remove_reference_t<Printable>)_printable);
 		//else
-			return _printable.toString();
+		return _printable.toString();
 	}
 
 	constexpr size_t ceil(const double _val) {

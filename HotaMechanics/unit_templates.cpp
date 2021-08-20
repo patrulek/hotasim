@@ -6,7 +6,7 @@
 namespace HotaMechanics {
    using namespace Utils;
    /* Simplest units: only walking, no abilities, only melee, etc */
-   std::unordered_map<std::string, Unit> unit_templates() {
+   std::unordered_map<std::string, Unit>& unit_templates() {
       static std::unordered_map<std::string, Unit> tmp;
       if (!tmp.empty())
          return tmp;

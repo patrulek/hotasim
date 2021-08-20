@@ -43,9 +43,11 @@ namespace CombatFieldTest {
 		EXPECT_EQ(CombatHexOccupation::EMPTY, field.getById(32).getOccupation());
 		field.fillHex(32, CombatHexOccupation::INDESTRUCTIBLE_OBSTACLE);
 		EXPECT_EQ(CombatHexOccupation::INDESTRUCTIBLE_OBSTACLE, field.getById(32).getOccupation());
+		EXPECT_TRUE(field.getOccupied().find(32) != std::end(field.getOccupied()));
 
 		field.clearHex(32);
 		EXPECT_EQ(CombatHexOccupation::EMPTY, field.getById(32).getOccupation());
+		EXPECT_TRUE(field.getOccupied().find(32) == std::end(field.getOccupied()));
 	}
 
 	// CombatField::setTemplate(vector<int>)
@@ -53,21 +55,64 @@ namespace CombatFieldTest {
 		CombatField field(createField());
 
 		int empty_values = 0;
-		for (int16_t hex : range(FIELD_SIZE))
+		for (HexId hex : range(FIELD_SIZE))
 			empty_values += field.getById(hex).getOccupation() == CombatHexOccupation::EMPTY;
 		EXPECT_EQ(FIELD_SIZE, empty_values); // new field without template should have all empty hexes
 
 		field = CombatField(createField(CombatFieldType::GRASS, CombatFieldTemplate::IMPS_2x100));
 
 		empty_values = 0;
-		for (int16_t hex : range(FIELD_SIZE))
+		for (HexId hex : range(FIELD_SIZE))
 			empty_values += field.getById(hex).getOccupation() == CombatHexOccupation::EMPTY;
 		EXPECT_NE(FIELD_SIZE, empty_values); // setting custom template with obstacles should set some
 
 		empty_values = 0;
 		field.setTemplate(CombatFieldTemplate::EMPTY);
-		for (int16_t hex : range(FIELD_SIZE))
+		for (HexId hex : range(FIELD_SIZE))
 			empty_values += field.getById(hex).getOccupation() == CombatHexOccupation::EMPTY;
 		EXPECT_EQ(FIELD_SIZE, empty_values); // were changing field template back to empty
+	}
+
+	TEST(CombatField, shouldReturnEqualHashesForSameFields) {
+		CombatField field(createField());
+		CombatField field2(createField());
+
+		Hash h1 = field.rehash();
+		Hash h2 = field2.rehash();
+
+		EXPECT_EQ(h1, h2);
+
+		field2.fillHex(32, CombatHexOccupation::UNIT);
+		h2 = field2.rehash();
+		
+		EXPECT_NE(h1, h2);
+
+		field2.clearHex(32);
+		h2 = field2.rehash();
+
+		EXPECT_EQ(h1, h2);
+	}
+
+	TEST(CombatField, shouldReturnDifferentHashesForDifferentFields) {
+		CombatField field(createField());
+		CombatField field2(createField());
+		field2.fillHex(32, CombatHexOccupation::UNIT);
+
+		Hash h1 = field.rehash();
+		Hash h2 = field2.rehash();
+
+		EXPECT_NE(h1, h2);
+
+		field2.clearHex(32);
+		field2.fillHex(33, CombatHexOccupation::UNIT);
+		h2 = field2.rehash();
+
+		EXPECT_NE(h1, h2);
+
+		CombatField field3(createField(CombatFieldType::GRASS, CombatFieldTemplate::IMPS_2x100));
+		Hash h3 = field3.rehash();
+
+		EXPECT_NE(h1, h3);
+		EXPECT_NE(h2, h3);
 	}
 };

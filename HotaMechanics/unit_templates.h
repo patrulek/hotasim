@@ -6,6 +6,6 @@
 #include "structures.h"
 
 namespace HotaMechanics {
-	std::unordered_map<std::string, Unit> unit_templates();
+	std::unordered_map<std::string, Unit>& unit_templates();
 
 }; // HotaMechanics

@@ -39,21 +39,21 @@ namespace HotaMechanics {
 	};
 
 	struct UnitStats {
-		BaseStats base_stats;
-		CombatStats combat_stats;
-		PrimaryStats primary_stats;
-		uint16_t fight_value;
+		BaseStats base_stats{ 0 };
+		CombatStats combat_stats{ 0 };
+		PrimaryStats primary_stats{ 0 };
+		uint16_t fight_value{ 0 };
 	};
 
 	struct HeroStats {
-		BaseStats base_stats;
-		PrimaryStats primary_stats;
+		BaseStats base_stats{ 0 };
+		PrimaryStats primary_stats{ 0 };
 	};
 
 	struct UnitPermutation {
-		int8_t unit_id;
-		int8_t unit_order;
-		int16_t unit_number;
+		UnitId unit_id{ Constants::INVALID_UNIT_ID };
+		uint8_t unit_order{ 0 };
+		int16_t unit_number{ 0 };
 
 		bool operator==(const UnitPermutation& _obj) const {
 			return unit_id == _obj.unit_id && unit_order == _obj.unit_order && unit_number == _obj.unit_number;
@@ -64,15 +64,13 @@ namespace HotaMechanics {
 	{
 		std::vector<UnitPermutation> permutations;
 
-		ArmyPermutation() { permutations.reserve(7); }
-
 		bool operator==(const ArmyPermutation& _obj) const {
 			return permutations == _obj.permutations;
 		}
 	};
 
 	struct SpellBook {
-		std::vector<Constants::Spells> spells;
+		std::vector<Constants::Spells> spells{};
 	};
 
 	struct Equipment {
@@ -80,34 +78,32 @@ namespace HotaMechanics {
 	};
 
 	struct Unit {
-		UnitStats stats;
-		std::string name;
+		UnitStats stats{ 0 };
+		std::string name{ "undefined" };
 	};
 
 	struct UnitStack {
-		Unit unit;
-		int16_t stack_number;
+
+		const Unit* unit{ nullptr };
+		int16_t stack_number{ 0 };
 	};
 
 	struct Hero {
-		HeroStats stats;
-		std::vector<UnitStack> army;
-
-		Hero() { army.reserve(7); }
-		~Hero() {}
+		HeroStats stats{ 0 };
+		std::vector<UnitStack> army{};
 	};
 
 	struct CombatAction {
-		Constants::CombatActionType action;
-		int16_t param1; // unit_id (target for attack/spellcast) : walk_distance (for walk action)
-		uint8_t target; // hex_id (for walk/melee attack/spellcast)
-		int16_t param2; // true/false (whether action ends unit turn; hero spellcast dont)
+		Constants::CombatActionType action{ Constants::CombatActionType::DEFENSE };
+		int16_t param1{ -1 }; // unit_id (target for attack/spellcast) : walk_distance (for walk action)
+		HexId target{ Constants::INVALID_HEX_ID }; // hex_id (for walk/melee attack/spellcast)
+		int16_t param2{ 0 }; // true/false (whether action ends unit turn; hero spellcast dont)
 	};
 
 	struct CombatEvent {
-		Constants::CombatEventType type;
-		int16_t param1;
-		uint8_t param2;
-		uint8_t param3;
+		Constants::CombatEventType type{ Constants::CombatEventType::BATTLE_START };
+		int16_t param1{ -1 };
+		HexId param2{ Constants::INVALID_HEX_ID }; // source hex
+		HexId param3{ Constants::INVALID_HEX_ID }; // target hex
 	};
 }; // HotaMechanics

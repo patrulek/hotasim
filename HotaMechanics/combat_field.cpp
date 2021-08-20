@@ -10,19 +10,11 @@ namespace HotaMechanics {
 	using namespace Constants;
 	using namespace Utils;
 
-	int64_t CombatField::rehash() {
-		//__debugbreak();
+	Hash CombatField::rehash() {
 		hash = 0;
 		for (auto& hex : occupied)
-			hash ^= std::hash<uint64_t>{}(hex);//((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
-		//for (auto& hex : hexes)
-		//	hash ^= (hex.isWalkable() * std::hash<int16_t>{}(hex.getId()));//((hex.getId() % FIELD_COLS) << (4 * hex.getId() / FIELD_COLS)));
+			hash ^= std::hash<Hash>{}(hex);
 
-		hash = std::hash<int64_t>{}(hash);
-		return hash;
-	}
-
-	const int64_t CombatField::getHash() const {
 		return hash;
 	}
 
@@ -30,12 +22,12 @@ namespace HotaMechanics {
 		return !(id % Constants::FIELD_COLS == 0 || id % Constants::FIELD_COLS == Constants::FIELD_COLS - 1);
 	}
 
-	const int16_t CombatHex::calcArea() const {
-		const int row = id / FIELD_COLS;
-		const int col = id % FIELD_COLS;
+	const HexAreaId CombatHex::calcArea() const {
+		const uint8_t row = id / FIELD_COLS;
+		const uint8_t col = id % FIELD_COLS;
 
-		const int base = (col > 5) + (col > 10);
-		const int shift = 3 * ((row > 3) + (row > 6));
+		const uint8_t base = (col > 5) + (col > 10);
+		const uint8_t shift = 3 * ((row > 3) + (row > 6));
 
 		return base + shift;
 	}
@@ -50,34 +42,38 @@ namespace HotaMechanics {
 			combatFieldTemplate = _field_template;
 			combatFieldId = _field_type;
 			hexes = fields[_field_template]->hexes;
+			hash = fields[_field_template]->hash;
+			occupied = fields[_field_template]->occupied;
 			return;
 		}
 
 		occupied.rehash(64);
+		hexes.reserve(FIELD_SIZE + 1);
 		setTemplate(_field_template);
+		rehash();
+
+		if (fields.find(_field_template) == std::end(fields))
+			fields[_field_template] = std::make_shared<CombatField>(std::move(CombatField(*this)));
 	}
 
 	void CombatField::setTemplate(const CombatFieldTemplate _field_template) {
-		const std::vector<int>& _template = Utils::getCombatFieldTemplate(_field_template);
+		const std::vector<HexId>& _template = Utils::getCombatFieldTemplate(_field_template);
 		occupied.clear();
+		hexes.clear();
 
 		if (_template.size() != FIELD_SIZE)
 			throw std::exception("Wrong template size");
 
 		combatFieldTemplate = _field_template;
 
-		for (uint8_t hex = 0; hex < FIELD_SIZE; ++hex) {
+		for (HexId hex = 0; hex < FIELD_SIZE; ++hex) {
 			const auto occupation = _template[hex] == 1 ? CombatHexOccupation::SOLID_OBSTACLE : CombatHexOccupation::EMPTY;
-			hexes[hex] = CombatHex(hex, occupation);
+			hexes.emplace_back(hex, occupation);
 			if (_template[hex] == 1)
-				fillHex(hex, CombatHexOccupation::SOLID_OBSTACLE);
+				occupied.insert(hex);
 		}
 
-		hexes[INVALID_HEX_ID] = CombatHex(INVALID_HEX_ID);
-
-		if (fields.find(_field_template) == std::end(fields))
-			fields[_field_template] = new CombatField(*this);
-		rehash();
+		hexes.emplace_back(INVALID_HEX_ID);
 	}
 
 	CombatField CombatField::retrieveCombatField(CombatFieldType _field_type, CombatFieldTemplate _field_template) {
@@ -86,5 +82,5 @@ namespace HotaMechanics {
 		return CombatField(_field_type, _field_template);
 	}
 
-	std::unordered_map<CombatFieldTemplate, CombatField*> CombatField::fields;
+	std::unordered_map<CombatFieldTemplate, std::shared_ptr<CombatField>> CombatField::fields;
 }; // HotaMechanics

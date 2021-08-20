@@ -1,6 +1,7 @@
 #include "utils.h"
 
 #include <random>
+#include <iostream>
 
 #include "combat_unit.h"
 
@@ -36,10 +37,19 @@ namespace HotaMechanics::Utils {
 		return distrib(gen);
 	}
 
-	std::vector<int> getCombatFieldTemplate(const CombatFieldTemplate _type) {
+	ArmyPermutation createBaseArmyPermutation(std::vector<UnitStack>& _army) {
+		ArmyPermutation permutation;
+
+		for (size_t i = 0; i < _army.size(); ++i)
+			permutation.permutations.push_back(UnitPermutation{ (UnitId)i, (uint8_t)i, _army[i].stack_number });
+
+		return permutation;
+	}
+
+	std::vector<uint8_t> getCombatFieldTemplate(const CombatFieldTemplate _type) {
 		// TODO: generate different field templates
 		if (_type == CombatFieldTemplate::IMPS_2x100)
-			return std::vector<int>{
+			return std::vector<uint8_t>{
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
@@ -54,7 +64,7 @@ namespace HotaMechanics::Utils {
 		};
 
 		if (_type == CombatFieldTemplate::TMP1)
-			return std::vector<int>{
+			return std::vector<uint8_t>{
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
@@ -69,7 +79,7 @@ namespace HotaMechanics::Utils {
 		};
 
 
-		return std::vector<int>{
+		return std::vector<uint8_t>{
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

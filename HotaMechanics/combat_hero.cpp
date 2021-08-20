@@ -7,20 +7,10 @@
 namespace HotaMechanics {
 	using namespace Constants;
 
-	CombatHero::CombatHero(const Hero& hero_template, const CombatSide _side)
-		: hero_template(hero_template), army_permutation(*(new ArmyPermutation(generateBaseArmyPermutation()))), side(_side) {
-		initialize();
-		generateUnitsFromArmy();
-	}
-
 	CombatHero::CombatHero(const Hero& _hero_template, const ArmyPermutation& _army_permutation, const CombatSide _side)
-		: hero_template(_hero_template), army_permutation(_army_permutation), side(_side) {
+		: hero_template(&_hero_template), army_permutation(&_army_permutation), side(_side) {
 		initialize();
 		generateUnitsFromArmy();
-	}
-
-	CombatHero::~CombatHero() {
-		//std::cout << "del hero: " << this << std::endl;
 	}
 
 	CombatHero::CombatHero(const CombatHero& _obj)
@@ -30,91 +20,47 @@ namespace HotaMechanics {
 		stats = _obj.stats;
 		side = _obj.side;
 
-		unit_ptrs.clear();
-		for (auto unit : _obj.getUnitsPtrs()) {
-			units.emplace_back(CombatUnit(*unit, *this));
-			unit_ptrs.push_back(&(units.back()));
-		}
-	}
-
-	// TODO: fix it
-	CombatHero& CombatHero::operator=(const CombatHero& _obj) {
-		if (this == &_obj)
-			return *this;
-
-		//initialize();
-		stats = _obj.stats;
-		side = _obj.side;
-
 		units.clear();
 		unit_ptrs.clear();
 		for (auto unit : _obj.getUnitsPtrs()) {
-			units.emplace_back(CombatUnit(*unit, *this));
+			units.emplace_back(*unit, *this);
 			unit_ptrs.push_back(&(units.back()));
 		}
-		return *this;
 	}
 
 	CombatHero::CombatHero(CombatHero&& _obj) noexcept
-		: hero_template(_obj.hero_template), army_permutation(_obj.army_permutation) {
+		: hero_template(std::move(_obj.hero_template)), army_permutation(std::move(_obj.army_permutation)) {
 		initialize();
 		stats = std::move(_obj.stats);
 		side = std::move(_obj.side);
 
+		units.clear();
 		unit_ptrs.clear();
 		for (auto unit : _obj.getUnitsPtrs()) {
-			units.emplace_back(CombatUnit(*unit, *this));
+			units.emplace_back(*unit, *this);
 			unit_ptrs.push_back(&(units.back()));
 		}
 		_obj.units.clear();
 		_obj.unit_ptrs.clear();
 	}
 
-	// TODO: fix it
-	CombatHero& CombatHero::operator=(CombatHero&& _obj) {
-		if (this == &_obj)
-			return *this;
-
-		//initialize();
-		stats = std::move(_obj.stats);
-		side = std::move(_obj.side);
-
-		units.clear();
-		unit_ptrs.clear();
-		for (auto unit : _obj.getUnitsPtrs()) {
-			units.emplace_back(CombatUnit(*unit, *this));
-			unit_ptrs.push_back(&(units.back()));
-		}
-		_obj.units.clear();
-		return *this;
-	}
-
 	void CombatHero::initialize() {
-		units.reserve(7);
-		unit_ptrs.reserve(7);
-		stats = hero_template.stats;
+		units.reserve(BASE_ARMY_SIZE);
+		unit_ptrs.reserve(BASE_ARMY_SIZE);
+		stats = hero_template->stats;
 
 		// if have artifacts modify stats
 		// if have secondary skills modify stats
 	}
 
-	ArmyPermutation CombatHero::generateBaseArmyPermutation() const {
-		ArmyPermutation permutation;
-
-		for (int8_t i = 0; i < hero_template.army.size(); ++i)
-			permutation.permutations.emplace_back(i, i, hero_template.army[i].stack_number);
-
-		return permutation;
-	}
-
 	void CombatHero::generateUnitsFromArmy() {
-		for (auto unit_perm : army_permutation.permutations)
+		for (auto& unit_perm : army_permutation->permutations)
 			addUnitFromArmy(unit_perm);
 	}
 
-	void CombatHero::addUnitFromArmy(UnitPermutation _unit_perm) {
-		const auto& unit_template = hero_template.army[_unit_perm.unit_id].unit;
-		units.emplace_back(CombatUnit{ unit_template, _unit_perm.unit_number, *this });
+	void CombatHero::addUnitFromArmy(const UnitPermutation& _unit_perm) {
+		const auto unit_template = hero_template->army[_unit_perm.unit_id].unit;
+		units.emplace_back(*unit_template, *this, _unit_perm.unit_number);
 		units.back().initUnit();
 		unit_ptrs.push_back(&(units.back()));
 	}
@@ -123,28 +69,29 @@ namespace HotaMechanics {
 		return unit_ptrs;
 	}
 
-	const int16_t CombatHero::getUnitId(const CombatUnit& _unit) const {
+	const UnitId CombatHero::getUnitId(const CombatUnit& _unit) const {
 		auto it = std::find_if(std::begin(units), std::end(units), [&_unit](const CombatUnit& _obj) { return &_obj == &_unit; });
-		bool found = (it != std::end(units));
-		return (int16_t)((it - std::begin(units)) * found - !found);
+		if (it != std::end(units))
+			return static_cast<UnitId>(it - std::begin(units));
+		return INVALID_UNIT_ID;
 	}
 
-	const int16_t CombatHero::getGlobalUnitId(const CombatUnit& _unit) const {
-		auto id = getUnitId(_unit);
-		return id + (21 * (side == CombatSide::DEFENDER));
+	const UnitId CombatHero::getGlobalUnitId(const CombatUnit& _unit) const {
+		if (side == CombatSide::ATTACKER) 
+			return getUnitId(_unit);
+		return getUnitId(_unit) + GUID_OFFSET;
 	}
 
 	const bool CombatHero::isAlive() const {
 		return std::any_of(std::begin(units), std::end(units), [](const auto& _unit) { return _unit.isAlive(); });
 	}
 
-	int64_t CombatHero::rehash() {
-		int64_t hash = std::hash<int16_t>{}(stats.primary_stats.mana);
+	Hash CombatHero::rehash() {
+		Hash hash = std::hash<Hash>{}(stats.primary_stats.mana);
+		hash ^= std::hash<Hash>{}(stats.base_stats.stats);
 
-		for (auto& unit : units) {
-			int64_t unit_hash = unit.rehash();
-			hash ^= unit_hash;
-		}
+		for (auto& unit : units)
+			hash ^= unit.rehash();
 
 		return hash;
 	}
