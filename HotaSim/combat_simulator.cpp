@@ -101,15 +101,15 @@ namespace HotaSim {
 		uint64_t mana_score = (1 << 7);
 		if (has_mana)
 			mana_score = static_cast<uint64_t>((1 << 7) * (1.0f - (float)(_state.attacker.getMana() - _initial_state.attacker.getMana()) / _initial_state.attacker.getMana()));
-		
-		
-		std::unordered_set<uint8_t> free_hexes;
-		std::unordered_set<uint8_t> reachable_hexes;
-		std::unordered_set<uint8_t> ai_reachable_hexes;
-		std::unordered_set<uint8_t> attackable_hexes;
+
+
+		HexSet free_hexes;
+		HexSet reachable_hexes;
+		HexSet ai_reachable_hexes;
+		HexSet attackable_hexes;
 		uint64_t team_awareness_score = 0;
 
-		if (_state.last_unit != -1 && _state.last_unit < 21) {
+		if (_state.last_unit != INVALID_UNIT_ID && _state.last_unit < 21) {
 			const auto& last_unit = manager->getStackByGlobalId(_state.last_unit);
 			const auto& reachables_ = manager->getCombatAI().getReachableHexesForUnit(last_unit);
 			reachable_hexes.insert(std::begin(reachables_), std::end(reachables_));
@@ -125,7 +125,7 @@ namespace HotaSim {
 			reachable_hexes.insert(std::begin(reachables), std::end(reachables));
 			free_hexes.insert(std::begin(reachables), std::end(reachables));
 		}
-		
+
 		for (auto& order_unit : _state.order) {
 			if (order_unit < 21)
 				continue;
@@ -137,8 +137,7 @@ namespace HotaSim {
 			ai_reachable_hexes.insert(std::begin(reachables), std::end(reachables));
 		}
 
-		for (const auto& att : attackable_hexes)
-			free_hexes.erase(att);
+		free_hexes.erase(attackable_hexes);
 
 		int alive_un = 0;
 		for (auto unit : manager->getCurrentState().attacker.getUnitsPtrs()) {
@@ -159,9 +158,9 @@ namespace HotaSim {
 
 		const size_t max_free_hexes = FIELD_SIZE - 2 * FIELD_ROWS - _state.field.getOccupied().size();
 		uint64_t max_map_awareness_score = max_free_hexes * 100;
-		uint64_t map_awareness_score = static_cast<uint64_t>((1 << 3) * 
-			((float)(92.5f * free_hexes.size() + 5.0f * reachable_hexes.size() + 2.5f * (max_free_hexes - ai_reachable_hexes.size())) 
-			/ max_map_awareness_score)) << 8;
+		uint64_t map_awareness_score = static_cast<uint64_t>((1 << 3) *
+			((float)(92.5f * free_hexes.size() + 5.0f * reachable_hexes.size() + 2.5f * (max_free_hexes - ai_reachable_hexes.size()))
+				/ max_map_awareness_score)) << 8;
 
 		map_awareness_score = std::min(map_awareness_score, (uint64_t)(1 << 3) << 8);
 
@@ -187,8 +186,6 @@ namespace HotaSim {
 	}
 
 	const bool CombatSimulator::simulatorConstraintsViolated(const CombatSequenceTree& _tree) {
-		// some states wasnt checked yet
-		bool some_states_left_rule_violated = _tree.isCurrentRoot() && !_tree.canTakeForgotten();
 
 		// reached total states limit for simulation
 		bool state_limit_reached_rule_violated = _tree.getSize() > estimated_total_states;
@@ -196,7 +193,7 @@ namespace HotaSim {
 		//if (_tree.isCurrentRoot() && !_tree.forgotten_paths.empty())
 		//	const_cast<CombatSequenceTree&>(_tree).takeForgotten();
 
-		return some_states_left_rule_violated || state_limit_reached_rule_violated;
+		return state_limit_reached_rule_violated;
 	}
 
 	const bool CombatSimulator::combatConstraintsViolated(const CombatSequenceTree& _tree) {
@@ -256,7 +253,6 @@ namespace HotaSim {
 							std::cout << "Total percentage checked: " << (float)tree.level_occurence[1] / first_turn_actions << std::endl;
 							std::cout << "Circular occurences: " << tree.circular_occurence << std::endl;
 							std::cout << "Early cutoffs: " << tree.early_cutoff << std::endl;
-							std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
 							std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 							std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
 							std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]
@@ -335,9 +331,6 @@ namespace HotaSim {
 
 					
 
-					bool random_jump = false;
-					bool root_jump = false;
-					bool take_forgotten = false;
 
 					// check if need to go up further
 					//if (tree.foundCircularPath()) {
@@ -356,10 +349,7 @@ namespace HotaSim {
 					//		tree.goParent();
 					//	}
 					//}
-					//else if (!root_jump && !random_jump) {
-					//	//std::cout << " LAST ACTION, JUMP\n\n";
-					//	while (tree.hasParent() && tree.unitStackLastAction())
-					//		tree.goParent();
+					
 
 					//	// wasnt last action of this unit, so we need to go back one more state (before that unit acted)
 					//	action_cnt = tree.current->action + 1;
@@ -409,7 +399,6 @@ namespace HotaSim {
 				std::cout << "Total states checked: " << std::dec << tree.getSize() << std::endl;
 				std::cout << "Circular occurences: " << tree.circular_occurence << std::endl;
 				std::cout << "Early cutoffs: " << tree.early_cutoff << std::endl;
-				std::cout << "Forgotten paths/total jumps: " << tree.forgotten_paths.size() - tree.fp_cnt << "/" << jump_random_parent + jump_root << std::endl;
 				std::cout << "Estimated turns rule violated: " << turns_rule_violation_cnt << std::endl;
 				std::cout << "Combat finished rule violated: " << combat_finished_cnt << std::endl;
 				std::cout << "Turns occurence: [0] = " << tree.turns_occurence[0] << " [1] = " << tree.turns_occurence[1]

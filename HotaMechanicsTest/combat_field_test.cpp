@@ -43,11 +43,11 @@ namespace CombatFieldTest {
 		EXPECT_EQ(CombatHexOccupation::EMPTY, field.getById(32).getOccupation());
 		field.fillHex(32, CombatHexOccupation::INDESTRUCTIBLE_OBSTACLE);
 		EXPECT_EQ(CombatHexOccupation::INDESTRUCTIBLE_OBSTACLE, field.getById(32).getOccupation());
-		EXPECT_TRUE(field.getOccupied().find(32) != std::end(field.getOccupied()));
+		EXPECT_TRUE(field.getOccupied()[32]);
 
 		field.clearHex(32);
 		EXPECT_EQ(CombatHexOccupation::EMPTY, field.getById(32).getOccupation());
-		EXPECT_TRUE(field.getOccupied().find(32) == std::end(field.getOccupied()));
+		EXPECT_FALSE(field.getOccupied()[32]);
 	}
 
 	// CombatField::setTemplate(vector<int>)
@@ -114,5 +114,62 @@ namespace CombatFieldTest {
 
 		EXPECT_NE(h1, h3);
 		EXPECT_NE(h2, h3);
+	}
+
+	TEST(CombatField, shouldReturnDifferentHashesForDifferentCombinations) {
+		CombatField field(createField());
+		field.fillHex(3, CombatHexOccupation::UNIT);
+		field.fillHex(37, CombatHexOccupation::UNIT);
+
+		CombatField field2(createField());
+		field2.fillHex(32, CombatHexOccupation::UNIT);
+		field2.fillHex(35, CombatHexOccupation::UNIT);
+		field2.fillHex(37, CombatHexOccupation::UNIT);
+
+		Hash h1 = field.rehash();
+		Hash h2 = field2.rehash();
+
+		EXPECT_NE(h1, h2);
+	}
+
+	TEST(CombatField, shouldGenerateUniqueHashes) {
+		std::unordered_map<Hash, HexSet> hashes;
+		std::unordered_map<Hash, std::pair<int, HexSet>> search_hashes;
+
+		for (int i = 0; i < 100000; ++i) {
+			CombatField field(createField());
+			int unit_fields = getRandomInt(2, 20);
+			int obstacle_fields = getRandomInt(0, 10);
+
+			for (int j = 0; j < unit_fields; ++j) {
+				int hex = getRandomInt(0, FIELD_SIZE - 1);
+				while (field.getOccupied()[hex])
+					hex = getRandomInt(0, FIELD_SIZE - 1);
+				field.fillHex(hex, CombatHexOccupation::UNIT);
+			}
+
+			for (int j = 0; j < obstacle_fields; ++j) {
+				int hex = getRandomInt(0, FIELD_SIZE - 1);
+				while (field.getOccupied()[hex])
+					hex = getRandomInt(0, FIELD_SIZE - 1);
+				field.fillHex(hex, CombatHexOccupation::SOLID_OBSTACLE);
+			}
+
+			field.rehash();
+			if (hashes.find(field.getHash()) != std::end(hashes)) {
+				EXPECT_TRUE(hashes[field.getHash()] == field.getOccupied());
+			}
+			hashes[field.getHash()] = field.getOccupied();
+
+			HexId source_hex = getRandomInt(1, FIELD_SIZE - 1);
+			Hash h = field.getHash();
+			h ^= std::hash<Hash>{}(static_cast<Hash>(source_hex) << 8);
+
+			if (search_hashes.find(h) != std::end(search_hashes)) {
+				EXPECT_EQ(source_hex, search_hashes[h].first);
+				EXPECT_EQ(field.getOccupied(), search_hashes[h].second);
+			}
+			search_hashes[h] = std::make_pair(source_hex, field.getOccupied());
+		}
 	}
 };

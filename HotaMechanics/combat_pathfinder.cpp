@@ -4,6 +4,8 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include <immintrin.h>
+
 #include "combat_field.h"
 
 namespace HotaMechanics {
@@ -15,6 +17,7 @@ namespace HotaMechanics {
 	CombatPathfinder::CombatPathfinder() {
 		path.reserve(64);
 		reachables.reserve(128);
+		pathmap_cache.rehash(1024 * 1024);
 		initializeAdjacents();
 		initializeDistances();
 		clearPathCache();
@@ -55,6 +58,8 @@ namespace HotaMechanics {
 	void CombatPathfinder::initializeAdjacents() {
 		for (HexId hex = 0; hex < FIELD_SIZE + 1; ++hex) {
 			adjacents[hex] = findAdjacents(hex);
+			adjacents_clockwise[hex] = AdjacentArray{ adjacents[hex][1], adjacents[hex][3], adjacents[hex][5],
+				adjacents[hex][4], adjacents[hex][2], adjacents[hex][0] };
 		}
 	}
 
@@ -105,13 +110,7 @@ namespace HotaMechanics {
 	}
 
 	const AdjacentArray CombatPathfinder::getAdjacentHexesClockwise(const HexId _source_hex) const {
-		auto& hexes = getAdjacentHexes(_source_hex);
-		return AdjacentArray{ hexes[1], hexes[3], hexes[5], hexes[4], hexes[2], hexes[0] };
-	}
-
-	const AdjacentArray CombatPathfinder::getAdjacentHexesCounterClockwise(const HexId _source_hex) const {
-		auto& hexes = getAdjacentHexes(_source_hex);
-		return AdjacentArray{ hexes[0], hexes[2], hexes[4], hexes[5], hexes[3], hexes[1] };
+		return adjacents_clockwise[_source_hex];
 	}
 
 	std::vector<HexId>& CombatPathfinder::getReachableHexesInRange(const HexId _source_hex, const uint8_t _range, const CombatField& _field,
@@ -239,58 +238,62 @@ namespace HotaMechanics {
 	}
 
 	void CombatPathfinder::pathMap(const HexId _source_hex, const CombatField& _field, const bool _double_wide, const uint8_t _range) {
-		//auto hash = _field.getHash();
-		//hash ^= std::hash<uint64_t>{}(_source_hex);
-		//hash ^= std::hash<uint64_t>{}(_range);
-		//if (pathmap_order.find(hash) != std::end(pathmap_order)) {
-		//	cache_buffer = pathmap_order[hash];
-		//	restorePathCache();
-		//	return;
-		//}
+		auto hash = const_cast<CombatField&>(_field).getHash();
+		hash ^= std::hash<Hash>{}(static_cast<Hash>(_source_hex) << 8 | _source_hex);
+		hash ^= std::hash<Hash>{}(static_cast<Hash>(_range) << 8 | _range);
+		if (pathmap_cache.find(hash) != std::end(pathmap_cache)) {
+			cache_buffer = pathmap_cache[hash];
+			restorePathCache();
+			return;
+		}
 		
 		checked[_source_hex] = true;
-		const uint8_t range_ = _range + 1;
-		uint8_t next_to_check_cnt = 0;
+		const uint32_t range_ = _range + 1;
+		uint32_t next_to_check_cnt = 0;
 		std::array<HexId, 32> next_to_check{};
-		uint8_t to_check_cnt = 1, dist = 1;
-		std::array<HexId, 32> to_check{ _source_hex };
+		uint32_t to_check_cnt = 1, dist = 1;
+		std::array<HexId, 32> to_check{}; to_check[0] = _source_hex;
+		Utils::HexSet reachables_{};
 
 		// just find path to all possible hexes
 
 		while (to_check_cnt > 0 && dist <= range_) {
-			HexId hex_id = to_check[--to_check_cnt];
+			const HexId hex_id = to_check[--to_check_cnt];
 
 			if (dist <= range_ && hex_id != _source_hex) {
-				reachables.push_back(hex_id);
+				reachables_.insert(hex_id);
 			}
 
-			auto& adjacent_hexes = getAdjacentHexesClockwise(hex_id);
+			const auto& adjacent_hexes = getAdjacentHexesClockwise(hex_id);
 			for (int i = 0; i < 6; ++i) {
-				HexId adj_hex = adjacent_hexes[i];
-				// if target hex is occupied by unit set it also as walkable, but later (after search) check if we need real path to hex or only distance
-				const bool is_walkable_hex = _field.getById(adj_hex).isWalkable();
-				if (is_walkable_hex && !checked[adj_hex]) {
-					next_to_check[next_to_check_cnt++] = adj_hex;
-				}
-				checked[adj_hex] = true;
+				const HexId adj_hex = adjacent_hexes[i];
+				if (!checked[adj_hex]) {
+					checked[adj_hex] = true;
+					// if target hex is occupied by unit set it also as walkable, but later (after search) check if we need real path to hex or only distance
+					const bool is_walkable_hex = _field.getById(adj_hex).isWalkable();
+					if (is_walkable_hex) {
+						next_to_check[next_to_check_cnt++] = adj_hex;
+					}
 
-				const bool is_closer = is_walkable_hex && (dist < distances[adj_hex]);
-				if (is_closer) {
-					distances[adj_hex] = dist;
-					paths[adj_hex] = hex_id;
+					const bool is_closer = is_walkable_hex && (dist < distances[adj_hex]);
+					if (is_closer) {
+						distances[adj_hex] = dist;
+						paths[adj_hex] = hex_id;
+					}
 				}
 			}
 
 
 			dist += (to_check_cnt == 0);
-			for (uint8_t hex = 0, end = (to_check_cnt == 0) * next_to_check_cnt; hex < end; ++hex)
+			for (uint32_t hex = 0, end = (to_check_cnt == 0) * next_to_check_cnt; hex < end; ++hex)
 				to_check[to_check_cnt++] = next_to_check[--next_to_check_cnt]; // reverse array
 		}
 
-		std::sort(std::begin(reachables), std::end(reachables));
-		//if (range_ > 32) {
-		//	pathmap_order[hash] = std::make_tuple(paths, distances, checked, reachables);
-		//}
+		for (HexId hex = reachables_.first(); hex < reachables_.last() + 1; ++hex)
+			if (reachables_[hex])
+				reachables.push_back(hex);
+
+		pathmap_cache[hash] = std::make_tuple(paths, distances, checked, reachables);
 	}
 
 	std::vector<HexId>& CombatPathfinder::findPath(const HexId _source_hex, const HexId _target_hex, const CombatField& _field, const bool _double_wide, const bool _ghost_hex, const uint8_t _range) {

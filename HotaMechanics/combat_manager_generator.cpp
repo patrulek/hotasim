@@ -10,17 +10,18 @@ namespace HotaMechanics {
 
 	const std::vector<CombatAction> CombatManager::generateActionsForPlayer() {
 		auto& active_stack = getActiveStack();
+		const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
 		const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, active_stack.getCombatStats().spd);
 
-#ifdef _DEBUG
-		for (auto hex : const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd,
-			current_state->field, false, false, false)) {
-			if (!current_state->field.isHexWalkable(hex)) {
-				const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
-				const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, active_stack.getCombatStats().spd);
-			}//throw std::exception("serious shit here");
-		}
-#endif
+//#ifdef _DEBUG
+//		for (auto hex : const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(active_stack.getHex(), active_stack.getCombatStats().spd,
+//			current_state->field, false, false, false)) {
+//			if (!current_state->field.isHexWalkable(hex)) {
+//				const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
+//				const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, active_stack.getCombatStats().spd);
+//			}//throw std::exception("serious shit here");
+//		}
+//#endif
 
 		if (!active_stack.canMakeAction())
 			return std::vector<CombatAction>();
@@ -76,17 +77,18 @@ namespace HotaMechanics {
 
 	const std::vector<CombatAction> CombatManager::generateActionsForAI() {
 		auto& active_stack = getActiveStack();
-		const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, 254);
+		const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
+		const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, MAX_FIELD_RANGE);
 
-#ifdef _DEBUG
-		for (auto hex : const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(active_stack.getHex(), 254,
-			current_state->field, false, false, false)) {
-			if (!current_state->field.isHexWalkable(hex)) {
-				const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
-				const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, 254);
-			}//throw std::exception("serious shit here");
-		}
-#endif
+//#ifdef _DEBUG
+//		for (auto hex : const_cast<CombatPathfinder&>(ai->getPathfinder()).getReachableHexesInRange(active_stack.getHex(), MAX_FIELD_RANGE,
+//			current_state->field, false, false, false)) {
+//			if (!current_state->field.isHexWalkable(hex)) {
+//				const_cast<CombatPathfinder&>(ai->getPathfinder()).clearPathCache();
+//				const_cast<CombatPathfinder&>(ai->getPathfinder()).pathMap(active_stack.getHex(), current_state->field, false, MAX_FIELD_RANGE);
+//			}//throw std::exception("serious shit here");
+//		}
+//#endif
 
 		if (!active_stack.canMakeAction())
 			return std::vector<CombatAction>();

@@ -24,7 +24,6 @@ namespace HotaSim {
 		
 		root = root_node;
 		current = root.get();
-		forgotten_paths.reserve(8096);
 		state_hashes.rehash(262144);
 		node_order.reserve(262144);
 		turns_occurence.fill(0);
@@ -60,7 +59,7 @@ namespace HotaSim {
 		if (child_node->turn > this->turn || _player_won) {
 			branch = this;
 			while (branch) {
-				if( _state_score > branch->best_branch_score)
+				if (_state_score > branch->best_branch_score)
 					branch->best_branch_score = _state_score;
 				branch = branch->parent;
 			}
@@ -109,15 +108,22 @@ namespace HotaSim {
 		++size;
 		++turns_occurence[_state.turn];
 		auto packed_state = const_cast<CombatSerializer&>(serializer).packCombatState(_state);
+		auto bbs = root->best_branch_score;
 		current->addChild(packed_state, _action, _action_size, _state_score, _seed, size, manager.didPlayerWon());
+
 		//node_hashes[StateHash(const_cast<CombatState&>(_state))] = current->children.back().get();
 		//if (_state_score > 0x0000800000008000) {
 		//	nodes_to_release[_state_score].push_back(&current->children.back());
 		//}
-		if( current->level > 0 && _action_size > 1 && taken.find(&current->children.back()) == std::end(taken))
+		if (current->level > 0 && _action_size > 1 && taken.find(&current->children.back()) == std::end(taken)) {
+			need_sort = true;
 			node_order.push_back(&current->children.back());
+		}
 		current = current->children.back().get();
 
+		if (bbs < root->best_branch_score) {
+			best_leaf = current;
+		}
 
 		if (_state_score > best_score ) {
 			best_score = _state_score;
@@ -137,9 +143,14 @@ namespace HotaSim {
 	}
 
 	void CombatSequenceTree::takeBest(const bool _halving) {
-		std::sort(std::begin(node_order), std::end(node_order), [](auto& n1, auto& n2) { 
-			return (0xFFFFFFFF00FFFFFF & (*n1)->score) < (0xFFFFFFFF00FFFFFF & (*n2)->score); 
-		});
+		
+		if (need_sort) {
+			std::sort(std::begin(node_order), std::end(node_order), [](auto& n1, auto& n2) {
+				return (0xFFFFFFFF00FFFFFF & (*n1)->score) < (0xFFFFFFFF00FFFFFF & (*n2)->score);
+				});
+			need_sort = false;
+		}
+
 		current = node_order.back()->get();
 		taken.insert(node_order.back());
 		node_order.pop_back();
@@ -148,21 +159,7 @@ namespace HotaSim {
 		circular_path_found = false;
 	}
 
-	void CombatSequenceTree::sortForgotten() {
-		std::sort(std::begin(forgotten_paths) + fp_cnt, std::end(forgotten_paths), [](auto _node1, auto _node2) { return _node1->best_branch_score > _node2->best_branch_score; });
-		since_last_sort = 0;
-	}
-
-	void CombatSequenceTree::takeForgotten() {
-		if (since_last_sort > 500)
-			sortForgotten();
-
-		if (!canTakeForgotten()) {
-			return;
-		}
-
-		current = forgotten_paths[fp_cnt++];
-	}
+	
 
 	void CombatSequenceTree::goParent() {
 		if (!current->parent)
@@ -171,56 +168,20 @@ namespace HotaSim {
 		current = current->parent;
 	}
 
-	void CombatSequenceTree::goRandomParent(const bool _combat_finished) {
-		if (current->level < 6) {
-			goRoot(_combat_finished);
-			return;
-		}
-
-		if (!_combat_finished)
-			forgotten_paths.push_back(current);
-
-		int target_turn = 2; // make random > 1
-
-		// go to the first state of a given turn
-		while (current->state->turn > target_turn)
-			goParent();
-
-		// go to first not checked state from this turn
-		while (!current->children.empty() && current->children.back()->action_size == current->children.back()->action + 1) {
-			current = current->children.back().get();
-		}
-	}
-
-	void CombatSequenceTree::goRoot(const bool _combat_finished) {
-		if (!_combat_finished)
-			forgotten_paths.push_back(current);
-
-
-		current = root.get();
-
-		while (!current->children.empty() && current->children.back()->action_size == current->children.back()->action + 1) {
-			current = current->children.back().get();
-		}
-
-		// checked all states, go root and end simulation
-		if (current->children.empty() && current->action_size == current->action + 1) {
-			current = root.get();
-			return;
-		}
-	}
+	
 
 	CombatSequenceNode* CombatSequenceTree::findBestLeaf() {
-		CombatSequenceNode* branch = root.get();
+		return best_leaf;
+		/*CombatSequenceNode* branch = root.get();
 
 		while (!branch->children.empty()) {
 			int best_depth = 999;
 			int best_idx = 0, idx = 0;
-			uint64_t best_score = 0x0000000000000000;
+			uint64_t best_score = 0x0000800000000000;
 
 			if (branch->children.size() > 1) {
 				for (auto& child : branch->children) {
-					if ((child->best_branch_score == branch->best_branch_score && child->score > best_score)) {
+					if ((child->best_branch_score == branch->best_branch_score )) {
 						best_idx = idx;
 						best_score = child->score;
 					}
@@ -231,6 +192,6 @@ namespace HotaSim {
 			branch = branch->children[best_idx].get();
 		}
 
-		return branch;
+		return branch;*/
 	}
 }

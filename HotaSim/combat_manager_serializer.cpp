@@ -111,10 +111,11 @@ namespace HotaSim {
 		// field state info
 		//CombatField field_ = CombatField::retrieveCombatField(field->getType(), field->getTemplate());
 		auto& field = current_state->field;
+		const_cast<Utils::HexSet&>(field.getOccupied()).clear();
 		int i = 0;
 		for (auto hex_occupation : _packed_state.hex_occupations) {
-			const_cast<CombatHex&>(field.getById(i++)).occupyHex(static_cast<CombatHexOccupation>(hex_occupation & 0x0F));
-			const_cast<CombatHex&>(field.getById(i++)).occupyHex(static_cast<CombatHexOccupation>((hex_occupation & 0xF0) >> 4));
+			field.fillHex(i++, static_cast<CombatHexOccupation>(hex_occupation & 0x0F));
+			field.fillHex(i++, static_cast<CombatHexOccupation>((hex_occupation & 0xF0) >> 4));
 		}
 
 		// ai state info

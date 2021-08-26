@@ -74,7 +74,7 @@ namespace CombatPathfinderTest {
 	}
 
 	// CombatPathfinder::getAdjacentHexesClockwise(); CombatPathfinder::getAdjacentHexesCounterClockwise()
-	TEST_F(CombatPathfinderTest, shouldReturnCorrectAdjacentHexesClockwiseAndCounterClockwise) {
+	TEST_F(CombatPathfinderTest, shouldReturnCorrectAdjacentHexesClockwise) {
 		HexId hex = getHexId(10, 16);
 		auto expected = AdjacentArray{169, INVALID_HEX_ID, 185, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID};
 		EXPECT_EQ(expected, pathfinder->getAdjacentHexes(hex));
@@ -84,12 +84,6 @@ namespace CombatPathfinderTest {
 
 		expected = AdjacentArray{INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, 185, 169};
 		EXPECT_EQ(expected, pathfinder->getAdjacentHexesClockwise(hex));
-
-		expected = AdjacentArray{INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID};
-		EXPECT_EQ(expected, pathfinder->getAdjacentHexesCounterClockwise(INVALID_HEX_ID)); // invalid source hex
-
-		expected = AdjacentArray{169, 185, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID, INVALID_HEX_ID};
-		EXPECT_EQ(expected, pathfinder->getAdjacentHexesCounterClockwise(hex));
 	}
 
 	// CombatPathfinder::getReachableHexesInRange(source_hex, range, field, can_fly, double_wide) 

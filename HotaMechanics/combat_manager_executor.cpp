@@ -25,7 +25,8 @@ namespace HotaMechanics {
 
 	void CombatManager::makeUnitWalk(uint8_t _target_hex, int _walk_distance) {
 		auto& active_stack = getActiveStack();
-		auto& path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
+		auto range = isPlayerMove() ? active_stack.getCombatStats().spd : MAX_FIELD_RANGE;
+		auto& path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field, false, false, range);
 
 		//if (path.empty()) {
 		//	path = const_cast<CombatPathfinder&>(ai->getPathfinder()).findPath(active_stack.getHex(), _target_hex, current_state->field);
@@ -36,15 +37,12 @@ namespace HotaMechanics {
 
 		auto new_event = createUnitPosChangedEvent(active_stack.getGlobalUnitId(), active_stack.getHex(), active_stack.getHex());
 		int walk_distance = _walk_distance == -1 ? active_stack.getCombatStats().spd : _walk_distance;
-		int16_t range = (int16_t)std::min(path.size(), (size_t)walk_distance);
-		current_state->field.clearHex(active_stack.getHex());
+		range = (int16_t)std::min(path.size(), (size_t)walk_distance);
 		for (int i = 0; i < range; ++i) {
 			active_stack.moveTo(path[i]);
 			new_event.param3 = path[i];
 		}
 
-		current_state->field.fillHex(new_event.param3, CombatHexOccupation::UNIT);
-		current_state->field.rehash();
 		action_events.emplace_back(std::move(new_event));
 		active_stack.setDone(); // TODO: shouldnt be done yet if we're attacking, unless quicksand or smth
 	}

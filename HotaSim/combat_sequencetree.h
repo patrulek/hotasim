@@ -78,10 +78,10 @@ namespace HotaSim {
 		std::shared_ptr<CombatSequenceNode> root{ nullptr };
 		CombatSequenceNode* current{ nullptr };
 		uint64_t size{ 0 };
+		CombatSequenceNode* best_leaf{ nullptr };
 
-		int fp_cnt{ 0 };
+		bool circular_path_found{ false };
 		int since_last_sort{ 0 };
-		std::vector<CombatSequenceNode*> forgotten_paths;
 		std::vector<CombatSequenceNode*> circular_paths;
 		//std::unordered_set<StateHash> state_hashes;
 		std::unordered_map<StateHash, int16_t> state_hashes;
@@ -90,6 +90,7 @@ namespace HotaSim {
 		int early_cutoff{ 0 };
 		uint64_t best_score{ 0x0000800000000000 };
 		int best_turns{ -1 };
+		bool need_sort{ false };
 		std::array<int, 32> turns_occurence;
 		std::array<int, 128> level_occurence;
 		std::unordered_map<uint64_t, std::vector<std::shared_ptr<CombatSequenceNode>*>> nodes_to_release;
@@ -109,17 +110,11 @@ namespace HotaSim {
 		void addState(const CombatState& _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const bool _first_ai_attack = false);
 		bool isCurrentRoot() const { return current == root.get(); }
 
-		void sortForgotten();
-		void takeForgotten();
-
 		void takeBest(const bool _halving = false);
 
 		uint64_t getSize() const { return size; }
-		const bool canTakeForgotten() const { return fp_cnt >= forgotten_paths.size(); }
 
 		void goParent();
-		void goRandomParent(const bool _combat_finished);
-		void goRoot(const bool _combat_finished);
 
 		bool foundCircularPath() { 
 			bool result = circular_path_found;
@@ -128,7 +123,6 @@ namespace HotaSim {
 		}
 		CombatSequenceNode* findBestLeaf();
 
-		bool circular_path_found{ false };
 	};
 
 }; // HotaSim

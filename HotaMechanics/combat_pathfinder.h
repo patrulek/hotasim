@@ -1,6 +1,7 @@
 #pragma once
 
 #include "structures.h"
+#include "utils.h"
 
 #include <array>
 #include <vector>
@@ -31,7 +32,6 @@ namespace HotaMechanics {
 		const bool areAdjacent(const HexId _source_hex, const HexId _target_hex) const;
 		const Constants::AdjacentArray& getAdjacentHexes(const HexId _source_hex) const;
 		const Constants::AdjacentArray getAdjacentHexesClockwise(const HexId _source_hex) const;
-		const Constants::AdjacentArray getAdjacentHexesCounterClockwise(const HexId _source_hex) const;
 
 		std::vector<HexId>& getReachableHexesInRange(const HexId _source_hex, const uint8_t _range, const CombatField& _field,
 																		const bool _can_fly, const bool _double_wide, const bool _ghost_hex = false);
@@ -51,8 +51,10 @@ namespace HotaMechanics {
 
 		std::vector<HexId> path;
 		std::array<Constants::AdjacentArray, Constants::FIELD_SIZE + 1> adjacents;
+		std::array<Constants::AdjacentArray, Constants::FIELD_SIZE + 1> adjacents_clockwise;
 
-		std::unordered_map<Hash, std::tuple<Constants::FieldArray, Constants::FieldArray, Constants::FieldFlagArray, std::vector<HexId>>> pathmap_order;
+		std::unordered_map<Hash, std::tuple<Constants::FieldArray, Constants::FieldArray, Constants::FieldFlagArray, std::vector<HexId>>> pathmap_cache;
+		std::unordered_map<Hash, std::pair<HexId, Utils::HexSet>> pathmap_temp_cache;
 
 		using HexDistanceArray = std::array<std::array<uint8_t, Constants::FIELD_SIZE + 1>, Constants::FIELD_SIZE + 1>;
 		HexDistanceArray hex_distances;

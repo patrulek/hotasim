@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "structures.h"
+#include "utils.h"
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
@@ -66,9 +67,11 @@ namespace HotaMechanics {
 		void fillHex(const uint8_t _target_hex, const Constants::CombatHexOccupation _occupied_by) {
 			hexes[_target_hex].occupyHex(_occupied_by);
 
-			if( _occupied_by == Constants::CombatHexOccupation::UNIT || _occupied_by == Constants::CombatHexOccupation::SOLID_OBSTACLE
+			if (_occupied_by == Constants::CombatHexOccupation::UNIT || _occupied_by == Constants::CombatHexOccupation::SOLID_OBSTACLE
 			|| _occupied_by == Constants::CombatHexOccupation::INDESTRUCTIBLE_OBSTACLE)
 				occupied.insert(_target_hex);
+			else
+				occupied.erase(_target_hex);
 		}
 		void clearHex(const uint8_t _target_hex) {
 			hexes[_target_hex].occupyHex(Constants::CombatHexOccupation::EMPTY);
@@ -88,7 +91,7 @@ namespace HotaMechanics {
 		const HexArray& getHexes() const { return hexes; }
 		const Constants::CombatFieldType getType() { return combatFieldId; }
 		const Constants::CombatFieldTemplate getTemplate() { return combatFieldTemplate; }
-		const std::unordered_set<HexId>& getOccupied() const { return occupied; }
+		const Utils::HexSet& getOccupied() const { return occupied; }
 		const Hash getHash() const { return hash; }
 		// ----------------------------------
 
@@ -100,7 +103,7 @@ namespace HotaMechanics {
 		Constants::CombatFieldTemplate combatFieldTemplate{ Constants::CombatFieldTemplate::EMPTY };
 		HexArray hexes;
 		Hash hash{ 0 };
-		std::unordered_set<HexId> occupied{};
+		Utils::HexSet occupied{};
 
 		static std::unordered_map<Constants::CombatFieldTemplate, std::shared_ptr<CombatField>> fields;
 	};

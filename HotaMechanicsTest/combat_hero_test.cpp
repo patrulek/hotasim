@@ -92,9 +92,9 @@ namespace CombatHeroTest {
 		Hash h1 = hero->rehash();
 		auto h_ptr = hero.get();
 
-		SetUp(createArmy("Peasant", 500, "Imp", 200));
-		Hash h2 = hero->rehash();
-		auto h_ptr2 = hero.get();
+		CombatHero hero2(*hero_template, *permutation, CombatSide::ATTACKER);
+		Hash h2 = hero2.rehash();
+		auto h_ptr2 = &hero2;
 
 		EXPECT_EQ(h1, h2);
 		EXPECT_NE(h_ptr, h_ptr2);

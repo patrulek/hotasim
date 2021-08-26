@@ -6,8 +6,6 @@
 
 #include "structures.h"
 
-#include "combat_field.h"
-
 
 namespace HotaMechanics {
 	class CombatUnit;
@@ -36,6 +34,75 @@ namespace HotaMechanics::Utils {
 	constexpr size_t ceil(const double _val) {
 		return (size_t)_val;
 	}
+
+	class HexSet {
+	public:
+		HexSet() {
+			data.fill(false);
+		}
+
+		template<typename Iter>
+		void insert(Iter _begin, Iter _end) {
+			while (_begin != _end) {
+				insert(*_begin);
+				++_begin;
+			}
+		}
+
+		void insert(HexId _hex) {
+			cnt += !data[_hex];
+			data[_hex] = true;
+			min = std::min(min, _hex);
+			max = std::max(max, _hex);
+		}
+
+		void erase(HexId _hex) {
+			cnt -= data[_hex];
+			data[_hex] = false;
+		}
+
+		void clear() {
+			cnt = 0;
+			min = Constants::INVALID_HEX_ID;
+			max = 0;
+			data.fill(false);
+		}
+
+		void erase(const HexSet& _set) {
+			for (HexId hex = min; hex < max + 1; ++hex) {
+				cnt -= (data[hex] && _set.data[hex]);
+				data[hex] &= !_set.data[hex];
+			}
+		}
+
+		const bool& operator[](const size_t _idx) const { return data[_idx]; }
+		const bool operator==(const HexSet& _obj) const { return data == _obj.data; }
+
+		std::vector<HexId> toVector() {
+			Constants::FieldArray arr;
+			uint32_t idx = 0;
+
+			for (HexId hex = min; hex < max + 1; ++hex) {
+				arr[idx] = hex;
+				idx += data[hex];
+			}
+
+			return std::vector<HexId>(std::begin(arr), std::begin(arr) + idx);
+		}
+
+		bool& operator[](size_t _index) { return data[_index]; }
+		HexId first() { return min; }
+		HexId last() { return max; }
+
+		size_t size() const {
+			return cnt;
+		}
+	private:
+		uint8_t cnt{ 0 };
+		HexId min{ Constants::INVALID_HEX_ID };
+		HexId max{ 0 };
+		Constants::FieldFlagArray data{};
+	};
 
 	//template<typename T>
 	//struct VectorList {

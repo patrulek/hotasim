@@ -12,8 +12,9 @@ namespace HotaMechanics {
 
 	Hash CombatField::rehash() {
 		hash = 0;
-		for (auto& hex : occupied)
-			hash ^= std::hash<Hash>{}(hex);
+		for (HexId hex = occupied.first(); hex < occupied.last() + 1; ++hex)
+			if( occupied[hex])
+				hash ^= std::hash<Hash>{}(hex);
 
 		return hash;
 	}
@@ -47,7 +48,6 @@ namespace HotaMechanics {
 			return;
 		}
 
-		occupied.rehash(64);
 		hexes.reserve(FIELD_SIZE + 1);
 		setTemplate(_field_template);
 		rehash();

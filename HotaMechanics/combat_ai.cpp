@@ -189,12 +189,6 @@ namespace HotaMechanics {
 				auto& reachables = u->getCombatSide() == CombatSide::ATTACKER ? player_unit_reachables : ai_unit_reachables;
 				auto& attackables = u->getCombatSide() == CombatSide::ATTACKER ? player_unit_attackables : ai_unit_attackables;
 
-				// set dead unit pos as reachable now
-				reachables[unit.getHex()] |= unit_bit;
-				auto& adjacent_hexes = pathfinder->getAdjacentHexes(unit.getHex());
-				for( HexId adj_hex = 0; adj_hex < 6; ++adj_hex )
-					attackables[adjacent_hexes[adj_hex]] |= unit_bit;
-
 				// go through all hexes in range that we could not reach earlier, and check that we can reach it now
 				for (HexId range_hex : pathfinder->getReachableHexesInRange(u->getHex(), u->getCombatStats().spd, field, false, false, false)) {
 					reachables[range_hex] |= unit_bit;
@@ -476,12 +470,12 @@ namespace HotaMechanics {
 		int walk_distance = !_active_stack.canWait();
 		auto& path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 		if (path.empty()) {
 			path = pathfinder->findPath(_active_stack.getHex(), _target_hex, _field);
 			throw std::exception("Should never happen here (empty path)");
 		}
-#endif
+//#endif
 
 		int fight_value_gain = !_active_stack.canWait() ? hexes_fight_value_gain[path[0]] : hexes_fight_value_gain[_active_stack.getHex()];
 		int range = (int)std::min(path.size(), (size_t)_active_stack.getCombatStats().spd);

@@ -273,9 +273,9 @@ namespace CombatManagerTest {
 		manager->nextState();
 
 		// start turn 1
-		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(5, 6), true };
+		CombatAction player_action{ CombatActionType::WALK, 32, getHexId(5, 5), true };
 		manager->nextStateByAction(player_action);
-		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(7, 6), true };
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(6, 5), true };
 		manager->nextStateByAction(player_action);
 		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(7, 5), true };
 		manager->nextStateByAction(player_action);
@@ -452,5 +452,129 @@ namespace CombatManagerTest {
 		EXPECT_EQ(3, actions[0].param1); // result hex (8, 12)
 		manager->nextStateByAction(actions[0]);
 		EXPECT_EQ(getHexId(8, 12), manager->getCurrentState().defender.getUnitsPtrs()[1]->getHex());
+	}
+
+	TEST_F(CombatManager_GeneratorTest, shouldFixWrongWalkInsteadOfAttackAction) {
+		SetUp(createHero(createArmy("Imp", 1, "Imp", 120)), createHero(createArmy("Peasant", 250, "Peasant", 250), CombatSide::DEFENDER));
+		manager->getCurrentState().field.setTemplate(CombatFieldTemplate::IMPS_2x100);
+		manager->setAllUnitStacks();
+		// start battle
+		manager->nextState();
+
+		// start turn 1
+		CombatAction player_action{ CombatActionType::WAIT, -1, 0xFF, true };
+		manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
+		manager->nextStateByAction(player_action);
+
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(2, 12), true };
+		manager->nextStateByAction(ai_action);
+		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(8, 12), true };
+		manager->nextStateByAction(ai_action);
+
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(1, 5), true };
+		manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(7, 5), true };
+		manager->nextStateByAction(player_action);
+
+		manager->nextState();
+
+		// start turn 2
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(2, 9), true };
+		manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
+		manager->nextStateByAction(player_action);
+
+		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(0, 10), true };
+		manager->nextStateByAction(ai_action);
+		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(5, 11), true };
+		manager->nextStateByAction(ai_action);
+
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(3, 6), true };
+		manager->nextStateByAction(player_action);
+
+		manager->nextState();
+
+		// start turn 3
+		player_action = CombatAction{ CombatActionType::ATTACK, 0, getHexId(1, 10), true };
+		manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::ATTACK, 0, getHexId(0, 9), true };
+		manager->nextStateByAction(player_action);
+
+		ai_action = CombatAction{ CombatActionType::ATTACK, 1, getHexId(0, 10), true };
+		manager->nextStateByAction(ai_action);
+		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(2, 9), true };
+		manager->nextStateByAction(ai_action);
+
+		manager->nextState();
+
+		// start turn 4
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(2, 11), true };
+		manager->nextStateByAction(player_action);
+
+		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(0, 11), true };
+		manager->nextStateByAction(ai_action);
+
+		manager->nextState();
+
+		// start turn 5
+		player_action = CombatAction{ CombatActionType::ATTACK, 1, getHexId(0, 12), true };
+		manager->nextStateByAction(player_action);
+
+		auto actions = manager->generateActionsForAI();
+		EXPECT_EQ(1, actions.size());
+		EXPECT_EQ(CombatActionType::ATTACK, actions[0].action);
+		EXPECT_EQ(getHexId(0, 11), actions[0].target);
+		EXPECT_EQ(1, actions[0].param1); // unit_id == 1
+	}
+
+	TEST_F(CombatManager_GeneratorTest, shouldFixWrongPlayerUnitRange) {
+		SetUp(createHero(createArmy("Imp", 1, "Imp", 120)), createHero(createArmy("Peasant", 250, "Peasant", 250), CombatSide::DEFENDER));
+		manager->getCurrentState().field.setTemplate(CombatFieldTemplate::IMPS_2x100);
+		manager->setAllUnitStacks();
+		// start battle
+		manager->nextState();
+
+		// start turn 1
+		CombatAction player_action{ CombatActionType::WAIT, -1, 0xFF, true };
+		manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
+		manager->nextStateByAction(player_action);
+
+		CombatAction ai_action{ CombatActionType::WALK, 32, getHexId(2, 12), true };
+		manager->nextStateByAction(ai_action);
+		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(8, 12), true };
+		manager->nextStateByAction(ai_action);
+
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(2, 6), true };
+		manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(4, 3), true };
+		manager->nextStateByAction(player_action);
+
+		manager->nextState();
+
+		// start turn 2
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(5, 8), true };
+		manager->nextStateByAction(player_action);
+		player_action = CombatAction{ CombatActionType::WAIT, -1, 0xFF, true };
+		manager->nextStateByAction(player_action);
+
+		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(4, 10), true };
+		manager->nextStateByAction(ai_action);
+		ai_action = CombatAction{ CombatActionType::WALK, 32, getHexId(6, 10), true };
+		manager->nextStateByAction(ai_action);
+
+		player_action = CombatAction{ CombatActionType::WALK, 32, getHexId(4, 5), true };
+		manager->nextStateByAction(player_action);
+
+		manager->nextState();
+
+		// start turn 3
+		player_action = CombatAction{ CombatActionType::ATTACK, 0, getHexId(5, 11), true };
+		manager->nextStateByAction(player_action);
+		
+		auto actions = manager->generateActionsForPlayer();
+		for (auto& action : actions)
+			EXPECT_FALSE(action.action == CombatActionType::ATTACK && action.target == getHexId(5, 11));
 	}
 }
