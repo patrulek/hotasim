@@ -1,0 +1,3766 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="45">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>0</ID>
+      <Description>"combat mgr ptr"</Description>
+      <ShowAsHex>1</ShowAsHex>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>8 Bytes</VariableType>
+      <Address>h3hota HD.exe+299420</Address>
+      <Offsets>
+        <Offset>0</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>5</ID>
+      <Description>"combat mgr's active unit stack ptr"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>4 Bytes</VariableType>
+      <Address>h3hota HD.exe+299420</Address>
+      <Offsets>
+        <Offset>132c8</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>6</ID>
+      <Description>"combat mgr's unit current action"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>4 Bytes</VariableType>
+      <Address>h3hota HD.exe+299420</Address>
+      <Offsets>
+        <Offset>3c</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>7</ID>
+      <Description>"attacker's # of stacks"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>4 Bytes</VariableType>
+      <Address>h3hota HD.exe+299420</Address>
+      <Offsets>
+        <Offset>54bc</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>8</ID>
+      <Description>"defender's # of stacks"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>4 Bytes</VariableType>
+      <Address>h3hota HD.exe+299420</Address>
+      <Offsets>
+        <Offset>54c0</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>1</ID>
+      <Description>"main game data"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>8 Bytes</VariableType>
+      <Address>h3hota HD.exe + 299538</Address>
+      <Offsets>
+        <Offset>0</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>2</ID>
+      <Description>"scenario difficulty"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>Byte</VariableType>
+      <Address>h3hota HD.exe + 299538</Address>
+      <Offsets>
+        <Offset>1f6d8</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>3</ID>
+      <Description>"player's first combat creature"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>Byte</VariableType>
+      <Address>h3hota HD.exe+299420</Address>
+      <Offsets>
+        <Offset>54cc</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>4</ID>
+      <Description>"enemy's first combat creature"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>Byte</VariableType>
+      <Address>h3hota HD.exe+299420</Address>
+      <Offsets>
+        <Offset>c3b4</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>9</ID>
+      <Description>"unit base data ptr"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>4 Bytes</VariableType>
+      <Address>h3hota HD.exe.data+167b0</Address>
+      <Offsets>
+        <Offset>0</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>10</ID>
+      <Description>"map kind (roe, ab, sod)"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>4 Bytes</VariableType>
+      <Address>h3hota HD.exe + 299538</Address>
+      <Offsets>
+        <Offset>1f698</Offset>
+      </Offsets>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols>
+    <SymbolEntry>
+      <Name>AIStartRoutine</Name>
+      <Address>h3hota HD.exe+22370</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>unknownFunc1</Name>
+      <Address>h3hota HD.exe.text+76740</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>calculateUnitsFightValues</Name>
+      <Address>h3hota HD.exe.text+34b10</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>setUnitQueuePriority</Name>
+      <Address>h3hota HD.exe.text+1e2c0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>checkUnitBlindedStonedParalyzed</Name>
+      <Address>h3hota HD.exe.text+1e500</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getUnitSpeed</Name>
+      <Address>h3hota HD.exe.text+479f0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>unknownFunc3</Name>
+      <Address>h3hota HD.exe.text+11a3a0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>setUnitQueueOrder</Name>
+      <Address>h3hota HD.exe.text+22340</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>unknownFunc4</Name>
+      <Address>h3hota HD.exe.text+20a0f0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>unknownFunc5</Name>
+      <Address>h3hota HD.exe.text+21ca0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>unknownFunc6</Name>
+      <Address>h3hota HD.exe.text+776b0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>dllUnknownFunc1</Name>
+      <Address>HD_HOTA.dll.text+15a870</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>dispatchThreadMessages</Name>
+      <Address>h3hota HD.exe.text+f7640</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getDiffBetweenCurrentAndBaseAttackValues</Name>
+      <Address>h3hota HD.exe.text+41270</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getCurrentAttackValue</Name>
+      <Address>h3hota HD.exe.text+41130</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getDiffBetweenCurrentAndBaseDefValues</Name>
+      <Address>h3hota HD.exe.text+41380</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getCurrentDefValue</Name>
+      <Address>h3hota HD.exe.text+412b0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>calcTotalFightValueForSide</Name>
+      <Address>h3hota HD.exe.text+1dc40</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>calculateUnitStackFightValue</Name>
+      <Address>h3hota HD.exe.text+41b80</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getUnitFightValueMultiplier</Name>
+      <Address>h3hota HD.exe.text+41770</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>sqrtOfCalculatedFightMultiplier</Name>
+      <Address>h3hota HD.exe.text+217154</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>calculateRelevantThingsForNotAShooterNorFlyer</Name>
+      <Address>h3hota HD.exe.text+21100</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>heroFunc1</Name>
+      <Address>h3hota HD.exe.text+e3580</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>validateParamToSqrtOfCalculatedFightMultiplier</Name>
+      <Address>h3hota HD.exe.text+21dc65</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>game's main data ptr</Name>
+      <Address>h3hota HD.exe+299538</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>combat mgr ptr</Name>
+      <Address>h3hota HD.exe+299420</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>unit database ptr</Name>
+      <Address>h3hota HD.exe.data + 167b0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>copy4Bytes</Name>
+      <Address>h3hota HD.exe.text+ae880</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>pathfindingFunc</Name>
+      <Address>h3hota HD.exe.text+b2160</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>artifact db ptr</Name>
+      <Address>h3hota HD.exe.data+2b68</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>isArtifactEquipped</Name>
+      <Address>h3hota HD.exe.text+d8460</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>doNothing</Name>
+      <Address>h3hota HD.exe.text+ae240</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getAdjacentHexId</Name>
+      <Address>h3hota HD.exe.text+123280</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>isObstacleAtHex</Name>
+      <Address>h3hota HD.exe.text+685f0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>isHexWalkable</Name>
+      <Address>h3hota HD.exe.text+45960</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>checkFirewallAtHexes</Name>
+      <Address>h3hota HD.exe.text+20670</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getStackTotalHealthPoints</Name>
+      <Address>h3hota HD.exe.text+41da0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>pathfinder's ptr</Name>
+      <Address>h3hota HD.exe+2992d4</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getUnitAnimationFramePtr</Name>
+      <Address>hota.dll.text+799f0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>renderUnitAnimationFrame??</Name>
+      <Address>hota.dll.text+e8290</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>convertFloatToInt</Name>
+      <Address>h3hota HD.exe.text+216f94</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getAdditionalDmgFromAllModifiers</Name>
+      <Address>h3hota HD.exe.text+42560</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getNegativeDmgModifier</Name>
+      <Address>h3hota HD.exe.text+428b0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>calculateStackDmgAndOtherStackTotalHealth</Name>
+      <Address>h3hota HD.exe.text+414a0</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>canPerformAShot</Name>
+      <Address>h3hota HD.exe.text+41610</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>getUnitPtrOnHex</Name>
+      <Address>h3hota HD.exe.text+e6230</Address>
+    </SymbolEntry>
+  </UserdefinedSymbols>
+  <Structures StructVersion="2">
+    <Structure Name="FightPowerStruct" AutoFill="0" AutoCreate="1" DefaultHex="0" AutoDestroy="0" DoNotSaveLocal="0" RLECompression="1" AutoCreateStructsize="4096">
+      <Elements>
+        <Element Offset="0" Vartype="4 Bytes" Bytesize="4" OffsetHex="00000000" Description="minimum atk diff" DisplayMethod="unsigned integer"/>
+        <Element Offset="4" Vartype="4 Bytes" Bytesize="4" OffsetHex="00000004" Description="minimum def diff" DisplayMethod="unsigned integer"/>
+        <Element Offset="8" Vartype="Byte" Bytesize="1" OffsetHex="00000008" Description="is ai flag cur side ??" DisplayMethod="unsigned integer"/>
+        <Element Offset="9" Vartype="Byte" Bytesize="1" OffsetHex="00000009" Description="is ai flag other side ??" DisplayMethod="unsigned integer"/>
+        <Element Offset="10" Vartype="Byte" Bytesize="1" RLECount="2" OffsetHex="0000000A" DisplayMethod="unsigned integer"/>
+        <Element Offset="12" Vartype="4 Bytes" Bytesize="4" OffsetHex="0000000C" Description="FightPowerCurSide1" DisplayMethod="unsigned integer"/>
+        <Element Offset="16" Vartype="4 Bytes" Bytesize="4" OffsetHex="00000010" Description="FightPowerOtherSide1" DisplayMethod="unsigned integer"/>
+        <Element Offset="20" Vartype="4 Bytes" Bytesize="4" OffsetHex="00000014" Description="FightPowerCurSide0" DisplayMethod="unsigned integer"/>
+        <Element Offset="24" Vartype="4 Bytes" Bytesize="4" OffsetHex="00000018" Description="FightPowerOtherSide0" DisplayMethod="unsigned integer"/>
+        <Element Offset="28" Vartype="4 Bytes" Bytesize="4" OffsetHex="0000001C" Description="player/ai fight power ratio index" DisplayMethod="unsigned integer"/>
+        <Element Offset="32" Vartype="4 Bytes" Bytesize="4" OffsetHex="00000020" Description="active side index" DisplayMethod="unsigned integer"/>
+        <Element Offset="36" Vartype="4 Bytes" Bytesize="4" OffsetHex="00000024" Description="other side index" DisplayMethod="unsigned integer"/>
+      </Elements>
+    </Structure>
+    <Structure Name="UnitOrderListStruct" AutoFill="0" AutoCreate="1" DefaultHex="0" AutoDestroy="0" DoNotSaveLocal="0" RLECompression="1" AutoCreateStructsize="4096">
+      <Elements>
+        <Element Offset="0" Vartype="Pointer" Bytesize="4" OffsetHex="00000000" DisplayMethod="unsigned integer"/>
+        <Element Offset="4" Vartype="Pointer" Bytesize="4" OffsetHex="00000004" Description="list first elem ptr" DisplayMethod="unsigned integer"/>
+        <Element Offset="8" Vartype="Pointer" Bytesize="4" OffsetHex="00000008" Description="list current elem ptr" DisplayMethod="unsigned integer"/>
+        <Element Offset="12" Vartype="Pointer" Bytesize="4" OffsetHex="0000000C" Description="list last elem ptr" DisplayMethod="unsigned integer"/>
+        <Element Offset="16" Vartype="Pointer" Bytesize="4" OffsetHex="00000010" DisplayMethod="unsigned integer"/>
+        <Element Offset="20" Vartype="4 Bytes" Bytesize="4" OffsetHex="00000014" DisplayMethod="unsigned integer"/>
+        <Element Offset="24" Vartype="4 Bytes" Bytesize="4" OffsetHex="00000018" Description="list size" DisplayMethod="unsigned integer"/>
+        <Element Offset="28" Vartype="Pointer" Bytesize="4" OffsetHex="0000001C" Description="side stack count ptr / hero army ptr" DisplayMethod="unsigned integer"/>
+      </Elements>
+    </Structure>
+  </Structures>
+  <DisassemblerComments>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC40</Address>
+      <Header>// Old notes says it calculates total/summed fight(?) value for a one side/hero
+// 1st param (ecx) - combat mgr ptr
+// 2nd - which side to calculate
+// 3rd - min atk diff
+// 4th - min def diff
+// 5th param - const {0,1} - related to checking some spell effects
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC47</Address>
+      <Comment>edi = side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC4A</Address>
+      <Comment>ebx = combat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC62</Address>
+      <Comment>eax = side stack count
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC6B</Address>
+      <Comment>esi = first (then current) unit stack ptr for side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC72</Address>
+      <Comment>if no more stacks left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC74</Address>
+      <Comment>eax = unit flags (can fly, dragon breath etc.)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC7A</Address>
+      <Comment>%s; check for "cannot move" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC7F</Address>
+      <Comment>if cannot move
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC81</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC89</Address>
+      <Comment>if unit type == arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC92</Address>
+      <Comment>edx = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1EC9C</Address>
+      <Comment>edx = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1ECA6</Address>
+      <Comment>edx = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1ECB5</Address>
+      <Comment>if unit type == first aid tent
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1ECBC</Address>
+      <Comment>if unit type == ammo cart
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1ECD0</Address>
+      <Comment>ecx = total side fight value (from all stacks)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1ECD8</Address>
+      <Comment>edx = # of stacks at side in edi
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1ECDF</Address>
+      <Comment>iterate to next unit stack
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F2C0</Address>
+      <Header>// Probably something with setting units queue priority
+// 1st param (ecx) - combat mgr ptr
+// 2nd param - const{0, 1} - dunno what
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F316</Address>
+      <Comment>if # of stacks &lt;= ebx
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F31C</Address>
+      <Header>// Here starts iteration over all units
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F322</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F329</Address>
+      <Comment>if unit type == arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F33A</Address>
+      <Comment>if unit cannot move
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F345</Address>
+      <Comment>if unit == first_aid_tent
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F34C</Address>
+      <Comment>if unit == ammo_cart
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F34E</Address>
+      <Comment>edx = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F35B</Address>
+      <Comment>if (TODO) spell is active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F363</Address>
+      <Comment>if (TODO) spell is active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F365</Address>
+      <Comment>%s; check "done" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F36A</Address>
+      <Comment>if unit action is done 
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F3AC</Address>
+      <Comment>%s; sub 1000 from unit speed - not moving this turn indicator
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F3C2</Address>
+      <Comment>set "after action" unit speed
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F3DB</Address>
+      <Header>// Here we iterate over units stacks
+// 0x548 (1352 bytes) is the size of combat creature structure
+// https://github.com/patrulek/H3API/blob/master/include/h3api/H3Combat/H3CombatCreature.hpp
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F3EA</Address>
+      <Header>// Here we have single list of units in a battle (player + ai)
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F41D</Address>
+      <Comment>edx = current unit side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F423</Address>
+      <Comment>eax = pointer to unit order list
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F434</Address>
+      <Comment>%s; esi = list size
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F449</Address>
+      <Comment>edx = real unit speed (regarding action; wait etc)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F459</Address>
+      <Header>// Compare unit speed with all other units until other owner
+// Prob calculates how many stacks will make action before other player
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F497</Address>
+      <Comment>edi = real owner(side) of unit
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F49D</Address>
+      <Comment>edx = other side than edi
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F49F</Address>
+      <Comment>ecx = how many units checked
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F4AA</Address>
+      <Header>// Here we probably set unit order (how many other units will make move before this unit can make action)
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1F500</Address>
+      <Header>// Dont remember which unit is checked; TODO
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FAA0</Address>
+      <Header>1st param (ecx) - combat mgr ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FAD4</Address>
+      <Comment>end loop if all player units checked
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FADA</Address>
+      <Comment>ecx = unit side index
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FB5D</Address>
+      <Comment>loop over all units
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FB63</Address>
+      <Comment>al = anti-magic garrison flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FB6B</Address>
+      <Comment>if anti-magic garrison
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FB71</Address>
+      <Comment>ecx = player hero ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FB7A</Address>
+      <Comment>if hero ptr is null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FB80</Address>
+      <Comment>%s; spellbook
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FB82</Address>
+      <Comment>eax = has spellbook flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FB89</Address>
+      <Comment>if doesnt have spellbook
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FBDC</Address>
+      <Comment>al = is (TODO) spell available to player via artifacts
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FBE5</Address>
+      <Comment>if spell (TODO) not available
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FC92</Address>
+      <Comment>loop over all possible (70) spells
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FCE0</Address>
+      <Header>1st param (ecx) - combat mgr ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FD03</Address>
+      <Comment>check spell casting possibility
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FD41</Address>
+      <Comment>eax = unit fight value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1FEC7</Address>
+      <Comment>loop over all units
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+203E0</Address>
+      <Header>1st param (ecx) - combat mgr ptr
+2nd param - unit stack ptr
+3rd param - ptr to 187 ptrs of ??
+4th param - ?? struct
+5th param - FightPowerStruct
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+203F1</Address>
+      <Comment>eax = current side idx
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+203F4</Address>
+      <Comment>ebx = other side idx
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20416</Address>
+      <Comment>edx = minimum def diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2041D</Address>
+      <Comment>eax = minimum atk diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20421</Address>
+      <Comment>eax = stack fight value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20449</Address>
+      <Comment>eax = # of stacks in side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20450</Address>
+      <Comment>esi = unit stack ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2046A</Address>
+      <Comment>if (TODO) spell is active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20470</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20478</Address>
+      <Comment>if (TODO) spell is active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2047E</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20486</Address>
+      <Comment>if (TODO) spell is active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2048C</Address>
+      <Comment>ecx = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20498</Address>
+      <Comment>if unit cannot move
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2049E</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+204A6</Address>
+      <Comment>if unit == first_aid_tent
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+204B1</Address>
+      <Comment>if unit == ammo_cart
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+204BC</Address>
+      <Comment>if unit == arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20502</Address>
+      <Comment>here we probably calcuate hexes that unit could attack (unit speed + 1)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2051D</Address>
+      <Comment>eax = unit stack ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20524</Address>
+      <Comment>ecx = # of stacks at side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20532</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2053A</Address>
+      <Comment>if unit cannot move
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20543</Address>
+      <Comment>if unit == arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20556</Address>
+      <Comment>esi = unit hex id
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+205A7</Address>
+      <Comment>loop over all unit stacks
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2067B</Address>
+      <Comment>loop over all hexes
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20687</Address>
+      <Comment>if unit not double wide
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+20739</Address>
+      <Comment>loop over all units
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21578</Address>
+      <Comment>eax = siege kind
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21670</Address>
+      <Header>// Checks firewalls on hexes and then what??
+1st param (ecx) - combat mgr ptr
+2nd param - unit stack ptr
+3rd param - ptr to 187 ptrs to ??
+4th param - FightPowerStruct
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2167F</Address>
+      <Comment>eax = ptr to hex-&gt;obstacleIdx field
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2168F</Address>
+      <Comment>%s; check "firewall" obstacle bit
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21693</Address>
+      <Comment>if no firewall at hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+216F9</Address>
+      <Comment>loop over all hexes
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21710</Address>
+      <Header>1st param (ecx) - combat mgr ptr
+2nd param - unit stack ptr
+3rd param - ptr to 187 ptrs to ??
+4th param - FightPowerStruct
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21716</Address>
+      <Comment>al = has moat
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21724</Address>
+      <Comment>if battle doesnt have moat
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21800</Address>
+      <Header>1st param (ecx) - combat mgr ptr
+2nd param - unit stack ptr
+3rd param - ??
+4th param - ?? struct
+5th param - FightPowerStruct
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21810</Address>
+      <Comment>eax = active side idx
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21813</Address>
+      <Comment>ecx = other side idx
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21824</Address>
+      <Comment>edi = ptr to 187 pointers to ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21868</Address>
+      <Comment>%s; check map kind
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2186F</Address>
+      <Comment>if map is from RoE or AB
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2188E</Address>
+      <Comment>cl = player difficulty
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21896</Address>
+      <Comment>if difficulty greater than 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+218C7</Address>
+      <Comment>if player difficulty &gt;= 2 (130%% and more)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21929</Address>
+      <Comment>cl = tactics phase
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21A72</Address>
+      <Comment>if player difficulty &gt;= 2 (130%% or more)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+21B46</Address>
+      <Comment>calculate dmg done/player unit killed by ai unit
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22100</Address>
+      <Header>// Calculates some things for a decision to make
+// 1st param (ecx) - combat mgr ptr
+// 2nd param - unit stack ptr
+// 3rd param - const{0, 1} - dunno what
+// 4th param - const{0, 1} - dunno what
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22370</Address>
+      <Header>// This is where AI is making decision for a single unit
+// 1st param (ecx) - combat mgr ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22376</Address>
+      <Comment>%s; set mgr's active stack ptr to null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22385</Address>
+      <Comment>ecx = current monster side (attacker/defender)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22396</Address>
+      <Comment>ecx = current monster index
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2239F</Address>
+      <Comment>i think here we have total monster index [0-20] - attacker; [21-41] - defender
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+223B3</Address>
+      <Comment>edi = active unit stack ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+223D2</Address>
+      <Comment>if unit type == arrow_tower || ballista || (TODO)  (???)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+223D4</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+223E6</Address>
+      <Comment>al = 3 means its not a flyer nor shooter
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+223EA</Address>
+      <Comment>eax = 1 means its not a flyer (but a shooter)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+223F2</Address>
+      <Comment>set combat action at this step = 3 (defend)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+223F9</Address>
+      <Comment>if unit not a shooter
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22428</Address>
+      <Comment>ecx = current active side (attacker/defender)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+225C0</Address>
+      <Header>1st param (ecx) - combat mgr ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+225CC</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+225DA</Address>
+      <Comment>if unit == sultan_efreet
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22CA0</Address>
+      <Header>// Old notes says its something with checking siege weapon, index clone and rendering
+// 1st param - combat mgr ptr
+// 2nd param - ??
+// 3rd param - unitStackPtr
+// 4th param - const{0,1}
+// 5th param - FightPowerStruct
+// 6th param - const{0, 1}
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D13</Address>
+      <Comment>%s; check "cannot move" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D19</Address>
+      <Comment>if cannot move
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D1F</Address>
+      <Comment>%s; check "siege weapon" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D24</Address>
+      <Comment>if not siege weapon
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D33</Address>
+      <Comment>eax = fight power struct
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D3B</Address>
+      <Comment>is other player a real player (not AI)?
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D50</Address>
+      <Comment>edx = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D5D</Address>
+      <Comment>if spell (TODO) turns &gt; 1
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D69</Address>
+      <Comment>if spell (TODO) turns &gt; 1
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D75</Address>
+      <Comment>if spell (TODO) turns != ecx
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22D81</Address>
+      <Comment>if spell (TODO) turns != ecx
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22DB2</Address>
+      <Comment>cl = tactics phase
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22DF1</Address>
+      <Comment>eax = side stack count
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22DFA</Address>
+      <Comment>edi = unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22E01</Address>
+      <Comment>if stack count &lt;= 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22E0E</Address>
+      <Comment>if unit type == arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22E1B</Address>
+      <Comment>eax = player unit move order priority (higher it will move earlier in turn)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22E21</Address>
+      <Comment>ecx = ai unit move order priority
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22E29</Address>
+      <Comment>if player unit will move earlier than ai unit
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22E36</Address>
+      <Comment>eax = unit hex id
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22E45</Address>
+      <Comment>al = is unit hex id position available for player
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22E4E</Address>
+      <Comment>if not reachable by player
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22EDC</Address>
+      <Comment>edx = # of stacks in side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22EE8</Address>
+      <Comment>loop over all units in side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22EF3</Address>
+      <Comment>eax = current ai unit idx
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22EF6</Address>
+      <Comment>edx = ai stack count
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22F09</Address>
+      <Comment>loop over all ai units
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22F41</Address>
+      <Comment>edx = current active side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22F47</Address>
+      <Comment>%s; set unit action to 0 (Cancel Action; the stack can do a different action now)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22F57</Address>
+      <Comment>if hero already casted
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22F65</Address>
+      <Comment>if tactics phase
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22F94</Address>
+      <Comment>ecx = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22FA1</Address>
+      <Comment>if unit is siege weapon
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22FB0</Address>
+      <Comment>if side doesnt have a hero
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22FED</Address>
+      <Comment>cl = anti-magic garrison flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22FF3</Address>
+      <Comment>eax = current active side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+22FFB</Address>
+      <Comment>if anti-magic garrsion
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+23001</Address>
+      <Comment>ecx = current active side hero ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+2300A</Address>
+      <Comment>if no hero for side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+232E0</Address>
+      <Header>// 1st param - struct pointer
+// 2nd param - ??
+// 3rd param - ??
+// 4th param - current node (in list) pointer
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+23329</Address>
+      <Comment>copy unit stack ptr to list elem
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+23340</Address>
+      <Header>// Sort unit list order by their speed
+// 1st param (ecx) - pointer to first elem 
+// 2nd param (edx) - pointer to last elem
+// 3rd param - const {0,1} - maybe asc/desc order
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+348A6</Address>
+      <Comment>%s; 1e is size of pathnode struct
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35600</Address>
+      <Header>// Calculates player unit dmg on an ai unit
+// 1st param (ecx) - FightPowerStruct
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35633</Address>
+      <Comment>eax = # of units in stack
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35661</Address>
+      <Comment>checks fire shield / sultan_efreet ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+357E0</Address>
+      <Header>1st param (ecx) - FightPowerStruct
+2nd param - player unit ptr
+3rd param - player stack total HP
+4th param - ai stack ptr
+5th param - ai stack total HP
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+357FF</Address>
+      <Comment>al = is other side ai flag ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35804</Address>
+      <Comment>if not ai
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+358C0</Address>
+      <Header>1st param (ecx) - FightPowerStruct
+2nd param - player unit ptr
+3rd param - ai unit ptr
+4th param - ??
+5th param - ??
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+358CF</Address>
+      <Comment>eax = player stack total HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+358DB</Address>
+      <Comment>eax = ai stack total HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+358F1</Address>
+      <Comment>eax = base total fight power (without modifiers) or maybe total fight power if army would be held by other side ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B10</Address>
+      <Header>// 1st param (ecx) - pointer to struct on stack with 40B (?) size
+// 2nd param - combat mgr ptr
+// 3rd param - possibly active side
+// This function is called two times but with different order of calculating total fight power for sides
+// this some comments needs to be generalized/reverted depnding on the order
+// Also check: FightPowerStruct
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B16</Address>
+      <Comment>eax = 3rd parameter
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B1A</Address>
+      <Comment>ebx = combat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B1E</Address>
+      <Comment>esi = FightPowerStruct
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B26</Address>
+      <Comment>edi = attacker first unit stack ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B2F</Address>
+      <Comment>ecx = other side index ?
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B31</Address>
+      <Comment>eax = ptr to attacker stacks count
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B60</Address>
+      <Comment>ecx = # of side unit stacks
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B6B</Address>
+      <Comment>if side units stack count == 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B6D</Address>
+      <Comment>ecx = # of units in [edi] stack
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B72</Address>
+      <Comment>if 0 units in stack
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35B7B</Address>
+      <Comment>if unit_type == arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BA2</Address>
+      <Comment>test if already set any value (need to set at least once)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BA4</Address>
+      <Comment>if values not set yet
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BA8</Address>
+      <Comment>if previous atk diff &lt;= current atk dif
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BAC</Address>
+      <Comment>set given atk diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BB3</Address>
+      <Comment>if previous def diff &lt;= current def diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BB5</Address>
+      <Comment>set given def diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BB8</Address>
+      <Comment>ebx = cmbat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BBB</Address>
+      <Comment>eax = struct 8B ptr{# player stacks, # enemy stacks)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BC5</Address>
+      <Comment>edx = number of player's or enemy's unit stacks
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BC7</Address>
+      <Comment>iterate to next player's unit stack
+
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BD0</Address>
+      <Comment>save current loop (unit stack) idx
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BD3</Address>
+      <Comment>if there are more stacks left to check
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BD5</Address>
+      <Comment>edi = side stack unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BD8</Address>
+      <Header>// iterate to next side units
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BDE</Address>
+      <Comment>%s; 6ee8 is size of hero army combat creatures (up to 21)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BEE</Address>
+      <Comment>if any side need to be checked still
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BF4</Address>
+      <Comment>eax = minimum def diff
+</Comment>
+      <Header>// if playing player vs ai; firstly we calculate total fight value for player
+// (2x calcTotalFightValueForSide)
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BF7</Address>
+      <Comment>ecx = minimum atk diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35BF9</Address>
+      <Comment>edx = side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C03</Address>
+      <Comment>eax = total fight value for side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C08</Address>
+      <Comment>ecx = miinimum atk diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C0A</Address>
+      <Comment>edx = side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C10</Address>
+      <Comment>eax = minimum def diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C1A</Address>
+      <Comment>eax = total fight value for side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C1F</Address>
+      <Comment>ecx = minimum atk diff
+</Comment>
+      <Header>// then we calculate it for AI
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C21</Address>
+      <Comment>edx = other side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C27</Address>
+      <Comment>eax = minimum def diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C31</Address>
+      <Comment>eax = total fight value for side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C48</Address>
+      <Comment>eax = total fight value for side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C4D</Address>
+      <Comment>ecx = attacker (player) total fight value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C50</Address>
+      <Comment>edx = defender (AI) total fight value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C5A</Address>
+      <Comment>if 2 * player fight power is &gt;= ai fight power
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C5C</Address>
+      <Comment>%s; edx = game's main data ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C62</Address>
+      <Comment>cl = scenario difficulty
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C6A</Address>
+      <Comment>if difficulty &gt; 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C6C</Address>
+      <Comment>ecx = cur side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C75</Address>
+      <Comment>bl = is not ai flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C7E</Address>
+      <Comment>if is not ai
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C84</Address>
+      <Comment>edx = attacker fight power
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35C91</Address>
+      <Comment>if player fight power &gt;= ai fight power
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35CA2</Address>
+      <Comment>if 5 * ai fight power &lt;= player fight power
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35CA6</Address>
+      <Comment>if player fight power == 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35CA8</Address>
+      <Comment>load player fight power
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35CB5</Address>
+      <Comment>load ai fight power
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35CBE</Address>
+      <Comment>calculate player/ai fight power ratio
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35CCA</Address>
+      <Comment>compare with 2.60, then 1.90, then 1.50; then 1.31, then 1.20, then 1.13
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35CD1</Address>
+      <Comment>get FPU status 
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35CD6</Address>
+      <Comment>if ratio &gt;= const(2.6, 1.9 ...)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35D87</Address>
+      <Comment>eax = ai unit dmg; ecx = player unit health
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35DE5</Address>
+      <Comment>cl = player difficulty
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35DED</Address>
+      <Comment>if difficulty &gt;= 130%%
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+35F77</Address>
+      <Comment>ecx = adjacent squares offset
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+360BC</Address>
+      <Comment>if no extended attack (eg. dragons breath)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42130</Address>
+      <Header>// 1st param (ecx) - unit stack ptr
+// 2nd param - const{0, 1} - dunno what
+// 3rd param - probably storage for units data
+// 4th param - FightPowerStruct
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4213D</Address>
+      <Comment>ebx = unit curr atk
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42148</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42150</Address>
+      <Comment>if spell (TODO) not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4215A</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42162</Address>
+      <Comment>if spell (TODO) not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4216F</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42178</Address>
+      <Comment>if spell (TODO) not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42221</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4222A</Address>
+      <Comment>if spell (TODO) not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42270</Address>
+      <Header>// 1st param - unit stack ptr
+// 2nd param - const{0, 1} - dunno what
+// 3rd param - probably some storage (for unit template values)
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42285</Address>
+      <Comment>ecx = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4228F</Address>
+      <Comment>edx = 7 * unit type (index)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42291</Address>
+      <Comment>ecx = 29 * unit type (index)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42294</Address>
+      <Header>// unit database ptr stores CreatureInformation structs
+// 116bytes per creature
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4229A</Address>
+      <Comment>esi = unit's base attack value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4229E</Address>
+      <Comment>eax = difference between current and base
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+422B0</Address>
+      <Header>1st param (ecx) - unit stack ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+422BD</Address>
+      <Comment>eax = turns of (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+422C5</Address>
+      <Comment>if (TODO) spell is not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+422D2</Address>
+      <Comment>ebx = def value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4231D</Address>
+      <Comment>al = has moat flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42325</Address>
+      <Comment>if doesnt have moat
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42380</Address>
+      <Header>// 1st param (ecx) - unit stack ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4238C</Address>
+      <Comment>ecx = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+423A1</Address>
+      <Comment>esi = unit's base def
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+423A5</Address>
+      <Comment>eax = difference between current and base
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+424A9</Address>
+      <Comment>eax = # of turns (TODO) spell elft
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+424B1</Address>
+      <Comment>if (TODO) spell is not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+424C9</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+424D1</Address>
+      <Comment>if spell (TODO) not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+424FA</Address>
+      <Comment>ecx = player unit dmg high
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42500</Address>
+      <Comment>eax = player unit dmg low
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4252E</Address>
+      <Comment>here we have avg dmg ((low+high)/2) * number of units in stack
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42548</Address>
+      <Comment>ecx = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42554</Address>
+      <Comment>if unit is not a clone
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4255D</Address>
+      <Comment>ecx = ai unit HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42563</Address>
+      <Comment>edx = ai unit health lost
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42566</Address>
+      <Comment>ecx = ai units number alive * ai unit HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4256A</Address>
+      <Comment>ecx = ai unit total HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42610</Address>
+      <Header>// Ballista and arrow_tower can always make a shot.
+// If hero has bow of sharpshooter and unit have shots left, it can shot.
+// Check also forgetfullness effect and if surrounded by enemy units.
+// 1st param (ecx) - unit stack ptr
+// 2nd param - const{0, 1} - dunno what
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4261E</Address>
+      <Comment>if unit type != ballista
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42629</Address>
+      <Comment>if unit type != arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42770</Address>
+      <Header>// Old notes says it get new fight value based on current spells and attributes
+// 1st param (ecx) - enemy's unit stack ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42786</Address>
+      <Comment>ecx = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4279F</Address>
+      <Comment>edi = base atk value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+427A3</Address>
+      <Comment>edx = probably its the min atk diff calculated earlier
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+427A6</Address>
+      <Comment>eax = diff btw cur and base atk
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+427AA</Address>
+      <Comment>eax = diff btw cur atk diff and min diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+427B4</Address>
+      <Comment>ecx = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+427DA</Address>
+      <Comment>edi = base def value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+427DE</Address>
+      <Comment>ecx = probably its the min def diff calculated earlier
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+427E1</Address>
+      <Comment>eax = diff btw cur and base def
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+427E3</Address>
+      <Comment>eax = diff btw cur def diff and min diff
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+427FE</Address>
+      <Comment>eax = # of turns of (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42806</Address>
+      <Comment>if (TODO) spell is not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42811</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42819</Address>
+      <Comment>if (TODO) spell is not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42827</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4282F</Address>
+      <Comment>if (TODO) spell is not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42840</Address>
+      <Comment>eax = side (0 attacker; 1 defender)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4284C</Address>
+      <Comment>eax = side's hero ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42855</Address>
+      <Comment>if no hero available for side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42859</Address>
+      <Comment>gets mutlipler from secondary skill (offense/armorer - probably)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4287E</Address>
+      <Comment>store calculated multiplier from (atk-def)*0.05 + 1 enemy -&gt; us
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42915</Address>
+      <Comment>edx = unit flags (is undead, flying etc)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4291B</Address>
+      <Comment>%s; check for shooter flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42921</Address>
+      <Comment>if not shooter
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42938</Address>
+      <Comment>edx = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4293E</Address>
+      <Comment>eax = unit side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+429B4</Address>
+      <Comment>edx = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+429BC</Address>
+      <Comment>if (TODO) spell is active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+429BE</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+429C6</Address>
+      <Comment>if (TODO) spell is not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42A80</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42A97</Address>
+      <Comment>load unit's base fight value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42A9B</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42AA9</Address>
+      <Comment>multiply base fight value with multiplier
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42B80</Address>
+      <Header>// 1st param (ecx) - enemy's unit stack ptr
+// 2nd param - min atk diff
+// 3rd param - min def diff
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42B89</Address>
+      <Comment>eax = # of units in stack
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42B8E</Address>
+      <Comment>if more than 0 units in stack
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42BAC</Address>
+      <Comment>if unit type == arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42C80</Address>
+      <Comment>result is stored in fp register
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42C85</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42C8E</Address>
+      <Comment>%s; check "clone" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42C93</Address>
+      <Comment>if not cloned unit
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42CB3</Address>
+      <Comment>eax = unit hit points
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42CB9</Address>
+      <Comment>ecx = unit's lost hit points
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42CBF</Address>
+      <Comment>eax = # of units in stack * hit points
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42CC3</Address>
+      <Comment>eax -= lost hit points
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42CC8</Address>
+      <Comment>number of units * hit points - lost hit points
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42CD1</Address>
+      <Comment>(# of units * HP - lost HP) * multiplier
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42CDA</Address>
+      <Comment>((# of units * HP - lost HP) * multipler) / HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42CF0</Address>
+      <Header>1st param (ecx) - unit stack ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42D0E</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42D1C</Address>
+      <Comment>if unit is not a clone
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42D51</Address>
+      <Comment>ecx = unit HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42D58</Address>
+      <Comment>ebx = stack total HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42D62</Address>
+      <Comment>eax = # of units in stack, edx = unit health remainder
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42D88</Address>
+      <Comment>here we have calculated stack fight value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42DA4</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42DAF</Address>
+      <Comment>if unit is not a clone
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42DB8</Address>
+      <Comment>eax = unit HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42DBE</Address>
+      <Comment>edx = unit health lost
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42DC1</Address>
+      <Comment>eax = units in stack * unit HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+42DC5</Address>
+      <Comment>eax = (units in stack * unit HP) - unit health lost
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43040</Address>
+      <Header>// Modifies unit dmg by walking distance (eg. champions), luck, atk/def difference
+// 1st param (ecx) - unit stack ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43060</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43063</Address>
+      <Comment>edi = ai unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43070</Address>
+      <Comment>if unit == cavalier
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43075</Address>
+      <Comment>if unit != champion
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+430A3</Address>
+      <Comment>eax = is lucky
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+430A8</Address>
+      <Comment>if doesnt have luck
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+430CD</Address>
+      <Comment>compare player unit atk with ai unit def
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+430CF</Address>
+      <Comment>if player unit atk &lt; ai unit def
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+430EB</Address>
+      <Comment>%s; cant get more than 3x additional dmg from atk/def difference
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4312B</Address>
+      <Comment>ecx = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43195</Address>
+      <Comment>eax = unit type
+</Comment>
+      <Header>// here we check if units hate themselves
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4319E</Address>
+      <Comment>below checks are for additional dmg when units hate themselves (titan/black dragon, angel/devil etc)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43410</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43418</Address>
+      <Comment>if (TODO) spell not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43429</Address>
+      <Comment>eax = unit real owner(side)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43435</Address>
+      <Comment>edi = side hero ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4343E</Address>
+      <Comment>if hero ptr is null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43480</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43488</Address>
+      <Comment>if (TODO) spell not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43560</Address>
+      <Header>1st param (ecx) - unit stack ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+435A9</Address>
+      <Comment>if unit == dread_knight
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+435B2</Address>
+      <Comment>if unit != ballista ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+438B0</Address>
+      <Header>// I think this may calculate negative dmg modifiers (what reduces our dmg)
+// 1st param (ecx) - player unit ptr
+// also ai unit ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+438E4</Address>
+      <Comment>if ai unit def &lt;= player unit atk
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+439CB</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+439D9</Address>
+      <Comment>if unit not a shooter
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+439F5</Address>
+      <Comment>al = unit is blinded
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+439FD</Address>
+      <Comment>if unit not blinded
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43A7B</Address>
+      <Comment>al = unit is paralyzed
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43A83</Address>
+      <Comment>if unit not paralyzed
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43C60</Address>
+      <Header>// 1st param (ecx) - unit stack ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43C7C</Address>
+      <Comment>if ai unit ptr is not null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43C9C</Address>
+      <Comment>eax = additional dmg (regarding all modifiers)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43CA1</Address>
+      <Comment>eax = base + additional dmg
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43CF4</Address>
+      <Comment>calculate new dmg with negative modifier
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43D27</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43D2F</Address>
+      <Comment>if (TODO) spell not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43D3A</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43D42</Address>
+      <Comment>if (TODO) spell not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43D50</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43D58</Address>
+      <Comment>if (TODO) spell not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43D69</Address>
+      <Comment>eax = ai unit side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43D75</Address>
+      <Comment>eax = ai side hero ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43D7E</Address>
+      <Comment>if hero ptr is null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43DA0</Address>
+      <Comment>if calculated dmg dealt &gt; 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+43DA2</Address>
+      <Comment>%s; always deal at least 1 dmg
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+46960</Address>
+      <Header>// This checks obstacles or units on a given hex position.
+// Used to check obstacles or units around (at adjacent hexes) given unit.
+// 1st param (ecx) - unit ptr
+// 2nd param - hex id to check
+// 3rd param - const{0, 1}
+// 4th param - ptr to something
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+46976</Address>
+      <Comment>if hex id out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+46982</Address>
+      <Comment>if hex id out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4698A</Address>
+      <Comment># of hexes in a row
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+46990</Address>
+      <Comment>eax = row id, ecx = col id
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+46994</Address>
+      <Comment>if column id == 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+4699D</Address>
+      <Comment>if column id == 16
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+469B6</Address>
+      <Comment>esi = hex ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+469C4</Address>
+      <Comment>if hex not walkable
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+469CA</Address>
+      <Comment>al = stack side on this hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+469CF</Address>
+      <Comment>if no unit on hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+469F9</Address>
+      <Comment>if unit is "double wide"
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+489F0</Address>
+      <Header>// Gets current unit speed; checks for slow/haste effect etc.
+// 1st param (ecx) - unit stack ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+489F4</Address>
+      <Comment>edx = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+489FA</Address>
+      <Comment>eax = unit speed
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+48A05</Address>
+      <Comment>if (TODO) spell is not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+65444</Address>
+      <Comment>ecx = side first unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+65446</Address>
+      <Comment>%s; check "cannot move" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+6544C</Address>
+      <Comment>if unit cannot move
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+6544E</Address>
+      <Comment>%s; check "siege weapon" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+65454</Address>
+      <Comment>if not a siege weapon
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+695F0</Address>
+      <Header>// Probably... checks "force field" and "local obstacle" bits on hex
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+6965A</Address>
+      <Comment>%s; check "local obstacle" bit
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+69662</Address>
+      <Comment>if not "local obstacle" on hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+6A086</Address>
+      <Comment>al = tutorial flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+6A08E</Address>
+      <Comment>if not tutorial
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+73F5D</Address>
+      <Comment>eax = unit action
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+73F62</Address>
+      <Comment>if action == cancel (0)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+77740</Address>
+      <Header>// My old notes says its something related to "blue highlight"
+// 1st param (ecx) - combat mgr ptr
+// 2nd param - const{0, 1} - dunno what
+// 3rd param - ??
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+77746</Address>
+      <Comment>al = blueHighlight
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+7774E</Address>
+      <Comment>if no blue highlight
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+786B0</Address>
+      <Header>// Performs chosen action ??
+// 1st param (ecx) - combat mgr ptr
+// 2nd param - ??
+// 3rd param - ??
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+AF880</Address>
+      <Header>// Copies 4 bytes from [edx] to [ecx]
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+AF882</Address>
+      <Comment>if pointer is null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B2B00</Address>
+      <Header>// Old notes says - check availability for left-side hex
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B2B0C</Address>
+      <Comment>// eax = ptr to some allocated memory
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B2B11</Address>
+      <Comment>if ptr not null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B2B2F</Address>
+      <Comment>esi = unit stack ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B2B40</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B2B48</Address>
+      <Comment>if spell (TODO) not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B2C72</Address>
+      <Comment>loop over all hexes
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B2C9B</Address>
+      <Comment>if unit type != catapult
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3009</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3013</Address>
+      <Comment>if unit is flyer
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3019</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3028</Address>
+      <Comment>if unit is "devil"
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3035</Address>
+      <Comment>al = battle has moat
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B303D</Address>
+      <Comment>if battle has no moat
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B30E4</Address>
+      <Comment>%s; check hex obstacle bits (4 = quicksand)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B30EC</Address>
+      <Comment>if no quicksand on hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B312A</Address>
+      <Comment>iterate to next battle hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3134</Address>
+      <Comment>loop over all hexes
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3136</Address>
+      <Comment>edx = unit hex id
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3149</Address>
+      <Comment>if unit not "double wide"
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3160</Address>
+      <Header>// pathfinding ??
+// 1st param (ecx) - pathfinding mgr
+// 2nd param - unit stack ptr
+// 3rd param - cur path size ??
+// 4th param - const{255} - max path size ??
+// 5th param - unit steps left ??
+// 6th param - unit speed ??
+// Performs bfs algorithm to find which hexes are available to given unit (i think so)
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B316F</Address>
+      <Comment>if unit stack ptr != null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B318C</Address>
+      <Comment>if battle not in town
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3218</Address>
+      <Header>// this loop clears attacker/defender availability for all hexes
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3226</Address>
+      <Comment>%s; available for attacker = 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3234</Address>
+      <Comment>%s; available for defender = 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B323C</Address>
+      <Comment>if more hexes to clear up
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3257</Address>
+      <Comment>if steps left &gt;= 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3266</Address>
+      <Comment>if steps left == 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B326B</Address>
+      <Comment>ecx = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3273</Address>
+      <Comment>if (TODO) spell is not active
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3284</Address>
+      <Comment>edx = position on battle (hex id)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B32CE</Address>
+      <Comment>does nothing
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3309</Address>
+      <Comment>edx = hex orientation (0 - left, 1 - right)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B330C</Address>
+      <Comment>eax = unit speed ?
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3314</Address>
+      <Comment>eax = unit hex id
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B33AF</Address>
+      <Comment>if hex out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B33B7</Address>
+      <Comment>if hex out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3418</Address>
+      <Comment>if adjacent hex out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3424</Address>
+      <Comment>if adjacent hex out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B343A</Address>
+      <Comment>if unit is double wide
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3442</Address>
+      <Comment>ecx = ptr to pathfinder's battle hexes
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3445</Address>
+      <Comment>some info about adjacent hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B34BA</Address>
+      <Comment>if hex not walkable
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B376E</Address>
+      <Comment>iterate to next adjacent hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3775</Address>
+      <Comment>loop over all adjacent hexes
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B37EC</Address>
+      <Comment>%s; seems like # of some elements in list (pointers or 4bytes ints)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B37EF</Address>
+      <Comment>if list is empty
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3816</Address>
+      <Comment>if hex out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B381D</Address>
+      <Comment>if hex in range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3910</Address>
+      <Header>// Dunno, possibly checks if hex distance is in range of unit speed
+1st param (ecx) - pathfinder ptr ??
+2nd param - unit position/hex id
+3rd param - ??
+4th param - const{0, 1}
+5th param - const{0, 1}
+6th param - unit speed
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3922</Address>
+      <Comment>if hex id out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B392E</Address>
+      <Comment>if hex id out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B393C</Address>
+      <Comment>if unit speed &gt; 4th param (current done steps maybe?)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3942</Address>
+      <Comment>edx = ptr to array of pathnodes
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B3947</Address>
+      <Comment>if array ptr not null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+B399A</Address>
+      <Comment>if edx &gt;= 500; hard limit on path length??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+D9460</Address>
+      <Header>// Probably does what the method name is
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+D946B</Address>
+      <Comment>edx = (TODO) artefact equipped
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+D947F</Address>
+      <Comment>edx = (TODO) artifact equipped
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+D9487</Address>
+      <Comment>if (TODO) artifact equipped
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+D948D</Address>
+      <Comment>%s; 19 == how much total artifacts (+spellbook/ballista etc) can hero equip
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+D949A</Address>
+      <Comment>eax = combination artifact id
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+D94A1</Address>
+      <Comment>if not a part of combined artifact ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+E4520</Address>
+      <Header>1st param (ecx) - hero ptr 
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+E4580</Address>
+      <Header>// 1st param (ecx) - hero's class ptr
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+E4586</Address>
+      <Comment>al = hero's (TODO) secondary skill level (probably Offense?)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+E4591</Address>
+      <Comment>edx = secondary skill mutliplier (probably)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+E459B</Address>
+      <Comment>if no (TODO) secondary skill available
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+E7230</Address>
+      <Comment>al = side of stack on current hex
+</Comment>
+      <Header>// Gets unit ptr on given hex
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+E7235</Address>
+      <Comment>if no unit on this hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+11B3A0</Address>
+      <Header>// My old notes says it adds current unit stack to some list and sets pointer to player's first unit
+// 1st param - UnitOrderListStruct
+// 2nd param - ??
+// 3rd param - another struct unknown size
+// Check: UnitOrderListStruct
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+11B3C9</Address>
+      <Comment>if enough space in list (otherwise it will resize)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+11B404</Address>
+      <Comment>allocates memory for some list; eax is pointer to that mem
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+11B482</Address>
+      <Comment>ecx = current ?? elem list ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+11B486</Address>
+      <Comment>eax = first elem lsit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+124280</Address>
+      <Header>// Old notes says it check adjacent hexes for a given one
+// 1st param (ecx) - unit ptr
+// 2nd param - unit position/hex id
+// 3rd param - adjacent hex id
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+124288</Address>
+      <Comment>if hex id out of range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+124290</Address>
+      <Comment>if hex id in range
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+124299</Address>
+      <Comment>eax = adjacent square index (0 - top right, 5 - top left)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+12429C</Address>
+      <Comment>%s; single hex unit can have only 6 adjacent hexes
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1242B0</Address>
+      <Comment>%s; this is for double hex units
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+1242CB</Address>
+      <Comment>eax = adjacent squares (-1 outside battleground boundaries)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+217FB3</Address>
+      <Comment>eax = stack's fight value converted to integer value
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"h3hota HD.exe"+218154</Address>
+      <Header>// Sqrt of calculated multiplier
+// Param in [esp]
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>00F87468</Address>
+      <Header>// 1st param - ??
+// 2nd param - unit stack ptr
+// 3rd param - ??
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>00FA33F7</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>00FA3B33</Address>
+      <Comment>eax = town ptr (if battle isnt in town it will be null)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>00FA9FDD</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>02769FDD</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>027708D3</Address>
+      <Comment>eax = # of turns (TODO) spell left
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>027733F7</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>02773B33</Address>
+      <Comment>eax = town structure ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>02779FDD</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>0278B933</Address>
+      <Comment>if pathnode not "accessible"
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>0279C78B</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+8811</Address>
+      <Comment>if already iterated over both sides
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+8829</Address>
+      <Comment>%s; iterate over all 21 unit slots 
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+882D</Address>
+      <Comment>if no unit slots left to check
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+89D8</Address>
+      <Comment>if unit type &lt; 145 (or 150?)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+8AC8</Address>
+      <Comment>ecx = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+8ACE</Address>
+      <Comment>%s; check "waiting" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+8AE8</Address>
+      <Comment>%s; check "morale" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+8B1F</Address>
+      <Comment>if didnt waiting and didnt have morale
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+8B68</Address>
+      <Comment>ecx = active stack ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+92AB</Address>
+      <Comment>eax = tactics phase
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+92B4</Address>
+      <Comment>if tactics phase
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137706</Address>
+      <Comment>eax = combat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137709</Address>
+      <Comment>ecx = current active side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+13770F</Address>
+      <Comment>edx = combat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137712</Address>
+      <Comment>%s; check hero casted flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+13771A</Address>
+      <Comment>if hero already casted
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137720</Address>
+      <Comment>eax = combat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137723</Address>
+      <Comment>ecx = tactics phase flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+13772C</Address>
+      <Comment>if tactics phase
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137735</Address>
+      <Comment>%s; current mon side -&gt; get active side first unit offset
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+13773F</Address>
+      <Comment>ecx = combat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137742</Address>
+      <Comment>edx = current active side first unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137749</Address>
+      <Comment>eax = combat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+13774C</Address>
+      <Comment>%s; ecx = current unit index offset
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137756</Address>
+      <Comment>edx = current unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+137763</Address>
+      <Comment>if unit is siege weapon
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+13776C</Address>
+      <Comment>ecx = current active side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+13777D</Address>
+      <Comment>if side doesnt have hero
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+1377E4</Address>
+      <Comment>ecx = combat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+1377E7</Address>
+      <Comment>edx = current side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+1377F0</Address>
+      <Comment>ecx = hero owner intflag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+15ACF9</Address>
+      <Comment>ecx = current active side
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+15AD0A</Address>
+      <Comment>if hero already casted
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+15B870</Address>
+      <Header>// This function moves unit and render animation
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+174DC3</Address>
+      <Comment>if unit type != arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+174E59</Address>
+      <Comment>if units in stack &gt; 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+174E6C</Address>
+      <Comment>if unit type != ammo_cart
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+174E78</Address>
+      <Comment>eax = unit flags
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+174E7E</Address>
+      <Comment>%s; check "done" flag
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"HD_HOTA.dll"+174E84</Address>
+      <Comment>if unit not done
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>07230E63</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>07230E66</Address>
+      <Comment>%s; check if unit type == balista
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>072371D6</Address>
+      <Comment>here we have multiplied value from atk multiplier and def multiplier
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>078E3486</Address>
+      <Comment>ecx = unit HP
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>078EB6C8</Address>
+      <Header>// 1st param (ecx) - FightPowerStruct
+</Header>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>078EDEB3</Address>
+      <Comment>%s; check if unit type == ballista
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>078F0CF7</Address>
+      <Comment>edi = ptr to unit hex id
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>078F0E66</Address>
+      <Comment>%s; check if unit type == ballista
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>079023BF</Address>
+      <Comment>%s; check "Arch devil" unit type ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>079023C2</Address>
+      <Comment>if unit is "Arch Devil"
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>0790352F</Address>
+      <Comment>eax = siege kind ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>07910E63</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>07910E66</Address>
+      <Comment>%s; check if unit == ballista
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+1B4DF</Address>
+      <Comment>ecx = player hero ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+1B4E7</Address>
+      <Comment>if hero ptr is null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+1B4E9</Address>
+      <Comment>%s; 158 is Ring of Oblivion artifact
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+1B4F9</Address>
+      <Comment>ecx = ai hero ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+1B501</Address>
+      <Comment>if hero ptr is  null
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+1BA3E</Address>
+      <Comment>if unit is not "double wide"
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2A7D0</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2A7D8</Address>
+      <Comment>if unit type != ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2A9BB</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2A9D3</Address>
+      <Comment>if unit is (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2A9DA</Address>
+      <Comment>if unit is not (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2ACCB</Address>
+      <Comment>if all hexes checked
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2AF50</Address>
+      <Comment>if unit type != ???
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2B094</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2B09C</Address>
+      <Comment>if unit is (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+2B0A3</Address>
+      <Comment>if unit is not (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+33B2A</Address>
+      <Comment>edx = combat mgr ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+33B48</Address>
+      <Comment>eax = player's first unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+33D7E</Address>
+      <Comment>eax = player's first unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+33D88</Address>
+      <Comment>%s; eax = ai's first unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+3431F</Address>
+      <Comment>edx = unit stack ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+7A9F0</Address>
+      <Comment>eax = unit stack ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+7A9F4</Address>
+      <Comment>%s; eax = unit animation frame
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E6A41</Address>
+      <Comment>if unit stack is nullptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E6A43</Address>
+      <Comment>ecx = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E70C1</Address>
+      <Comment>if combat is on a boat
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E70CA</Address>
+      <Comment>if combat is not on a (TODO) special terrain
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E70D9</Address>
+      <Comment>if unit is (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E70E0</Address>
+      <Comment>if unit is (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E70E4</Address>
+      <Comment>if combat is on a boat
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E70EB</Address>
+      <Comment>if unit is (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E70F2</Address>
+      <Comment>if unit is (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E8480</Address>
+      <Comment>if unit not a shooter
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E85FC</Address>
+      <Comment>%s; check "force field" obstacle bit
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+E8604</Address>
+      <Comment>if not "force field" on hex
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F44A6</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F44AE</Address>
+      <Comment>if unit type == (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F44B5</Address>
+      <Comment>if unit type != (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F46E2</Address>
+      <Comment>if unit type != (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F47B4</Address>
+      <Comment>if player stack total HP &lt;= 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F4D80</Address>
+      <Comment>if unit not "unlucky"
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F5A9B</Address>
+      <Comment>ecx = ai unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F5A9E</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F5AA7</Address>
+      <Comment>if unit != psychic_elemental
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F5AC7</Address>
+      <Comment>if unit != magic_elemental
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F5B6C</Address>
+      <Comment>if unit is not (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F6104</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F610C</Address>
+      <Comment>if unit type is (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F6113</Address>
+      <Comment>if unit type is not (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F6134</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F613C</Address>
+      <Comment>if unit type is (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F6143</Address>
+      <Comment>if unit type is not (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F7642</Address>
+      <Comment>if player unit is not (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F7744</Address>
+      <Comment>if player unit is (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F774B</Address>
+      <Comment>if player unit is not (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F78C6</Address>
+      <Comment>edx = player unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F78C9</Address>
+      <Comment>esi = ai unit ptr
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F78CC</Address>
+      <Comment>eax = unit real owner (side)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F78D5</Address>
+      <Comment>eax = player unit side index (stack index in army)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F78E5</Address>
+      <Comment>eax = ai unit real owner (side)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F78EE</Address>
+      <Comment>eax = ai unit side index (stack index in army)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F83FE</Address>
+      <Comment>if unit type != ???
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F84E7</Address>
+      <Comment>eax = unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F84EF</Address>
+      <Comment>if unit type == ballista
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F84F6</Address>
+      <Comment>if unit type == ??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F84FD</Address>
+      <Comment>if unit type == arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F8B5E</Address>
+      <Comment>if unit != (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F8BC7</Address>
+      <Comment>%s; check number of shots
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F8BCE</Address>
+      <Comment>if # of shots &gt; 0
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F8BD0</Address>
+      <Comment>%s; check unit type
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F8BD7</Address>
+      <Comment>if unit type != arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F8C7E</Address>
+      <Comment>if number of shots &gt; 0 (unit is a shooter)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F8C87</Address>
+      <Comment>if unit type != arrow_tower
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F935E</Address>
+      <Comment>if unit type is not (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+F96CB</Address>
+      <Comment>if unit is not (TODO)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"hota.dll"+1AFD70</Address>
+      <Comment>
+</Comment>
+    </DisassemblerComment>
+  </DisassemblerComments>
+</CheatTable>
