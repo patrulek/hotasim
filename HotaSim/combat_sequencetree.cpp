@@ -33,8 +33,6 @@ namespace HotaSim {
 
 
 	void CombatSequenceNode::addChild(std::shared_ptr<CombatStatePacked> _state, const int _action, const int _action_size, const uint64_t _state_score, const int _seed, const uint64_t _size, const bool _player_won) {
-		score = _state_score;
-
 		CombatSequenceNode* branch = this;
 		int new_depth = children.empty();
 
@@ -109,7 +107,7 @@ namespace HotaSim {
 		++turns_occurence[_state.turn];
 		auto packed_state = const_cast<CombatSerializer&>(serializer).packCombatState(_state);
 		auto bbs = root->best_branch_score;
-		current->addChild(packed_state, _action, _action_size, _state_score, _seed, size, manager.didPlayerWon());
+		current->addChild(packed_state, _action, _action_size, _state_score, _seed, size, manager.isCombatFinished());
 
 		//node_hashes[StateHash(const_cast<CombatState&>(_state))] = current->children.back().get();
 		//if (_state_score > 0x0000800000008000) {
@@ -121,7 +119,7 @@ namespace HotaSim {
 		}
 		current = current->children.back().get();
 
-		if (bbs < root->best_branch_score) {
+		if (bbs < current->best_branch_score) {
 			best_leaf = current;
 		}
 
@@ -154,9 +152,38 @@ namespace HotaSim {
 		current = node_order.back()->get();
 		taken.insert(node_order.back());
 		node_order.pop_back();
-		if( _halving && node_order.size() > 15000)
-			node_order.erase(std::begin(node_order) + 150, std::begin(node_order) + node_order.size() - 150);
+
+		std::vector<std::shared_ptr<CombatSequenceNode>*> node_order2; node_order2.reserve(5000);
+
+
+		if (_halving && node_order.size() > 1000) {
+			//node_order.erase(std::begin(node_order) + 450, std::begin(node_order) + node_order.size() - 450);
+			std::array<int, 16> occurences{}; occurences.fill(0);
+
+			for (auto no : node_order) {
+				occurences[(*no)->turn]++;
+			}
+
+			int m = 0;
+			for (auto occ : occurences)
+				m = std::max(m, occ);
+
+			occurences.fill(0);
+
+			for (auto no : node_order) {
+				//if (occurences[(*no)->turn]++ < m / 1024)
+				if((*no)->turn <= 3)
+					node_order2.push_back(no);
+			}
+
+			node_order2.erase(std::begin(node_order2) + 150, std::begin(node_order2) + node_order2.size() - 50);
+			node_order = node_order2;
+		}
 		circular_path_found = false;
+
+		if (current->score > best_leaf->score) {
+			best_leaf = current;
+		}
 	}
 
 	

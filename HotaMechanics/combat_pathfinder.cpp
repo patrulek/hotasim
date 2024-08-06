@@ -225,9 +225,16 @@ namespace HotaMechanics {
 		path.clear();
 		path.push_back(start);
 
+		// temp
+		int cnt = 0;
+
 		while (paths[start] != _source_hex) {
 			start = paths[start];
 			path.push_back(start);
+			++cnt;
+
+			if (cnt > 20)
+				std::cout << "got a problem!\n";
 		}
 
 		if (path.size() > _range)
@@ -240,7 +247,7 @@ namespace HotaMechanics {
 	void CombatPathfinder::pathMap(const HexId _source_hex, const CombatField& _field, const bool _double_wide, const uint8_t _range) {
 		auto hash = const_cast<CombatField&>(_field).getHash();
 		hash ^= std::hash<Hash>{}(static_cast<Hash>(_source_hex) << 8 | _source_hex);
-		hash ^= std::hash<Hash>{}(static_cast<Hash>(_range) << 8 | _range);
+		hash ^= std::hash<Hash>{}(static_cast<Hash>(_range) << 16 | _range);
 		if (pathmap_cache.find(hash) != std::end(pathmap_cache)) {
 			cache_buffer = pathmap_cache[hash];
 			restorePathCache();

@@ -29,6 +29,11 @@ namespace HotaSim {
 			auto& path = const_cast<CombatPathfinder&>(manager.getCombatAI().getPathfinder()).findPath(active_stack.getHex(), _action.target,
 				manager.getCurrentState().field, false);
 
+			if (path.empty()) {
+				path = const_cast<CombatPathfinder&>(manager.getCombatAI().getPathfinder()).findPath(active_stack.getHex(), _action.target,
+					manager.getCurrentState().field, false);
+			}
+
 			int walk_distance = _action.param1 == -1 ? active_stack.getCombatStats().spd : _action.param1;
 			walk_distance = std::min(path.size(), (size_t)walk_distance) - 1;
 			auto& target_hex = manager.getCurrentState().field.getById(path[walk_distance]);
@@ -43,6 +48,7 @@ namespace HotaSim {
 	}
 
 	void CombatRewinder::rewind(const std::vector<int>& _actions, const std::vector<int>& _seeds) {
+		const_cast<CombatPathfinder&>(manager.getCombatAI().getPathfinder()).clearPathmapCache();
 		manager.reinitialize();
 		manager.nextState();
 		std::cout << "\n\n====================================================\nBattle has started\n===================================================\n\n";
@@ -67,6 +73,9 @@ namespace HotaSim {
 				}
 				continue;
 			}
+
+			if (manager.isCombatFinished())
+				break;
 
 			manager.nextState();
 			std::cout << "\nTurn " << manager.getCurrentState().turn + 1 << " has started\n-----\n";
